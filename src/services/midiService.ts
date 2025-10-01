@@ -35,7 +35,7 @@ export class MidiService {
     if (inputs.length === 0) return false;
 
     // Find specific device or use first available
-    const targetInput = deviceName 
+    const targetInput = deviceName
       ? inputs.find(input => input.name.includes(deviceName))
       : inputs.find(input => input.name.toLowerCase().includes('zoom')) || inputs[0];
 
@@ -53,7 +53,7 @@ export class MidiService {
     if (outputs.length === 0) return false;
 
     // Find specific device or use first available
-    const targetOutput = deviceName 
+    const targetOutput = deviceName
       ? outputs.find(output => output.name.includes(deviceName))
       : outputs.find(output => output.name.toLowerCase().includes('zoom')) || outputs[0];
 
@@ -72,9 +72,10 @@ export class MidiService {
 
     // Clamp value to valid range
     const clampedValue = Math.max(control.min, Math.min(control.max, value));
-    
+
     try {
-      this.output.sendControlChange(control.cc, clampedValue, control.channel);
+      // WebMidi v3: third argument is options object, not a channel number
+      this.output.sendControlChange(control.cc, clampedValue, { channels: control.channel });
       console.log(`Sent CC${control.cc} = ${clampedValue} on channel ${control.channel}`);
     } catch (error) {
       console.error('Failed to send MIDI CC:', error);
@@ -90,6 +91,31 @@ export class MidiService {
     this.input.addListener('controlchange', (event: any) => {
       callback(event.controller.number, event.value, event.message.channel);
     });
+  }
+
+  // Note helpers for sound pads
+  sendNoteOn(note: number, channel: number, velocity = 100): void {
+    if (!this.output) {
+      console.warn('No MIDI output connected');
+      return;
+    }
+    try {
+      this.output.playNote(note, { channels: channel, attack: velocity });
+    } catch (error) {
+      console.error('Failed to send Note On:', error);
+    }
+  }
+
+  sendNoteOff(note: number, channel: number, release = 0): void {
+    if (!this.output) {
+      console.warn('No MIDI output connected');
+      return;
+    }
+    try {
+      this.output.stopNote(note, { channels: channel, release });
+    } catch (error) {
+      console.error('Failed to send Note Off:', error);
+    }
   }
 
   removeAllListeners(): void {

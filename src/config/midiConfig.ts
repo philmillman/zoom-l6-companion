@@ -38,6 +38,13 @@ export interface GlobalControls {
   compressor: MIDIControl;
 }
 
+export interface SoundPad {
+  id: number;
+  name: string;
+  note: number; // MIDI note number
+  channel: number;
+}
+
 // Channel strip MIDI CC mappings (typical values - may need adjustment based on actual device)
 export const channelControls: ChannelControls[] = [
   // Channel 1
@@ -171,3 +178,11 @@ export const globalControls: GlobalControls = {
   efxType: { name: 'EFX Type', cc: 117, channel: 1, min: 0, max: 127, defaultValue: 0, type: 'knob' },
   compressor: { name: 'Compressor', cc: 119, channel: 1, min: 0, max: 127, defaultValue: 0, type: 'toggle' },
 };
+
+// Sound Pads (Note numbers based on screenshot: C3=60, D3=62, E3=64, F3=65)
+export const soundPads: SoundPad[] = [
+  { id: 1, name: 'Pad 1', note: 60, channel: 1 },
+  { id: 2, name: 'Pad 2', note: 62, channel: 1 },
+  { id: 3, name: 'Pad 3', note: 64, channel: 1 },
+  { id: 4, name: 'Pad 4', note: 65, channel: 1 },
+];

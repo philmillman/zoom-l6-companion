@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
+import SoundPads from './components/SoundPads.vue';
 import { channelControls, globalControls } from './config/midiConfig';
 
 // Reactive state
@@ -121,6 +122,11 @@ function loadPreset() {
             :globalData="globalControls"
             @controlChange="onGlobalControlChange"
           />
+        </section>
+        
+        <!-- Sound Pads -->
+        <section class="soundpads-section">
+          <SoundPads />
         </section>
         
         <!-- Preset Management (if advanced mode is enabled) -->

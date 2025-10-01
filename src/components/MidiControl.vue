@@ -132,7 +132,8 @@ function buttonUp() {
 
 function startDrag(event: MouseEvent | TouchEvent) {
   isDragging.value = true;
-  const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+  const clientYRaw = 'touches' in event ? event.touches?.[0]?.clientY : event.clientY;
+  const clientY = clientYRaw ?? 0;
   dragStartY.value = clientY;
   dragStartValue.value = currentValue.value;
   
@@ -147,7 +148,8 @@ function startDrag(event: MouseEvent | TouchEvent) {
 function handleDrag(event: MouseEvent | TouchEvent) {
   if (!isDragging.value) return;
   
-  const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+  const clientYRaw = 'touches' in event ? event.touches?.[0]?.clientY : event.clientY;
+  const clientY = clientYRaw ?? dragStartY.value;
   const deltaY = dragStartY.value - clientY; // Inverted for natural feel
   const sensitivity = 0.5;
   const deltaValue = deltaY * sensitivity;

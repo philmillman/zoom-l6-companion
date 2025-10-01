@@ -203,13 +203,19 @@ function autoConnect() {
   
   // Fallback: connect to first available devices
   if (!zoomInput && availableInputs.value.length > 0) {
-    selectedInput.value = availableInputs.value[0].name;
-    connectInput();
+    const firstIn = availableInputs.value[0];
+    if (firstIn) {
+      selectedInput.value = firstIn.name;
+      connectInput();
+    }
   }
   
   if (!zoomOutput && availableOutputs.value.length > 0) {
-    selectedOutput.value = availableOutputs.value[0].name;
-    connectOutput();
+    const firstOut = availableOutputs.value[0];
+    if (firstOut) {
+      selectedOutput.value = firstOut.name;
+      connectOutput();
+    }
   }
 }
 
