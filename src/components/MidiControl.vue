@@ -3,7 +3,7 @@
     <label class="control-label">{{ control.name }}</label>
     
     <!-- Fader -->
-    <div v-if="control.type === 'fader'" class="fader-container">
+    <div v-if="control.type === 'fader'" class="fader-container" @dblclick.prevent="resetToDefault">
       <input
         type="range"
         :min="control.min"
@@ -22,11 +22,28 @@
         class="knob"
         @mousedown="startDrag"
         @touchstart="startDrag"
+        @dblclick.prevent="resetToDefault"
         :style="{ transform: `rotate(${knobRotation}deg)` }"
       >
         <div class="knob-indicator"></div>
       </div>
       <div class="value-display">{{ displayValue }}</div>
+    </div>
+    
+    <!-- LFO toggle button (bottom-right of container) -->
+    <button v-if="control.type === 'knob'" class="lfo-btn" :class="{ active: lfo.enabled }" @click.stop="openPopover" :title="lfo.enabled ? 'LFO active' : 'Open LFO'" @dblclick.stop.prevent="resetToDefault">
+      <span class="lfo-dot" :style="lfoDotStyle"></span>
+    </button>
+    
+    <!-- Centered Dialog Popover -->
+    <div v-if="showPopover" class="lfo-overlay" @click="closePopover">
+      <div class="lfo-dialog" @click.stop>
+        <div class="lfo-dialog-header">
+          <div class="lfo-dialog-title">LFO: {{ control.name }}</div>
+          <button class="lfo-close" @click="closePopover">×</button>
+        </div>
+        <LFOControl :config="lfo" @update:config="updateLfoConfig" />
+      </div>
     </div>
     
     <!-- Toggle Button -->
@@ -59,6 +76,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { MIDIControl } from '../config/midiConfig';
 import { midiService } from '../services/midiService';
+import LFOControl, { type LFOConfig, type LFOShape } from './LFOControl.vue';
 
 interface Props {
   control: MIDIControl;
@@ -94,6 +112,85 @@ const knobRotation = computed(() => {
   const range = props.control.max - props.control.min;
   const normalized = (currentValue.value - props.control.min) / range;
   return (normalized * 270) - 135; // -135 to +135 degrees
+});
+
+// LFO state
+const showPopover = ref(false);
+const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', enabled: false });
+const lfoPhaseVal = ref(0);
+const lfoBaseValue = ref(props.control.defaultValue);
+let lfoRafId = 0;
+let lfoLastTime = performance.now();
+let lfoPhase = 0; // 0..1
+
+function openPopover() { showPopover.value = true; }
+function closePopover() { showPopover.value = false; }
+
+function updateLfoConfig(cfg: LFOConfig) {
+  lfo.value = cfg;
+}
+
+const lfoDotStyle = computed(() => ({
+  transform: `scale(${lfo.value.enabled ? 1 + 0.2 * Math.abs(lfoPhaseVal.value) : 1})`,
+}));
+
+function lfoShapeSample(shape: LFOShape, p: number): number {
+  switch (shape) {
+    case 'sine':
+      return Math.sin(p * Math.PI * 2);
+    case 'triangle': {
+      const t = (p + 0.25) % 1;
+      return 1 - 4 * Math.abs(Math.round(t - 0.25) - (t - 0.25));
+    }
+    case 'square':
+      return p < 0.5 ? 1 : -1;
+    case 'saw':
+      return 2 * ((p + 0.5) % 1) - 1;
+  }
+}
+
+function lfoLoop() {
+  const now = performance.now();
+  const dt = (now - lfoLastTime) / 1000;
+  lfoLastTime = now;
+  if (lfo.value.enabled && lfo.value.rate > 0) {
+    lfoPhase = (lfoPhase + dt * lfo.value.rate) % 1;
+    const v = lfoShapeSample(lfo.value.shape, lfoPhase);
+    lfoPhaseVal.value = v;
+    const base = lfoBaseValue.value;
+    const depth = lfo.value.depth * (props.control.max - props.control.min);
+    const modulated = base + v * depth;
+    updateValue(modulated);
+  }
+  lfoRafId = requestAnimationFrame(lfoLoop);
+}
+
+function startLfo() {
+  cancelAnimationFrame(lfoRafId);
+  lfoLastTime = performance.now();
+  lfoRafId = requestAnimationFrame(lfoLoop);
+}
+
+function stopLfo() {
+  cancelAnimationFrame(lfoRafId);
+}
+
+watch(() => lfo.value.enabled, (enabled) => {
+  if (enabled) startLfo(); else stopLfo();
+}, { immediate: true });
+
+// Update base value when user manually changes the control
+watch(() => currentValue.value, (newValue) => {
+  if (!lfo.value.enabled) {
+    lfoBaseValue.value = newValue;
+  }
+});
+
+// Update base value when LFO is disabled
+watch(() => lfo.value.enabled, (enabled) => {
+  if (!enabled) {
+    lfoBaseValue.value = currentValue.value;
+  }
 });
 
 // Methods
@@ -166,6 +263,16 @@ function stopDrag() {
   document.removeEventListener('touchend', stopDrag);
 }
 
+// Reset to default (double-click / double-tap)
+function resetToDefault() {
+  const value = props.control.defaultValue;
+  updateValue(value);
+  // When LFO is disabled, also update base value
+  if (!lfo.value.enabled) {
+    lfoBaseValue.value = value;
+  }
+}
+
 // Watch for external value changes (e.g., resets)
 watch(
   () => props.modelValue,
@@ -202,6 +309,7 @@ onUnmounted(() => {
   background: #2a2a2a;
   transition: all 0.2s ease;
   min-width: 60px;
+  position: relative;
 }
 
 .midi-control.active {
@@ -287,6 +395,57 @@ onUnmounted(() => {
   transform: translateX(-50%);
   border-radius: 1px;
 }
+
+/* LFO button */
+.lfo-btn {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #222;
+  border: 1px solid #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.lfo-btn.active { border-color: #4a90e2; box-shadow: 0 0 6px rgba(74,144,226,0.6); }
+.lfo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4a90e2;
+  transition: transform 0.05s linear;
+}
+
+/* Centered dialog popover */
+.lfo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.lfo-dialog {
+  background: #1f1f1f;
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 300px;
+  max-width: 90vw;
+}
+.lfo-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.lfo-dialog-title { color: #4a90e2; font-weight: 700; font-size: 14px; }
+.lfo-close { background: transparent; color: #bbb; border: none; font-size: 18px; cursor: pointer; }
 
 /* Toggle Button Styles */
 .toggle-container {
