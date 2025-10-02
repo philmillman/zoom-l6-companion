@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
 import SoundPads from './components/SoundPads.vue';
 import { channelControls, globalControls } from './config/midiConfig';
+import { midiService } from './services/midiService';
 
 // Reactive state
 const midiConnected = ref(false);
@@ -13,7 +14,7 @@ const appSettings = reactive({
   compactMode: false,
 });
 
-// Refs to channel components for resetting
+// Refs to channel components for resetting and LFO control
 type ChannelStripInstance = InstanceType<typeof ChannelStrip> | null;
 const channelRefs = ref<ChannelStripInstance[]>([]);
 
@@ -22,6 +23,16 @@ function onMidiConnectionChanged(connected: boolean) {
   midiConnected.value = connected;
   if (connected) {
     console.log('MIDI connected successfully');
+    // Add global MIDI listener when connected
+    if (globalMidiListener) {
+      midiService.addControlChangeListener(globalMidiListener);
+    }
+  } else {
+    console.log('MIDI disconnected');
+    // Remove global MIDI listener when disconnected
+    if (globalMidiListener) {
+      midiService.removeControlChangeListener(globalMidiListener);
+    }
   }
 }
 
@@ -49,6 +60,41 @@ function loadPreset() {
   console.log('Loading preset');
   // Implementation for loading presets
 }
+
+// Computed property to check if there are any active LFOs globally
+const hasGlobalActiveLfos = computed(() => {
+  return channelRefs.value.some((channelStrip) => {
+    return channelStrip && channelStrip.hasActiveLfos;
+  });
+});
+
+function disableAllGlobalLfos() {
+  // Call disableAllLfos on each channel strip
+  channelRefs.value.forEach((channelStrip) => {
+    if (channelStrip) {
+      channelStrip.disableAllLfos?.();
+    }
+  });
+}
+
+// Global MIDI input handler for debugging and monitoring
+let globalMidiListener: ((cc: number, value: number, channel: number) => void) | null = null;
+
+onMounted(() => {
+  // Set up global MIDI input monitoring
+  globalMidiListener = (cc, value, channel) => {
+    console.log(`[App] Global MIDI received: CC${cc} = ${value} on channel ${channel}`);
+  };
+  
+  // The listener will be added when MIDI connects via onMidiConnectionChanged
+});
+
+onUnmounted(() => {
+  if (globalMidiListener) {
+    midiService.removeControlChangeListener(globalMidiListener);
+    globalMidiListener = null;
+  }
+});
 </script>
 
 <template>
@@ -63,10 +109,9 @@ function loadPreset() {
         
         <div class="header-controls">
           <button 
+            @click="appSettings.compactMode = !appSettings.compactMode"
             class="header-button"
             :class="{ active: appSettings.compactMode }"
-            disabled
-            title="Coming soon"
           >
             Compact
           </button>
@@ -96,6 +141,15 @@ function loadPreset() {
               <button @click="resetAllChannels" class="section-button reset-button">
                 Reset All
               </button>
+              <button 
+                @click="disableAllGlobalLfos" 
+                class="section-button lfo-disable-button"
+                :class="{ disabled: !hasGlobalActiveLfos }"
+                :disabled="!hasGlobalActiveLfos"
+                :title="hasGlobalActiveLfos ? 'Disable all LFOs globally' : 'No active LFOs'"
+              >
+                {{ hasGlobalActiveLfos ? 'Disable LFOs' : 'No LFOs' }}
+              </button>
             </div>
           </div>
           
@@ -110,6 +164,7 @@ function loadPreset() {
               v-for="channel in channelControls"
               :key="channel.channel"
               :channelData="channel"
+              :compactMode="appSettings.compactMode"
               ref="channelRefs"
               @controlChange="onChannelControlChange"
             />
@@ -163,7 +218,7 @@ function loadPreset() {
 
     <footer class="app-footer">
       <div class="footer-content">
-        <p>&copy; 2024 Zoom L6 Companion App | Built with Vue.js & WebMIDI</p>
+        <p>Built by <a href="https://github.com/philmillman" target="_blank">philmillman</a> | Not affiliated with Zoom Corp</p>
       </div>
     </footer>
   </div>
@@ -265,6 +320,7 @@ body {
   color: #fff;
 }
 
+
 /* Main Content */
 .app-main {
   flex: 1;
@@ -272,6 +328,12 @@ body {
   margin: 0 auto;
   padding: 20px;
   width: 100%;
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: 4px;
+  }
 }
 
 .mixer-container {
@@ -324,6 +386,30 @@ body {
 .reset-button:hover {
   background: #f44336;
   border-color: #f44336;
+}
+
+.lfo-disable-button {
+  background: #ff9800;
+  color: white;
+}
+
+.lfo-disable-button:hover {
+  background: #fb8c00;
+  border-color: #fb8c00;
+}
+
+.lfo-disable-button.disabled,
+.lfo-disable-button:disabled {
+  background: #666;
+  border-color: #555;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.lfo-disable-button.disabled:hover,
+.lfo-disable-button:disabled:hover {
+  background: #666;
+  border-color: #555;
 }
 
 /* Channel Grid */
@@ -451,7 +537,7 @@ body {
   font-size: 12px;
 }
 
-/* Responsive Design */
+/* Mobile-first responsive design */
 @media (max-width: 1200px) {
   .app-main {
     padding: 16px;
@@ -480,6 +566,12 @@ body {
   .channels-grid {
     justify-content: center;
     padding: 12px;
+    gap: 6px;
+  }
+  
+  .channels-grid.compact {
+    gap: 4px;
+    padding: 8px;
   }
   
   .presets-controls {
@@ -494,23 +586,77 @@ body {
   .prompt-content h2 {
     font-size: 20px;
   }
-}
-
-@media (max-width: 480px) {
-  .app-main {
-    padding: 12px;
-  }
-  
-  .app-title {
-    font-size: 20px;
-  }
   
   .section-title {
     font-size: 16px;
   }
   
+  .section-controls {
+    flex-direction: row;
+    gap: 6px;
+  }
+  
+  .reset-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-main {
+    padding: 0px;
+  }
+  
+  .app-title {
+    font-size: 18px;
+  }
+  
+  .companion-text {
+    font-size: 14px;
+  }
+  
+  .section-title {
+    font-size: 14px;
+  }
+  
   .channels-grid {
-    gap: 4px;
+    gap: 1px;
+    padding: 2px;
+  }
+  
+  .channels-grid.compact {
+    gap: 0px;
+    padding: 1px;
+  }
+  
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .header-button {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  
+  .prompt-content {
+    padding: 12px;
+  }
+  
+  .prompt-content h2 {
+    font-size: 18px;
+  }
+  
+  .setup-steps {
+    font-size: 12px;
+  }
+  
+  .mixer-container {
+    gap: 8px;
+  }
+  
+  .section-header {
+    margin-bottom: 8px;
+    padding-bottom: 4px;
   }
 }
 </style>

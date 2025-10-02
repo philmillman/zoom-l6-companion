@@ -4,6 +4,7 @@
       <h2 class="global-title">Global</h2>
     </div>
     
+    <!-- Always show normal layout -->
     <div class="controls-container">
       <div class="control-section">
         <div class="section-title">Effects</div>
@@ -49,6 +50,7 @@ const values = reactive({
 function onControlChange(section: string, control: string, value: number) {
   emit('controlChange', section, control, value);
 }
+
 
 // Method to reset all controls to defaults
 function resetToDefaults() {
@@ -101,6 +103,7 @@ defineExpose({
   padding: 16px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 25%; /* Match channel strip section width */
 }
 
 .section-title {
@@ -156,6 +159,18 @@ defineExpose({
   border-bottom-color: rgba(244, 67, 54, 0.3);
 }
 
+/* Compact Mode */
+.global-controls.compact {
+  padding: 8px;
+}
+
+.compact-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .controls-container {
@@ -178,12 +193,21 @@ defineExpose({
   .effect-controls {
     gap: 8px;
   }
+  
+  .compact-controls {
+    gap: 4px;
+  }
 }
 
 @media (max-width: 480px) {
   .global-controls {
-    padding: 12px;
-    margin: 4px;
+    padding: 8px;
+    margin: 2px;
+  }
+  
+  .global-controls.compact {
+    padding: 4px;
+    margin: 1px;
   }
   
   .global-title {
@@ -198,6 +222,10 @@ defineExpose({
   .effect-controls {
     flex-direction: column;
     align-items: center;
+  }
+  
+  .compact-controls {
+    gap: 2px;
   }
 }
 </style>

@@ -110,4 +110,61 @@ function noteLabel(note: number) {
   font-size: 12px;
   color: #9bbcf3;
 }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .sound-pads {
+    padding: 12px;
+    margin: 4px;
+  }
+  
+  .pads-title {
+    font-size: 16px;
+  }
+  
+  .pads-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  
+  .pad-button {
+    height: 100px;
+  }
+  
+  .pad-id {
+    font-size: 20px;
+  }
+  
+  .pad-note {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sound-pads {
+    padding: 4px;
+    margin: 1px;
+  }
+  
+  .pads-title {
+    font-size: 14px;
+  }
+  
+  .pads-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+  
+  .pad-button {
+    height: 80px;
+  }
+  
+  .pad-id {
+    font-size: 18px;
+  }
+  
+  .pad-note {
+    font-size: 10px;
+  }
+}
 </style>

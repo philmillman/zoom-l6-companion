@@ -111,11 +111,15 @@ const selectedOutput = ref('');
 const availableInputs = ref<Input[]>([]);
 const availableOutputs = ref<Output[]>([]);
 
-const isConnected = computed(() => midiService.isConnected);
+const isConnected = computed(() => {
+  return midiService.connectionState.value;
+});
+
 const connectionStatus = computed(() => {
   if (hasError.value) return 'Error';
   if (!isInitialized.value) return 'Initializing...';
   if (!isConnected.value) return 'Disconnected';
+  
   return `Connected: ${midiService.inputName} → ${midiService.outputName}`;
 });
 
@@ -141,8 +145,11 @@ function refreshDevices() {
   isRefreshing.value = true;
   
   try {
-    availableInputs.value = midiService.getAvailableInputs();
-    availableOutputs.value = midiService.getAvailableOutputs();
+    const inputs = midiService.getAvailableInputs();
+    const outputs = midiService.getAvailableOutputs();
+    
+    availableInputs.value = inputs;
+    availableOutputs.value = outputs;
   } catch (error) {
     console.error('Error refreshing devices:', error);
   } finally {
@@ -155,7 +162,7 @@ function connectInput() {
   
   const success = midiService.connectInput(selectedInput.value);
   if (success) {
-    emit('connectionChanged', midiService.isConnected);
+    emit('connectionChanged', midiService.connectionState.value);
   } else {
     selectedInput.value = '';
   }
@@ -166,7 +173,7 @@ function connectOutput() {
   
   const success = midiService.connectOutput(selectedOutput.value);
   if (success) {
-    emit('connectionChanged', midiService.isConnected);
+    emit('connectionChanged', midiService.connectionState.value);
   } else {
     selectedOutput.value = '';
   }
@@ -180,7 +187,16 @@ function disconnect() {
 }
 
 function autoConnect() {
-  // Try to find and connect Zoom devices automatically
+  // Priority 1: Look for "mixer control port" devices
+  const mixerInput = availableInputs.value.find(device => 
+    device.name.toLowerCase().includes('mixer control port')
+  );
+  
+  const mixerOutput = availableOutputs.value.find(device => 
+    device.name.toLowerCase().includes('mixer control port')
+  );
+  
+  // Priority 2: Look for Zoom/L6 devices
   const zoomInput = availableInputs.value.find(device => 
     device.name.toLowerCase().includes('zoom') || 
     device.name.toLowerCase().includes('l6')
@@ -191,18 +207,22 @@ function autoConnect() {
     device.name.toLowerCase().includes('l6')
   );
   
-  if (zoomInput) {
-    selectedInput.value = zoomInput.name;
+  // Connect input (prioritize mixer control port)
+  const targetInput = mixerInput || zoomInput;
+  if (targetInput) {
+    selectedInput.value = targetInput.name;
     connectInput();
   }
   
-  if (zoomOutput) {
-    selectedOutput.value = zoomOutput.name;
+  // Connect output (prioritize mixer control port)
+  const targetOutput = mixerOutput || zoomOutput;
+  if (targetOutput) {
+    selectedOutput.value = targetOutput.name;
     connectOutput();
   }
   
   // Fallback: connect to first available devices
-  if (!zoomInput && availableInputs.value.length > 0) {
+  if (!targetInput && availableInputs.value.length > 0) {
     const firstIn = availableInputs.value[0];
     if (firstIn) {
       selectedInput.value = firstIn.name;
@@ -210,7 +230,7 @@ function autoConnect() {
     }
   }
   
-  if (!zoomOutput && availableOutputs.value.length > 0) {
+  if (!targetOutput && availableOutputs.value.length > 0) {
     const firstOut = availableOutputs.value[0];
     if (firstOut) {
       selectedOutput.value = firstOut.name;
@@ -219,8 +239,14 @@ function autoConnect() {
   }
 }
 
+
 onMounted(() => {
   initializeMidi();
+  
+  // Set up device state change callback
+  midiService.setDeviceStateChangeCallback(() => {
+    refreshDevices();
+  });
 });
 </script>
 
@@ -388,6 +414,7 @@ onMounted(() => {
   background: #ef8900;
   transform: translateY(-1px);
 }
+
 
 .action-button:disabled {
   opacity: 0.5;

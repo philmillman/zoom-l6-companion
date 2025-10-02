@@ -1,4 +1,5 @@
 import { WebMidi, Input, Output } from 'webmidi';
+import { ref, computed } from 'vue';
 import type { MIDIControl } from '../config/midiConfig';
 
 export class MidiService {
@@ -6,16 +7,44 @@ export class MidiService {
   private output: Output | null = null;
   private isInitialized = false;
 
+  // Reactive state for connection tracking
+  private _isConnected = ref(false);
+  private _inputName = ref('No input connected');
+  private _outputName = ref('No output connected');
+
+  // Device state change callback
+  private onDeviceStateChangeCallback: (() => void) | null = null;
+
   async initialize(): Promise<boolean> {
     try {
       await WebMidi.enable();
       this.isInitialized = true;
-      console.log('WebMIDI enabled successfully');
+
+      // Listen for device state changes
+      WebMidi.addListener('connected', (event) => {
+        this.onDeviceStateChange();
+      });
+
+      WebMidi.addListener('disconnected', (event) => {
+        this.onDeviceStateChange();
+      });
       return true;
     } catch (error) {
       console.error('Failed to enable WebMIDI:', error);
       return false;
     }
+  }
+
+  private onDeviceStateChange() {
+    // Notify the component to refresh devices
+    if (this.onDeviceStateChangeCallback) {
+      this.onDeviceStateChangeCallback();
+    }
+  }
+
+  // Method to set the device state change callback
+  setDeviceStateChangeCallback(callback: () => void) {
+    this.onDeviceStateChangeCallback = callback;
   }
 
   getAvailableInputs(): Input[] {
@@ -42,7 +71,8 @@ export class MidiService {
     if (!targetInput) return false;
 
     this.input = targetInput;
-    console.log('Connected to MIDI input:', targetInput.name);
+    this._inputName.value = targetInput.name;
+    this._isConnected.value = this.input !== null || this.output !== null;
     return true;
   }
 
@@ -60,7 +90,8 @@ export class MidiService {
     if (!targetOutput) return false;
 
     this.output = targetOutput;
-    console.log('Connected to MIDI output:', targetOutput.name);
+    this._outputName.value = targetOutput.name;
+    this._isConnected.value = this.input !== null || this.output !== null;
     return true;
   }
 
@@ -82,15 +113,70 @@ export class MidiService {
     }
   }
 
+  private controlChangeListeners: Set<(cc: number, value: number, channel: number) => void> = new Set();
+
   addControlChangeListener(callback: (cc: number, value: number, channel: number) => void): void {
     if (!this.input) {
       console.warn('No MIDI input connected');
       return;
     }
 
-    this.input.addListener('controlchange', (event: any) => {
-      callback(event.controller.number, event.value, event.message.channel);
-    });
+    // Add callback to our set of listeners
+    this.controlChangeListeners.add(callback);
+
+    // If this is the first listener, set up the MIDI input listener
+    if (this.controlChangeListeners.size === 1) {
+      this.input.addListener('controlchange', (event: any) => {
+        const cc = event.controller.number;
+        // Get the normalized value (0-1) and convert to MIDI range (0-127)
+        const normalizedValue = event.value; // This is 0-1
+        const channel = event.message.channel;
+
+        // Convert normalized value to MIDI range (0-127)
+        let rawValue = Math.round(normalizedValue * 127);
+
+        // Try to get the actual raw MIDI value from various sources
+        const controllerValue = event.controller.value;
+        const messageData = event.message.dataBytes || event.message.data;
+
+        if (controllerValue !== undefined && controllerValue >= 0 && controllerValue <= 127) {
+          rawValue = controllerValue;
+        } else if (messageData && messageData.length >= 3) {
+          // MIDI CC message format: [status, cc, value]
+          const midiValue = messageData[2];
+          if (midiValue !== undefined && midiValue >= 0 && midiValue <= 127) {
+            rawValue = midiValue;
+          }
+        }
+
+        // Ensure we have a valid MIDI value (0-127)
+        if (rawValue < 0 || rawValue > 127 || isNaN(rawValue)) {
+          console.warn(`Invalid MIDI value: ${rawValue}, using normalized value * 127`);
+          rawValue = Math.round(normalizedValue * 127);
+        }
+
+        console.log(`Received MIDI CC: CC${cc} = ${rawValue} (raw) / ${normalizedValue} (normalized) on channel ${channel}`);
+        console.log('MIDI Value Sources:', {
+          controllerValue: controllerValue,
+          normalizedValue: normalizedValue,
+          messageData: messageData,
+          finalRawValue: rawValue
+        });
+
+        // Use the raw MIDI value (0-127) for our controls
+        this.controlChangeListeners.forEach(listener => {
+          try {
+            listener(cc, rawValue, channel);
+          } catch (error) {
+            console.error('Error in MIDI listener callback:', error);
+          }
+        });
+      });
+    }
+  }
+
+  removeControlChangeListener(callback: (cc: number, value: number, channel: number) => void): void {
+    this.controlChangeListeners.delete(callback);
   }
 
   // Note helpers for sound pads
@@ -100,7 +186,9 @@ export class MidiService {
       return;
     }
     try {
-      this.output.playNote(note, { channels: channel, attack: velocity });
+      // Convert MIDI velocity (0-127) to normalized value (0-1)
+      const normalizedVelocity = Math.max(0, Math.min(1, velocity / 127));
+      this.output.playNote(note, { channels: channel, attack: normalizedVelocity });
     } catch (error) {
       console.error('Failed to send Note On:', error);
     }
@@ -122,25 +210,35 @@ export class MidiService {
     if (this.input) {
       this.input.removeListener();
     }
+    this.controlChangeListeners.clear();
   }
 
   disconnect(): void {
     this.removeAllListeners();
     this.input = null;
     this.output = null;
+    this._inputName.value = 'No input connected';
+    this._outputName.value = 'No output connected';
+    this._isConnected.value = false;
   }
 
   get isConnected(): boolean {
-    return this.input !== null || this.output !== null;
+    return this._isConnected.value;
+  }
+
+  // Expose the reactive ref for Vue components to track
+  get connectionState() {
+    return this._isConnected;
   }
 
   get inputName(): string {
-    return this.input?.name || 'No input connected';
+    return this._inputName.value;
   }
 
   get outputName(): string {
-    return this.output?.name || 'No output connected';
+    return this._outputName.value;
   }
+
 }
 
 // Singleton instance

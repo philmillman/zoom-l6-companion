@@ -1,5 +1,5 @@
 <template>
-  <div class="midi-control" :class="[`control-${control.type}`, { active: isActive }]">
+  <div class="midi-control" :class="[`control-${control.type}`, { active: isActive, compact }]">
     <label class="control-label">{{ control.name }}</label>
     
     <!-- Fader -->
@@ -31,7 +31,7 @@
     </div>
     
     <!-- LFO toggle button (bottom-right of container) -->
-    <button v-if="control.type === 'knob'" class="lfo-btn" :class="{ active: lfo.enabled }" @click.stop="openPopover" :title="lfo.enabled ? 'LFO active' : 'Open LFO'" @dblclick.stop.prevent="resetToDefault">
+    <button v-if="control.type === 'knob' && !compact" class="lfo-btn" :class="{ active: lfo.enabled }" @click.stop="openPopover" :title="lfo.enabled ? 'LFO active' : 'Open LFO'" @dblclick.stop.prevent="resetToDefault">
       <span class="lfo-dot" :style="lfoDotStyle"></span>
     </button>
     
@@ -69,6 +69,28 @@
         {{ control.name }}
       </button>
     </div>
+    
+    <!-- Radio Group -->
+    <div v-else-if="control.type === 'radio'" class="radio-container">
+      <div class="radio-group">
+        <label 
+          v-for="option in control.options" 
+          :key="option.value"
+          class="radio-option"
+          :class="{ active: currentValue === option.value }"
+        >
+          <input
+            type="radio"
+            :name="`${control.name}-${control.cc}`"
+            :value="option.value"
+            :checked="currentValue === option.value"
+            @change="handleRadioChange(option.value)"
+            class="radio-input"
+          />
+          <span class="radio-label">{{ option.label }}</span>
+        </label>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -81,6 +103,7 @@ import LFOControl, { type LFOConfig, type LFOShape } from './LFOControl.vue';
 interface Props {
   control: MIDIControl;
   modelValue?: number;
+  compact?: boolean;
 }
 
 interface Emits {
@@ -89,7 +112,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: undefined
+  modelValue: undefined,
+  compact: false
 });
 
 const emit = defineEmits<Emits>();
@@ -200,14 +224,16 @@ function handleInput(event: Event) {
   updateValue(value);
 }
 
-function updateValue(value: number) {
+function updateValue(value: number, fromMidi = false) {
   const clampedValue = Math.max(props.control.min, Math.min(props.control.max, value));
   currentValue.value = clampedValue;
   emit('update:modelValue', clampedValue);
   emit('change', clampedValue);
   
-  // Send MIDI CC
-  midiService.sendControlChange(props.control, clampedValue);
+  // Only send MIDI CC if the update is NOT from MIDI input (to avoid feedback loop)
+  if (!fromMidi) {
+    midiService.sendControlChange(props.control, clampedValue);
+  }
   
   // Visual feedback
   isActive.value = true;
@@ -225,6 +251,10 @@ function buttonDown() {
 
 function buttonUp() {
   updateValue(0);
+}
+
+function handleRadioChange(value: number) {
+  updateValue(value);
 }
 
 function startDrag(event: MouseEvent | TouchEvent) {
@@ -284,18 +314,52 @@ watch(
   { immediate: true }
 );
 
+// MIDI input listener reference for cleanup
+let midiListener: ((cc: number, value: number, channel: number) => void) | null = null;
+
 onMounted(() => {
   // Listen for MIDI input to update control
-  midiService.addControlChangeListener((cc, value, channel) => {
+  midiListener = (cc, value, channel) => {
     if (cc === props.control.cc && channel === props.control.channel) {
-      currentValue.value = value;
-      emit('update:modelValue', value);
+      console.log(`Updating control ${props.control.name} from MIDI: CC${cc} = ${value}`);
+      
+      // Validate the MIDI value
+      if (value === undefined || value === null || isNaN(value)) {
+        console.warn(`Invalid MIDI value received for ${props.control.name}: ${value}`);
+        return;
+      }
+      
+      // Ensure value is in valid range
+      const validValue = Math.max(0, Math.min(127, Math.round(value)));
+      console.log(`Validated MIDI value: ${value} -> ${validValue}`);
+      
+      // Use updateValue with fromMidi=true to avoid feedback loop
+      updateValue(validValue, true);
     }
-  });
+  };
+  
+  midiService.addControlChangeListener(midiListener);
+});
+
+// Method to disable LFO
+function disableLfo() {
+  lfo.value.enabled = false;
+  stopLfo();
+}
+
+// Expose methods and state for external access
+defineExpose({
+  disableLfo,
+  lfo
 });
 
 onUnmounted(() => {
   stopDrag();
+  // Clean up MIDI listener
+  if (midiListener) {
+    midiService.removeControlChangeListener(midiListener);
+    midiListener = null;
+  }
 });
 </script>
 
@@ -310,6 +374,11 @@ onUnmounted(() => {
   transition: all 0.2s ease;
   min-width: 60px;
   position: relative;
+}
+
+.midi-control.compact {
+  padding: 4px;
+  min-width: 40px;
 }
 
 .midi-control.active {
@@ -338,6 +407,7 @@ onUnmounted(() => {
 .fader {
   writing-mode: bt-lr; /* IE */
   -webkit-appearance: slider-vertical; /* WebKit */
+  appearance: slider-vertical; /* Standard */
   width: 20px;
   height: 120px;
   background: #1a1a1a;
@@ -512,16 +582,26 @@ onUnmounted(() => {
   min-height: 12px;
 }
 
-/* Responsive */
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .midi-control {
     min-width: 50px;
     padding: 6px;
   }
   
+  .midi-control.compact {
+    min-width: 30px;
+    padding: 2px;
+  }
+  
   .knob {
     width: 40px;
     height: 40px;
+  }
+  
+  .compact .knob {
+    width: 30px;
+    height: 30px;
   }
   
   .fader-container {
@@ -530,6 +610,163 @@ onUnmounted(() => {
   
   .fader {
     height: 100px;
+  }
+  
+  .control-label {
+    font-size: 9px;
+  }
+  
+  .compact .control-label {
+    font-size: 8px;
+  }
+  
+  .value-display {
+    font-size: 9px;
+  }
+  
+  .compact .value-display {
+    font-size: 8px;
+  }
+  
+  .toggle-button {
+    width: 45px;
+    height: 28px;
+    font-size: 9px;
+  }
+  
+  .compact .toggle-button {
+    width: 40px;
+    height: 25px;
+    font-size: 8px;
+  }
+  
+  .control-button {
+    padding: 6px 12px;
+    font-size: 9px;
+  }
+  
+  .compact .control-button {
+    padding: 4px 8px;
+    font-size: 8px;
+  }
+}
+
+/* Radio Group Styles */
+.radio-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  border: 2px solid #4a4a4a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  text-align: center;
+  position: relative;
+}
+
+.radio-option:hover {
+  background: #2a2a2a;
+  border-color: #6aa0f2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.radio-option.active {
+  background: #4a90e2;
+  border-color: #4a90e2;
+  color: white;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+  transform: translateY(-1px);
+}
+
+.radio-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #ccc;
+  transition: color 0.2s ease;
+}
+
+.radio-option.active .radio-label {
+  color: white;
+}
+
+/* Compact mode for radio groups */
+.midi-control.compact .radio-group {
+  gap: 2px;
+}
+
+.midi-control.compact .radio-option {
+  padding: 4px 8px;
+  font-size: 9px;
+  min-width: 45px;
+}
+
+.midi-control.compact .radio-label {
+  font-size: 8px;
+}
+
+/* Mobile optimizations for radio groups */
+@media (max-width: 768px) {
+  .radio-group {
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  
+  .radio-option {
+    padding: 6px 8px;
+    font-size: 10px;
+    min-width: 50px;
+  }
+  
+  .radio-label {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .radio-group {
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  
+  .radio-option {
+    padding: 4px 6px;
+    font-size: 9px;
+    min-width: 40px;
+  }
+  
+  .radio-label {
+    font-size: 8px;
   }
 }
 </style>
