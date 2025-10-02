@@ -128,13 +128,16 @@ function updateSystemInfo() {
 }
 
 function formatTimestamp(date: Date): string {
-  return date.toLocaleTimeString('en-US', { 
+  const timeString = date.toLocaleTimeString('en-US', { 
     hour12: false, 
     hour: '2-digit', 
     minute: '2-digit', 
-    second: '2-digit',
-    fractionalSecondDigits: 3
+    second: '2-digit'
   });
+  
+  // Add milliseconds manually for better compatibility
+  const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
+  return `${timeString}.${milliseconds}`;
 }
 
 function getLogTypeClass(type: ErrorLog['type']): string {
