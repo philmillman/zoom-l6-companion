@@ -19,6 +19,14 @@
         <option value="saw">Saw</option>
       </select>
     </div>
+    <div class="lfo-row">
+      <label>Mode</label>
+      <select v-model="local.mode" @change="emitConfig">
+        <option value="bipolar">Bipolar</option>
+        <option value="positive">Positive</option>
+        <option value="negative">Negative</option>
+      </select>
+    </div>
     <div class="lfo-actions">
       <button class="toggle" :class="{ active: local.enabled }" @click="toggle">{{ local.enabled ? 'Disable' : 'Enable' }}</button>
     </div>
@@ -29,11 +37,13 @@
 import { ref, watch } from 'vue';
 
 export type LFOShape = 'sine' | 'triangle' | 'square' | 'saw';
+export type LFOMode = 'negative' | 'positive' | 'bipolar';
 
 export interface LFOConfig {
   rate: number;   // Hz
   depth: number;  // 0..1
   shape: LFOShape;
+  mode: LFOMode;
   enabled: boolean;
 }
 
@@ -52,6 +62,7 @@ const local = ref<LFOConfig>({
   rate: props.config?.rate ?? 1,
   depth: props.config?.depth ?? 0.3,
   shape: props.config?.shape ?? 'sine',
+  mode: props.config?.mode ?? 'bipolar',
   enabled: props.config?.enabled ?? false,
 });
 

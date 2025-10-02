@@ -98,7 +98,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { MIDIControl } from '../config/midiConfig';
 import { midiService } from '../services/midiService';
-import LFOControl, { type LFOConfig, type LFOShape } from './LFOControl.vue';
+import LFOControl, { type LFOConfig, type LFOShape, type LFOMode } from './LFOControl.vue';
 
 interface Props {
   control: MIDIControl;
@@ -140,7 +140,7 @@ const knobRotation = computed(() => {
 
 // LFO state
 const showPopover = ref(false);
-const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', enabled: false });
+const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', mode: 'bipolar', enabled: false });
 const lfoPhaseVal = ref(0);
 const lfoBaseValue = ref(props.control.defaultValue);
 let lfoRafId = 0;
@@ -173,17 +173,29 @@ function lfoShapeSample(shape: LFOShape, p: number): number {
   }
 }
 
+function applyLFOMode(value: number, mode: LFOMode): number {
+  switch (mode) {
+    case 'bipolar':
+      return value; // -1 to +1, centered on current value
+    case 'positive':
+      return (value + 1) / 2; // 0 to +1, only positive modulation
+    case 'negative':
+      return (value - 1) / 2; // -1 to 0, only negative modulation
+  }
+}
+
 function lfoLoop() {
   const now = performance.now();
   const dt = (now - lfoLastTime) / 1000;
   lfoLastTime = now;
   if (lfo.value.enabled && lfo.value.rate > 0) {
     lfoPhase = (lfoPhase + dt * lfo.value.rate) % 1;
-    const v = lfoShapeSample(lfo.value.shape, lfoPhase);
-    lfoPhaseVal.value = v;
+    const rawValue = lfoShapeSample(lfo.value.shape, lfoPhase);
+    const modeValue = applyLFOMode(rawValue, lfo.value.mode);
+    lfoPhaseVal.value = modeValue;
     const base = lfoBaseValue.value;
     const depth = lfo.value.depth * (props.control.max - props.control.min);
-    const modulated = base + v * depth;
+    const modulated = base + modeValue * depth;
     updateValue(modulated);
   }
   lfoRafId = requestAnimationFrame(lfoLoop);
