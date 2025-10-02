@@ -114,6 +114,8 @@ export class MidiService {
   }
 
   private controlChangeListeners: Set<(cc: number, value: number, channel: number) => void> = new Set();
+  private noteOnListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
+  private noteOffListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
 
   addControlChangeListener(callback: (cc: number, value: number, channel: number) => void): void {
     if (!this.input) {
@@ -179,6 +181,74 @@ export class MidiService {
     this.controlChangeListeners.delete(callback);
   }
 
+  addNoteOnListener(callback: (note: number, velocity: number, channel: number) => void): void {
+    if (!this.input) {
+      console.warn('No MIDI input connected');
+      return;
+    }
+
+    // Add callback to our set of listeners
+    this.noteOnListeners.add(callback);
+
+    // If this is the first listener, set up the MIDI input listener
+    if (this.noteOnListeners.size === 1) {
+      this.input.addListener('noteon', (event: any) => {
+        const note = event.note.number;
+        const velocity = event.velocity || 0;
+        const channel = event.message.channel;
+
+        console.log(`Received MIDI Note On: ${note} (vel: ${velocity}) on channel ${channel}`);
+
+        // Notify all listeners
+        this.noteOnListeners.forEach(listener => {
+          try {
+            listener(note, velocity, channel);
+          } catch (error) {
+            console.error('Error in Note On listener callback:', error);
+          }
+        });
+      });
+    }
+  }
+
+  removeNoteOnListener(callback: (note: number, velocity: number, channel: number) => void): void {
+    this.noteOnListeners.delete(callback);
+  }
+
+  addNoteOffListener(callback: (note: number, velocity: number, channel: number) => void): void {
+    if (!this.input) {
+      console.warn('No MIDI input connected');
+      return;
+    }
+
+    // Add callback to our set of listeners
+    this.noteOffListeners.add(callback);
+
+    // If this is the first listener, set up the MIDI input listener
+    if (this.noteOffListeners.size === 1) {
+      this.input.addListener('noteoff', (event: any) => {
+        const note = event.note.number;
+        const velocity = event.velocity || 0;
+        const channel = event.message.channel;
+
+        console.log(`Received MIDI Note Off: ${note} (vel: ${velocity}) on channel ${channel}`);
+
+        // Notify all listeners
+        this.noteOffListeners.forEach(listener => {
+          try {
+            listener(note, velocity, channel);
+          } catch (error) {
+            console.error('Error in Note Off listener callback:', error);
+          }
+        });
+      });
+    }
+  }
+
+  removeNoteOffListener(callback: (note: number, velocity: number, channel: number) => void): void {
+    this.noteOffListeners.delete(callback);
+  }
+
   // Note helpers for sound pads
   sendNoteOn(note: number, channel: number, velocity = 100): void {
     if (!this.output) {
@@ -211,6 +281,8 @@ export class MidiService {
       this.input.removeListener();
     }
     this.controlChangeListeners.clear();
+    this.noteOnListeners.clear();
+    this.noteOffListeners.clear();
   }
 
   disconnect(): void {

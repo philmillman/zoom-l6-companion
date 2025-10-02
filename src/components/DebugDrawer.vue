@@ -58,9 +58,11 @@ const systemInfo = reactive({
   viewportSize: '',
   devicePixelRatio: window.devicePixelRatio,
   webMidiSupported: false,
-  midiConnected: false,
   timestamp: new Date()
 });
+
+// Reactive MIDI connection state
+const midiConnected = computed(() => midiService.connectionState.value);
 
 // Computed properties
 const errorCount = computed(() => errorLogs.value.length);
@@ -123,7 +125,6 @@ function clearLogs(type: 'errors' | 'midi' | 'all' = 'all') {
 function updateSystemInfo() {
   systemInfo.viewportSize = `${window.innerWidth}x${window.innerHeight}`;
   systemInfo.onLine = navigator.onLine;
-  systemInfo.midiConnected = midiService.isConnected;
   systemInfo.timestamp = new Date();
 }
 
@@ -195,36 +196,72 @@ function setupErrorHandling() {
 
 // MIDI monitoring setup
 function setupMidiMonitoring() {
-  // Monitor MIDI input
-  const midiInputListener = (cc: number, value: number, channel: number) => {
+  // Monitor MIDI input - Control Changes
+  const midiCCListener = (cc: number, value: number, channel: number) => {
     addMidiLog('in', 'cc', channel, { cc, value }, `CC${cc} = ${value} on channel ${channel}`);
   };
 
-  // Monitor MIDI output (we'll need to patch the midiService)
+  // Monitor MIDI input - Note On
+  const midiNoteOnListener = (note: number, velocity: number, channel: number) => {
+    addMidiLog('in', 'note', channel, { note, velocity, type: 'on' }, `Note On: ${note} (vel: ${velocity}) on channel ${channel}`);
+  };
+
+  // Monitor MIDI input - Note Off
+  const midiNoteOffListener = (note: number, velocity: number, channel: number) => {
+    addMidiLog('in', 'note', channel, { note, velocity, type: 'off' }, `Note Off: ${note} (vel: ${velocity}) on channel ${channel}`);
+  };
+
+  // Monitor MIDI output (we'll need to patch the midiService methods)
   const originalSendControlChange = midiService.sendControlChange;
+  const originalSendNoteOn = midiService.sendNoteOn;
+  const originalSendNoteOff = midiService.sendNoteOff;
+
+  // Patch sendControlChange
   midiService.sendControlChange = function(control: any, value: number) {
     addMidiLog('out', 'cc', control.channel, { cc: control.cc, value }, `CC${control.cc} = ${value} on channel ${control.channel}`);
     return originalSendControlChange.call(this, control, value);
   };
 
-  // Add MIDI input listener
+  // Patch sendNoteOn
+  midiService.sendNoteOn = function(note: number, channel: number, velocity: number) {
+    addMidiLog('out', 'note', channel, { note, velocity, type: 'on' }, `Note On: ${note} (vel: ${velocity}) on channel ${channel}`);
+    return originalSendNoteOn.call(this, note, channel, velocity);
+  };
+
+  // Patch sendNoteOff
+  midiService.sendNoteOff = function(note: number, channel: number, release: number) {
+    addMidiLog('out', 'note', channel, { note, release, type: 'off' }, `Note Off: ${note} (rel: ${release}) on channel ${channel}`);
+    return originalSendNoteOff.call(this, note, channel, release);
+  };
+
+  // Add MIDI input listeners
   if (midiService.isConnected) {
-    midiService.addControlChangeListener(midiInputListener);
+    midiService.addControlChangeListener(midiCCListener);
+    midiService.addNoteOnListener(midiNoteOnListener);
+    midiService.addNoteOffListener(midiNoteOffListener);
   }
 
   // Watch for MIDI connection changes
-  const stopWatching = watch(() => midiService.isConnected, (connected) => {
+  const stopWatching = watch(() => midiService.connectionState.value, (connected) => {
     if (connected) {
-      midiService.addControlChangeListener(midiInputListener);
+      midiService.addControlChangeListener(midiCCListener);
+      midiService.addNoteOnListener(midiNoteOnListener);
+      midiService.addNoteOffListener(midiNoteOffListener);
     } else {
-      midiService.removeControlChangeListener(midiInputListener);
+      midiService.removeControlChangeListener(midiCCListener);
+      midiService.removeNoteOnListener(midiNoteOnListener);
+      midiService.removeNoteOffListener(midiNoteOffListener);
     }
   });
 
   // Return cleanup function
   return () => {
-    midiService.removeControlChangeListener(midiInputListener);
+    midiService.removeControlChangeListener(midiCCListener);
+    midiService.removeNoteOnListener(midiNoteOnListener);
+    midiService.removeNoteOffListener(midiNoteOffListener);
     midiService.sendControlChange = originalSendControlChange;
+    midiService.sendNoteOn = originalSendNoteOn;
+    midiService.sendNoteOff = originalSendNoteOff;
     stopWatching();
   };
 }
@@ -446,8 +483,8 @@ watch(() => props.isVisible, (visible) => {
               </div>
               <div class="info-item">
                 <span class="info-label">MIDI Connected:</span>
-                <span class="info-value" :class="{ connected: systemInfo.midiConnected, disconnected: !systemInfo.midiConnected }">
-                  {{ systemInfo.midiConnected ? 'Yes' : 'No' }}
+                <span class="info-value" :class="{ connected: midiConnected, disconnected: !midiConnected }">
+                  {{ midiConnected ? 'Yes' : 'No' }}
                 </span>
               </div>
             </div>
@@ -888,11 +925,12 @@ watch(() => props.isVisible, (visible) => {
   }
   
   .debug-tabs {
-    flex-direction: column;
+    flex-direction: row;
   }
   
   .debug-tab {
-    padding: 12px;
+    padding: 8px 6px;
+    font-size: 10px;
   }
 }
 
@@ -909,6 +947,20 @@ watch(() => props.isVisible, (visible) => {
   
   .debug-panel {
     max-height: 80vh;
+  }
+  
+  .debug-tabs {
+    flex-direction: row;
+  }
+  
+  .debug-tab {
+    padding: 6px 4px;
+    font-size: 9px;
+  }
+  
+  .tab-badge {
+    font-size: 8px;
+    padding: 1px 3px;
   }
   
   .log-header {
