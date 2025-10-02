@@ -4,6 +4,7 @@ import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
 import SoundPads from './components/SoundPads.vue';
+import DebugDrawer from './components/DebugDrawer.vue';
 import { channelControls, globalControls } from './config/midiConfig';
 import { midiService } from './services/midiService';
 
@@ -13,6 +14,7 @@ const appSettings = reactive({
   showAdvanced: false,
   compactMode: false,
 });
+const showDebugDrawer = ref(false);
 
 // Refs to channel components for resetting and LFO control
 type ChannelStripInstance = InstanceType<typeof ChannelStrip> | null;
@@ -75,6 +77,10 @@ function disableAllGlobalLfos() {
       channelStrip.disableAllLfos?.();
     }
   });
+}
+
+function onDebugDrawerToggle() {
+  showDebugDrawer.value = !showDebugDrawer.value;
 }
 
 // Global MIDI input handler for debugging and monitoring
@@ -221,6 +227,12 @@ onUnmounted(() => {
         <p>Built by <a href="https://github.com/philmillman" target="_blank">philmillman</a> | Not affiliated with Zoom Corp</p>
       </div>
     </footer>
+
+    <!-- Debug Drawer -->
+    <DebugDrawer 
+      :isVisible="showDebugDrawer"
+      @toggle="onDebugDrawerToggle"
+    />
   </div>
 </template>
 
