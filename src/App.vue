@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
@@ -15,6 +15,26 @@ const appSettings = reactive({
   compactMode: false,
 });
 const showDebugDrawer = ref(false);
+const debugDrawerExpanded = ref(true); // Start with panel open by default
+
+// Debug data storage (persists between toggles)
+const debugData = reactive({
+  errorLogs: [] as any[],
+  midiLogs: [] as any[],
+  activeTab: 'errors' as 'errors' | 'midi' | 'system',
+  systemInfo: {
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    cookieEnabled: navigator.cookieEnabled,
+    onLine: navigator.onLine,
+    screenResolution: `${screen.width}x${screen.height}`,
+    viewportSize: '',
+    devicePixelRatio: window.devicePixelRatio,
+    webMidiSupported: false,
+    timestamp: new Date()
+  }
+});
 
 // Refs to channel components for resetting and LFO control
 type ChannelStripInstance = InstanceType<typeof ChannelStrip> | null;
@@ -79,8 +99,25 @@ function disableAllGlobalLfos() {
   });
 }
 
+async function toggleDebugDrawer() {
+  if (!showDebugDrawer.value) {
+    // Show the debugger and restore its previous state
+    showDebugDrawer.value = true;
+    // Wait for the component to be mounted, then restore the panel state
+    await nextTick();
+    // Trigger reactivity by setting the value again
+    const currentState = debugDrawerExpanded.value;
+    debugDrawerExpanded.value = !currentState;
+    await nextTick();
+    debugDrawerExpanded.value = currentState;
+  } else {
+    // Hide the entire debugger (state is preserved)
+    showDebugDrawer.value = false;
+  }
+}
+
 function onDebugDrawerToggle() {
-  showDebugDrawer.value = !showDebugDrawer.value;
+  debugDrawerExpanded.value = !debugDrawerExpanded.value;
 }
 
 // Global MIDI input handler for debugging and monitoring
@@ -129,6 +166,15 @@ onUnmounted(() => {
             title="Coming soon"
           >
             Advanced
+          </button>
+          
+          <button 
+            @click="toggleDebugDrawer"
+            class="header-button debug-button"
+            :class="{ active: showDebugDrawer }"
+            title="Toggle Debug Console"
+          >
+            Debug
           </button>
         </div>
       </div>
@@ -230,7 +276,9 @@ onUnmounted(() => {
 
     <!-- Debug Drawer -->
     <DebugDrawer 
-      :isVisible="showDebugDrawer"
+      v-if="showDebugDrawer"
+      :isVisible="debugDrawerExpanded"
+      :debugData="debugData"
       @toggle="onDebugDrawerToggle"
     />
   </div>
@@ -330,6 +378,18 @@ body {
   background: #4a90e2;
   border-color: #4a90e2;
   color: #fff;
+}
+
+.debug-button.active {
+  background: #ff9800;
+  border-color: #ff9800;
+  color: #fff;
+}
+
+.debug-button:hover {
+  background: rgba(255, 152, 0, 0.2);
+  border-color: rgba(255, 152, 0, 0.3);
+  color: #ff9800;
 }
 
 

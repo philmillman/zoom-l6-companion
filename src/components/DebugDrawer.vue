@@ -5,10 +5,33 @@ import { midiService } from '../services/midiService';
 // Props
 interface Props {
   isVisible?: boolean;
+  debugData?: {
+    errorLogs: any[];
+    midiLogs: any[];
+    activeTab: 'errors' | 'midi' | 'system';
+    systemInfo: any;
+  };
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isVisible: false
+  isVisible: false,
+  debugData: () => ({
+    errorLogs: [],
+    midiLogs: [],
+    activeTab: 'errors',
+    systemInfo: {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      cookieEnabled: navigator.cookieEnabled,
+      onLine: navigator.onLine,
+      screenResolution: `${screen.width}x${screen.height}`,
+      viewportSize: '',
+      devicePixelRatio: window.devicePixelRatio,
+      webMidiSupported: false,
+      timestamp: new Date()
+    }
+  })
 });
 
 // Emits
@@ -18,7 +41,12 @@ const emit = defineEmits<{
 
 // Reactive state
 const isExpanded = ref(false);
-const activeTab = ref<'errors' | 'midi' | 'system'>('errors');
+const activeTab = computed({
+  get: () => props.debugData.activeTab,
+  set: (value: 'errors' | 'midi' | 'system') => {
+    props.debugData.activeTab = value;
+  }
+});
 
 // Error logging
 interface ErrorLog {
@@ -29,9 +57,6 @@ interface ErrorLog {
   stack?: string;
   source?: string;
 }
-
-const errorLogs = ref<ErrorLog[]>([]);
-const maxLogs = 100;
 
 // MIDI message logging
 interface MidiLog {
@@ -44,31 +69,22 @@ interface MidiLog {
   description: string;
 }
 
-const midiLogs = ref<MidiLog[]>([]);
-const maxMidiLogs = 50;
+// Use persistent debug data from props
+const errorLogs = computed(() => props.debugData.errorLogs);
+const midiLogs = computed(() => props.debugData.midiLogs);
+const systemInfo = computed(() => props.debugData.systemInfo);
 
-// System info
-const systemInfo = reactive({
-  userAgent: navigator.userAgent,
-  platform: navigator.platform,
-  language: navigator.language,
-  cookieEnabled: navigator.cookieEnabled,
-  onLine: navigator.onLine,
-  screenResolution: `${screen.width}x${screen.height}`,
-  viewportSize: '',
-  devicePixelRatio: window.devicePixelRatio,
-  webMidiSupported: false,
-  timestamp: new Date()
-});
+const maxLogs = 100;
+const maxMidiLogs = 50;
 
 // Reactive MIDI connection state
 const midiConnected = computed(() => midiService.connectionState.value);
 
 // Computed properties
-const errorCount = computed(() => errorLogs.value.length);
-const midiCount = computed(() => midiLogs.value.length);
-const hasErrors = computed(() => errorLogs.value.some(log => log.type === 'error'));
-const hasWarnings = computed(() => errorLogs.value.some(log => log.type === 'warning'));
+const errorCount = computed(() => props.debugData.errorLogs.length);
+const midiCount = computed(() => props.debugData.midiLogs.length);
+const hasErrors = computed(() => props.debugData.errorLogs.some(log => log.type === 'error'));
+const hasWarnings = computed(() => props.debugData.errorLogs.some(log => log.type === 'warning'));
 
 // Methods
 function toggleDrawer() {
@@ -86,11 +102,11 @@ function addErrorLog(type: ErrorLog['type'], message: string, stack?: string, so
     source
   };
   
-  errorLogs.value.unshift(log);
+  props.debugData.errorLogs.unshift(log);
   
   // Keep only the most recent logs
-  if (errorLogs.value.length > maxLogs) {
-    errorLogs.value = errorLogs.value.slice(0, maxLogs);
+  if (props.debugData.errorLogs.length > maxLogs) {
+    props.debugData.errorLogs.splice(maxLogs);
   }
 }
 
@@ -105,27 +121,27 @@ function addMidiLog(direction: MidiLog['direction'], type: MidiLog['type'], chan
     description
   };
   
-  midiLogs.value.unshift(log);
+  props.debugData.midiLogs.unshift(log);
   
   // Keep only the most recent logs
-  if (midiLogs.value.length > maxMidiLogs) {
-    midiLogs.value = midiLogs.value.slice(0, maxMidiLogs);
+  if (props.debugData.midiLogs.length > maxMidiLogs) {
+    props.debugData.midiLogs.splice(maxMidiLogs);
   }
 }
 
 function clearLogs(type: 'errors' | 'midi' | 'all' = 'all') {
   if (type === 'errors' || type === 'all') {
-    errorLogs.value = [];
+    props.debugData.errorLogs.length = 0;
   }
   if (type === 'midi' || type === 'all') {
-    midiLogs.value = [];
+    props.debugData.midiLogs.length = 0;
   }
 }
 
 function updateSystemInfo() {
-  systemInfo.viewportSize = `${window.innerWidth}x${window.innerHeight}`;
-  systemInfo.onLine = navigator.onLine;
-  systemInfo.timestamp = new Date();
+  props.debugData.systemInfo.viewportSize = `${window.innerWidth}x${window.innerHeight}`;
+  props.debugData.systemInfo.onLine = navigator.onLine;
+  props.debugData.systemInfo.timestamp = new Date();
 }
 
 function formatTimestamp(date: Date): string {
@@ -276,7 +292,7 @@ function setupSystemMonitoring() {
   window.addEventListener('offline', updateViewport);
 
   // Check WebMIDI support
-  systemInfo.webMidiSupported = 'requestMIDIAccess' in navigator;
+  props.debugData.systemInfo.webMidiSupported = 'requestMIDIAccess' in navigator;
 
   return () => {
     window.removeEventListener('resize', updateViewport);
@@ -306,9 +322,7 @@ onUnmounted(() => {
 
 // Watch for visibility changes
 watch(() => props.isVisible, (visible) => {
-  if (visible && !isExpanded.value) {
-    isExpanded.value = true;
-  }
+  isExpanded.value = visible;
 });
 </script>
 
@@ -405,7 +419,7 @@ watch(() => props.isVisible, (visible) => {
               <div class="log-message">{{ log.message }}</div>
               <div class="log-stack" v-if="log.stack">{{ log.stack }}</div>
             </div>
-            <div v-if="errorLogs.length === 0" class="no-logs">
+            <div v-if="props.debugData.errorLogs.length === 0" class="no-logs">
               No error logs yet
             </div>
           </div>
@@ -435,7 +449,7 @@ watch(() => props.isVisible, (visible) => {
                 <pre>{{ JSON.stringify(log.data, null, 2) }}</pre>
               </div>
             </div>
-            <div v-if="midiLogs.length === 0" class="no-logs">
+            <div v-if="props.debugData.midiLogs.length === 0" class="no-logs">
               No MIDI messages yet
             </div>
           </div>
@@ -451,34 +465,34 @@ watch(() => props.isVisible, (visible) => {
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Platform:</span>
-                <span class="info-value">{{ systemInfo.platform }}</span>
+                <span class="info-value">{{ props.debugData.systemInfo.platform }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Language:</span>
-                <span class="info-value">{{ systemInfo.language }}</span>
+                <span class="info-value">{{ props.debugData.systemInfo.language }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Online:</span>
-                <span class="info-value" :class="{ online: systemInfo.onLine, offline: !systemInfo.onLine }">
-                  {{ systemInfo.onLine ? 'Yes' : 'No' }}
+                <span class="info-value" :class="{ online: props.debugData.systemInfo.onLine, offline: !props.debugData.systemInfo.onLine }">
+                  {{ props.debugData.systemInfo.onLine ? 'Yes' : 'No' }}
                 </span>
               </div>
               <div class="info-item">
                 <span class="info-label">Screen:</span>
-                <span class="info-value">{{ systemInfo.screenResolution }}</span>
+                <span class="info-value">{{ props.debugData.systemInfo.screenResolution }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Viewport:</span>
-                <span class="info-value">{{ systemInfo.viewportSize }}</span>
+                <span class="info-value">{{ props.debugData.systemInfo.viewportSize }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Pixel Ratio:</span>
-                <span class="info-value">{{ systemInfo.devicePixelRatio }}</span>
+                <span class="info-value">{{ props.debugData.systemInfo.devicePixelRatio }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">WebMIDI:</span>
-                <span class="info-value" :class="{ supported: systemInfo.webMidiSupported, unsupported: !systemInfo.webMidiSupported }">
-                  {{ systemInfo.webMidiSupported ? 'Supported' : 'Not Supported' }}
+                <span class="info-value" :class="{ supported: props.debugData.systemInfo.webMidiSupported, unsupported: !props.debugData.systemInfo.webMidiSupported }">
+                  {{ props.debugData.systemInfo.webMidiSupported ? 'Supported' : 'Not Supported' }}
                 </span>
               </div>
               <div class="info-item">
@@ -490,7 +504,7 @@ watch(() => props.isVisible, (visible) => {
             </div>
             <div class="user-agent">
               <span class="info-label">User Agent:</span>
-              <div class="info-value">{{ systemInfo.userAgent }}</div>
+              <div class="info-value">{{ props.debugData.systemInfo.userAgent }}</div>
             </div>
           </div>
         </div>
