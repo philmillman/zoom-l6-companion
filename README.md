@@ -1,47 +1,62 @@
 # Zoom L6 Companion App
 
-A web-based companion application for the Zoom L6 mixer built with Vue.js and WebMIDI.js. This app allows you to control your Zoom L6 mixer directly from your browser using MIDI over USB.
+**This project is not affiliated with Zoom Corp.**
+
+> This is under active development, contributions are welcome!
+
+A web-based companion application for the Zoom L6 mixer built with Vue.js and WebMIDI.js. This app allows you to control your Zoom L6 mixer directly from your browser using MIDI over USB. 
 
 ## Features
 
-- **6 Channel Strips** - Full control over each of the 6 channels including:
-  - Gain control
-  - 3-band EQ (High, Mid, Low)
+- **4 Channel Strips** - Full control over each of the 4 channels including:
+  - 3-band EQ (High, Mid with frequency control, Low)
   - Pan control
   - Aux sends (Aux1, Aux2)
+  - Effects send (EFX)
   - Volume fader
-  - Mute and Solo buttons
+  - Mute, Mono (ch 3/4), USB (ch 5/6) buttons
 
-- **Global Controls** - Master section and effects:
-  - Master volume and aux controls
-  - Reverb send, return, and type
-  - Delay send, return, time, and feedback
-  - Compressor threshold, ratio, attack, and release
+- **Global Controls** - Effects section:
+  - EFX Type selector (Hall, Room, Spring, Delay, Echo)
+  - Compressor on/off toggle
+
+- **LFO (Low Frequency Oscillator) System** - Advanced modulation features:
+  - Individual LFO control for each knob parameter
+  - Multiple waveforms: Sine, Triangle, Square, Saw
+  - Three modulation modes: Bipolar, Positive, Negative
+  - Adjustable rate (0.1-10 Hz) and depth (0-100%)
+  - Visual feedback with animated indicators
+  - Global LFO disable controls
+
+- **Sound Pads** - MIDI trigger pads:
+  - 4 programmable MIDI note triggers
+  - MIDI note on/off messages
 
 - **MIDI Integration** - WebMIDI.js powered features:
   - Auto-detection of Zoom L6 device
   - Real-time bidirectional MIDI communication
   - Support for manual device selection
-  - MIDI CC mapping based on Zoom L6 specification
+  - MIDI CC mapping based on Zoom L6 specification (coming soon to UI)
+  - MIDI note triggers via Sound Pads (coming soon to UI)
 
 - **Modern UI** - Responsive design features:
-  - Dark theme optimized for studio environments
-  - Compact and Advanced view modes
+  - Dark theme
+  - Compact and regular view modes
+  - Mobile-optimized layout with smart label placement
   - Touch-friendly controls for tablets
   - Responsive layout for all screen sizes
+  - Debug console for troubleshooting
 
 ## Requirements
-
 - Modern web browser with WebMIDI support (Chrome, Edge, Firefox)
 - Zoom L6 mixer connected via USB
-- MIDI drivers installed (usually automatic)
+- MIDI drivers installed (Windows)
 
 ## Setup Instructions
 
 1. **Connect your Zoom L6**:
    - Connect the Zoom L6 to your computer via USB cable
    - Ensure the device is powered on
-   - Verify MIDI drivers are installed (should be automatic)
 
 2. **Launch the app**:
    - Open the companion app in a compatible web browser
@@ -55,6 +70,8 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
 4. **Start mixing**:
    - Use the channel strips to control individual channels
    - Adjust global effects and master controls
+   - Enable LFOs on individual controls for modulation effects
+   - Use Sound Pads to trigger MIDI notes
    - Changes are sent to the Zoom L6 in real-time
 
 ## MIDI CC Mapping
@@ -62,30 +79,27 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
 The app uses the following MIDI CC mappings (typical values - may need adjustment based on your device firmware):
 
 ### Channel Controls (per channel)
-- Gain: CC1, 21, 41, 61, 81, 101 (channels 1-6)
-- Volume: CC7, 27, 47, 67, 87, 107 (channels 1-6)  
-- Pan: CC10, 30, 50, 70, 90, 110 (channels 1-6)
-- EQ High: CC11, 31, 51, 71, 91, 111 (channels 1-6)
-- EQ Mid: CC12, 32, 52, 72, 92, 112 (channels 1-6)
-- EQ Low: CC13, 33, 53, 73, 93, 113 (channels 1-6)
-- Aux1: CC14, 34, 54, 74, 94, 114 (channels 1-6)
-- Aux2: CC15, 35, 55, 75, 95, 115 (channels 1-6)
-- Mute: CC16, 36, 56, 76, 96, 116 (channels 1-6)
-- Solo: CC17, 37, 57, 77, 97, 117 (channels 1-6)
+- Volume: CC7, 27, 47, 67 (channels 1-4)  
+- Pan: CC10, 30, 50, 70 (channels 1-4)
+- EQ High: CC11, 31, 51, 71 (channels 1-4)
+- EQ Mid: CC12, 32, 52, 72 (channels 1-4)
+- EQ Mid Frequency: CC13, 33, 53, 73 (channels 1-4)
+- EQ Low: CC14, 34, 54, 74 (channels 1-4)
+- Aux1: CC15, 35, 55, 75 (channels 1-4)
+- Aux2: CC16, 36, 56, 76 (channels 1-4)
+- EFX Send: CC17, 37, 57, 77 (channels 1-4)
+- Mute: CC18, 38, 58, 78 (channels 1-4)
+- Mono (Ch 3-4): CC19, 39 (channels 3-4)
 
 ### Global Controls
-- Master Volume: CC8
-- Reverb Send: CC2
-- Reverb Return: CC3
-- Reverb Type: CC4
-- Delay Send: CC5
-- Delay Return: CC6
-- Delay Time: CC20
-- Delay Feedback: CC9
-- Compressor Threshold: CC118
-- Compressor Ratio: CC119
-- Compressor Attack: CC120
-- Compressor Release: CC121
+- EFX Type: CC117 (Radio selection: Hall=1, Room=26, Spring=51, Delay=80, Echo=105)
+- Compressor: CC119 (Toggle: On/Off)
+
+### Sound Pads (MIDI Notes)
+- Pad 1: Note 60 (C3)
+- Pad 2: Note 62 (D3)
+- Pad 3: Note 64 (E3)
+- Pad 4: Note 65 (F3)
 
 ## Development
 
@@ -109,6 +123,29 @@ npm run dev
 npm run build
 ```
 
+## Usage Tips
+
+### LFO System
+- **Enable LFOs**: Click the small LFO button on any knob in regular view mode
+- **LFO Controls**: Adjust rate (speed), depth (amount), shape (waveform), and mode (direction)
+- **Visual Feedback**: Active LFOs show animated indicators on controls
+- **Global Control**: Use "Disable LFOs" buttons to quickly turn off all LFOs
+
+### Compact Mode
+- **Mobile Optimization**: Automatically shows labels inside buttons and knobs
+- **Space Efficient**: All controls in a single row for better mobile experience
+- **Touch Friendly**: Optimized button sizes for touch interaction
+
+### Sound Pads
+- **MIDI Triggers**: Send MIDI note on/off messages to your Zoom L6
+- **Touch Support**: Works with both mouse and touch input
+- **Programmable**: MIDI notes can be customized in the configuration
+
+### Debug Console
+- **Troubleshooting**: Access via the Debug button in the header
+- **MIDI Monitoring**: View real-time MIDI communication logs
+- **Error Tracking**: Monitor system errors and warnings
+
 ## Customization
 
 ### Adjusting MIDI CC Values
@@ -119,31 +156,31 @@ If your Zoom L6 uses different MIDI CC mappings, you can modify the configuratio
 The app uses CSS custom properties for theming. Key color values can be found in:
 `src/App.vue` (global styles section)
 
+### Sound Pad Configuration
+Modify Sound Pad MIDI notes and channels in:
+`src/config/midiConfig.ts` (soundPads array)
+
 ## Troubleshooting
 
 ### MIDI Connection Issues
 1. Ensure WebMIDI is supported in your browser
 2. Check USB cable connection
 3. Verify Zoom L6 is powered on and in MIDI mode
-4. Try refreshing the device list
-5. Check browser console for error messages
+4. Try refreshing the device list and select the correct device (this varies by OS)
+5. Check debug console and browser console for error messages
 
-### Performance Issues
-1. Use Chrome or Edge for best WebMIDI performance
-2. Close other browser tabs using audio/MIDI
-3. Enable "Compact Mode" for better mobile performance
+## Browser & OS Compatibility
 
-## Browser Compatibility
+| Browser | Windows | macOS | Linux | Android | iOS | Notes |
+|---------|---------|-------|-------|---------|-----|-------|
+| Chrome | ✅ | ✅ | ✅ | 🚧 | ❌ | Recommended browser |
+| Microsoft Edge | ✅ | ✅ | ✅ | 🚧 | ❌ | Full WebMIDI support |
+| Firefox | ✅ | ✅ | ✅ | 🚧 | ❌ | Requires WebMIDI enabled |
+| Safari | ❌ | ✅ | ❌ | ❌ | ❌ | Plugin required |
 
-- ✅ Chrome (recommended)
-- ✅ Microsoft Edge  
-- ✅ Firefox (with WebMIDI enabled)
-- ❌ Safari (WebMIDI not supported)
+See https://webmidijs.org/docs/getting-started/ and https://caniuse.com/midi for more information.
 
-## License
-
-This project is open source. Feel free to modify and distribute according to your needs.
 
 ## Contributing
 
-Issues and pull requests welcome! Please ensure any MIDI CC changes are well documented and tested with actual hardware.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

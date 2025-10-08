@@ -1,0 +1,112 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for the Zoom L6 Companion app
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see added.
+      placeholder: Describe the feature here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What is the use case?
+      placeholder: Describe the problem or need this feature would address...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution or how you envision this feature working.
+      placeholder: How should this feature work?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: Which area of the app would this feature affect?
+      options:
+        - User Interface
+        - MIDI Controls
+        - LFO System
+        - Sound Pads
+        - Global Controls
+        - Performance
+        - Mobile Experience
+        - Debug/Developer Tools
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would be useful
+        - High - Important for my workflow
+        - Critical - Blocks my usage of the app
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternatives have you considered or are currently using?
+      placeholder: Describe any workarounds or alternative solutions...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or Examples
+      description: If applicable, add mockups, screenshots, or examples from other applications.
+      placeholder: Paste images or describe visual examples...
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical details, constraints, or considerations you're aware of.
+      placeholder: Technical notes, MIDI CC mappings, browser compatibility concerns, etc.
+
+  - type: checkboxes
+    id: contribution-willingness
+    attributes:
+      label: Contribution
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I would like to contribute to implementing this feature
+        - label: I can help with testing this feature
+        - label: I can provide feedback during development
+        - label: I can help with documentation
+
+  - type: checkboxes
+    id: feature-checklist
+    attributes:
+      label: Feature Request Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched for existing feature requests before creating this one
+          required: true
+        - label: I have checked that this feature doesn't already exist
+          required: true
+        - label: This feature would be useful to other users, not just me
+          required: false
