@@ -159,14 +159,14 @@ onUnmounted(() => {
             Compact
           </button>
           
-          <button 
+          <!-- <button 
             class="header-button"
             :class="{ active: appSettings.showAdvanced }"
             disabled
             title="Coming soon"
           >
             Advanced
-          </button>
+          </button> -->
           
           <button 
             @click="toggleDebugDrawer"

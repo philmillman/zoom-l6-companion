@@ -27,7 +27,10 @@
       >
         <div class="knob-indicator"></div>
       </div>
-      <div class="value-display">{{ displayValue }}</div>
+      <div class="value-display">
+        <span v-if="compact" class="knob-label">{{ control.name }}</span>
+        <span v-else>{{ displayValue }}</span>
+      </div>
     </div>
     
     <!-- LFO toggle button (bottom-right of container) -->
@@ -53,7 +56,8 @@
         :class="{ active: currentValue > 63 }"
         @click="toggleValue"
       >
-        {{ currentValue > 63 ? 'ON' : 'OFF' }}
+        <span v-if="compact" class="toggle-label">{{ control.name }}</span>
+        <span class="toggle-state">{{ currentValue > 63 ? 'ON' : 'OFF' }}</span>
       </button>
     </div>
     
@@ -408,6 +412,19 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
+.midi-control.compact .control-label {
+  display: none;
+}
+
+.knob-label {
+  font-size: 9px;
+  color: #4a90e2;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
 /* Fader Styles */
 .fader-container {
   display: flex;
@@ -547,6 +564,24 @@ onUnmounted(() => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.toggle-label {
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.toggle-state {
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 .toggle-button.active {
@@ -640,6 +675,10 @@ onUnmounted(() => {
     font-size: 8px;
   }
   
+  .compact .knob-label {
+    font-size: 8px;
+  }
+  
   .toggle-button {
     width: 45px;
     height: 28px;
@@ -649,6 +688,14 @@ onUnmounted(() => {
   .compact .toggle-button {
     width: 40px;
     height: 25px;
+    font-size: 8px;
+  }
+  
+  .compact .toggle-label {
+    font-size: 7px;
+  }
+  
+  .compact .toggle-state {
     font-size: 8px;
   }
   
@@ -779,6 +826,23 @@ onUnmounted(() => {
   
   .radio-label {
     font-size: 8px;
+  }
+  
+  .compact .toggle-button {
+    width: 35px;
+    height: 22px;
+  }
+  
+  .compact .toggle-label {
+    font-size: 6px;
+  }
+  
+  .compact .toggle-state {
+    font-size: 7px;
+  }
+  
+  .compact .knob-label {
+    font-size: 7px;
   }
 }
 </style>
