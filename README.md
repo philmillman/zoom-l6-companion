@@ -4,11 +4,19 @@
 
 > This is under active development, contributions are welcome!
 
+***You can try it out here: https://zooml6.webmidi.cc in a WebMIDI supported browser***
+
+
+![full channel view](/images/channel-full.png)
+
+
 A web-based companion application for the Zoom L6 mixer built with Vue.js and WebMIDI.js. This app allows you to control your Zoom L6 mixer directly from your browser using MIDI over USB. 
 
 ## Features
 
-- **4 Channel Strips** - Full control over each of the 4 channels including:
+![compact channel view](/images/channel-compact.png)
+
+- **6 Channel Strips** - Full control over each of the 4 channels including:
   - 3-band EQ (High, Mid with frequency control, Low)
   - Pan control
   - Aux sends (Aux1, Aux2)
@@ -146,10 +154,16 @@ npm run build
 - **MIDI Monitoring**: View real-time MIDI communication logs
 - **Error Tracking**: Monitor system errors and warnings
 
+![Zoom L6 Companion App](/images/debugger.png)
+
 ## Customization
 
+
+> [!NOTE]
+> We'll be adding configuration options for MIDI CC, channel, and pad notes to the UI in the future. Right now it uses the default Zoom L6 MIDI CC mappings.
+
 ### Adjusting MIDI CC Values
-If your Zoom L6 uses different MIDI CC mappings, you can modify the configuration in:
+If your Zoom L6 uses different MIDI mappings, you can modify the configuration in:
 `src/config/midiConfig.ts`
 
 ### UI Customization

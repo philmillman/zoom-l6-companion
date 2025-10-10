@@ -264,6 +264,7 @@ onUnmounted(() => {
             <li>Click "Auto-Connect Zoom" or manually select the device</li>
             <li>Start controlling your mixer!</li>
           </ul>
+          <p>Note: Right now we're using the default Zoom L6 MIDI mappings. We'll add configuration options soon. See <a href="https://github.com/philmillman/zoom-l6-companion" target="_blank">the README</a> for more information.</p>
         </div>
       </div>
     </main>
