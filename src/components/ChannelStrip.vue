@@ -205,13 +205,17 @@
           Reset
         </button>
         <button 
-          @click="disableAllLfos"
-          class="lfo-disable-button"
-          :class="{ disabled: !hasActiveLfos }"
-          :disabled="!hasActiveLfos"
-          :title="hasActiveLfos ? 'Disable all LFOs on this channel' : 'No active LFOs on this channel'"
+          @click="pauseResumeAllLfos"
+          class="lfo-control-button"
+          :class="{ 
+            disabled: !hasActiveOrPausedLfos,
+            pause: hasActiveLfos,
+            resume: hasPausedLfos
+          }"
+          :disabled="!hasActiveOrPausedLfos"
+          :title="hasActiveLfos ? 'Pause all LFOs on this channel' : hasPausedLfos ? 'Resume all LFOs on this channel' : 'No active or paused LFOs on this channel'"
         >
-          {{ hasActiveLfos ? 'Disable LFOs' : 'No LFOs' }}
+          {{ lfoButtonText }}
         </button>
       </div>
     </div>
@@ -302,25 +306,8 @@ function resetToDefaults() {
   if (props.channelData.controls.usb34) {
     values.usb34 = props.channelData.controls.usb34.defaultValue;
   }
-}
-
-// Computed property to check if there are any active LFOs on this channel
-const hasActiveLfos = computed(() => {
-  const allRefs = [
-    eqHighRef.value, eqMidRef.value, eqMidFreqRef.value, eqLowRef.value,
-    aux1Ref.value, aux2Ref.value, efxSendRef.value,
-    panRef.value, volumeRef.value, muteRef.value,
-    monoX2Ref.value, usb12Ref.value, usb34Ref.value
-  ];
   
-  return allRefs.some((controlRef) => {
-    return controlRef && controlRef.lfo && controlRef.lfo.enabled;
-  });
-});
-
-// Method to disable all LFOs on this channel
-function disableAllLfos() {
-  // Call disableLfo on all MidiControl components in this channel
+  // Also disable all LFOs when resetting
   const allRefs = [
     eqHighRef.value, eqMidRef.value, eqMidFreqRef.value, eqLowRef.value,
     aux1Ref.value, aux2Ref.value, efxSendRef.value,
@@ -335,11 +322,89 @@ function disableAllLfos() {
   });
 }
 
+// Helper function to get all control refs
+function getAllControlRefs() {
+  return [
+    eqHighRef.value, eqMidRef.value, eqMidFreqRef.value, eqLowRef.value,
+    aux1Ref.value, aux2Ref.value, efxSendRef.value,
+    panRef.value, volumeRef.value, muteRef.value,
+    monoX2Ref.value, usb12Ref.value, usb34Ref.value
+  ];
+}
+
+// Computed property to check if there are any active or paused LFOs on this channel
+const hasActiveLfos = computed(() => {
+  return getAllControlRefs().some((controlRef) => {
+    return controlRef && controlRef.lfo && controlRef.lfo.state === 'active';
+  });
+});
+
+const hasPausedLfos = computed(() => {
+  return getAllControlRefs().some((controlRef) => {
+    return controlRef && controlRef.lfo && controlRef.lfo.state === 'paused';
+  });
+});
+
+const hasActiveOrPausedLfos = computed(() => {
+  return hasActiveLfos.value || hasPausedLfos.value;
+});
+
+const lfoButtonText = computed(() => {
+  if (!hasActiveOrPausedLfos.value) return 'No LFOs';
+  if (hasActiveLfos.value) return 'Pause LFOs';
+  return 'Resume LFOs';
+});
+
+// Method to pause/resume all LFOs on this channel
+function pauseResumeAllLfos() {
+  const allRefs = getAllControlRefs();
+  
+  // If there are any active LFOs, pause all active ones
+  // Otherwise, resume all paused ones
+  if (hasActiveLfos.value) {
+    // Pause all active LFOs
+    allRefs.forEach((controlRef) => {
+      if (controlRef && controlRef.pauseLfo) {
+        controlRef.pauseLfo();
+      }
+    });
+  } else {
+    // Resume all paused LFOs
+    allRefs.forEach((controlRef) => {
+      if (controlRef && controlRef.resumeLfo) {
+        controlRef.resumeLfo();
+      }
+    });
+  }
+}
+
+// Separate methods for explicit pause/resume (used by global controls)
+function pauseAllLfos() {
+  const allRefs = getAllControlRefs();
+  allRefs.forEach((controlRef) => {
+    if (controlRef && controlRef.pauseLfo) {
+      controlRef.pauseLfo();
+    }
+  });
+}
+
+function resumeAllLfos() {
+  const allRefs = getAllControlRefs();
+  allRefs.forEach((controlRef) => {
+    if (controlRef && controlRef.resumeLfo) {
+      controlRef.resumeLfo();
+    }
+  });
+}
+
 // Expose methods
 defineExpose({
   resetToDefaults,
-  disableAllLfos,
+  pauseResumeAllLfos,
+  pauseAllLfos,
+  resumeAllLfos,
   hasActiveLfos,
+  hasActiveOrPausedLfos,
   values
 });
 </script>
@@ -628,7 +693,7 @@ defineExpose({
   box-shadow: 0 1px 4px rgba(244, 67, 54, 0.3);
 }
 
-.lfo-disable-button {
+.lfo-control-button {
   padding: 6px 12px;
   background: #ff9800;
   border: 1px solid #f57c00;
@@ -644,20 +709,42 @@ defineExpose({
   min-width: 0;
 }
 
-.lfo-disable-button:hover {
+.lfo-control-button.pause {
+  background: #4a90e2;
+  border-color: #3a7bc8;
+}
+
+.lfo-control-button.resume {
+  background: #f5a623;
+  border-color: #e09512;
+}
+
+.lfo-control-button:hover {
   background: #fb8c00;
   border-color: #ef6c00;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
-.lfo-disable-button:active {
+.lfo-control-button.pause:hover {
+  background: #5a9ff2;
+  border-color: #4a8dd8;
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+}
+
+.lfo-control-button.resume:hover {
+  background: #f7b84d;
+  border-color: #f0a733;
+  box-shadow: 0 2px 8px rgba(245, 166, 35, 0.3);
+}
+
+.lfo-control-button:active {
   transform: translateY(0);
   box-shadow: 0 1px 4px rgba(255, 152, 0, 0.3);
 }
 
-.lfo-disable-button.disabled,
-.lfo-disable-button:disabled {
+.lfo-control-button.disabled,
+.lfo-control-button:disabled {
   background: #666;
   border-color: #555;
   color: #999;
@@ -666,8 +753,8 @@ defineExpose({
   box-shadow: none;
 }
 
-.lfo-disable-button.disabled:hover,
-.lfo-disable-button:disabled:hover {
+.lfo-control-button.disabled:hover,
+.lfo-control-button:disabled:hover {
   background: #666;
   border-color: #555;
   transform: none;
@@ -683,7 +770,7 @@ defineExpose({
   }
   
   .reset-button,
-  .lfo-disable-button {
+  .lfo-control-button {
     padding: 4px 10px;
     font-size: 9px;
   }
@@ -697,7 +784,7 @@ defineExpose({
   }
   
   .reset-button,
-  .lfo-disable-button {
+  .lfo-control-button {
     padding: 3px 8px;
     font-size: 8px;
   }

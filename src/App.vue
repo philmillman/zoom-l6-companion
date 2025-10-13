@@ -5,7 +5,9 @@ import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
 import SoundPads from './components/SoundPads.vue';
 import DebugDrawer from './components/DebugDrawer.vue';
-import { channelControls, globalControls } from './config/midiConfig';
+import AdvancedSettings from './components/AdvancedSettings.vue';
+import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from './config/midiConfig';
+import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
 import { midiService } from './services/midiService';
 
 // Reactive state
@@ -16,6 +18,12 @@ const appSettings = reactive({
 });
 const showDebugDrawer = ref(false);
 const debugDrawerExpanded = ref(true); // Start with panel open by default
+const showAdvancedSettings = ref(false);
+
+// MIDI configuration state (can be overridden by advanced settings)
+const channelControls = ref<ChannelControls[]>(JSON.parse(JSON.stringify(defaultChannelControls)));
+const globalControls = ref<GlobalControlsType>(JSON.parse(JSON.stringify(defaultGlobalControls)));
+const soundPads = ref<SoundPad[]>(JSON.parse(JSON.stringify(defaultSoundPads)));
 
 // Debug data storage (persists between toggles)
 const debugData = reactive({
@@ -90,13 +98,43 @@ const hasGlobalActiveLfos = computed(() => {
   });
 });
 
-function disableAllGlobalLfos() {
-  // Call disableAllLfos on each channel strip
-  channelRefs.value.forEach((channelStrip) => {
-    if (channelStrip) {
-      channelStrip.disableAllLfos?.();
-    }
+const hasGlobalPausedLfos = computed(() => {
+  return channelRefs.value.some((channelStrip) => {
+    return channelStrip && channelStrip.hasActiveOrPausedLfos && !channelStrip.hasActiveLfos;
   });
+});
+
+const hasGlobalActiveOrPausedLfos = computed(() => {
+  return channelRefs.value.some((channelStrip) => {
+    return channelStrip && channelStrip.hasActiveOrPausedLfos;
+  });
+});
+
+const globalLfoButtonText = computed(() => {
+  if (!hasGlobalActiveOrPausedLfos.value) return 'No LFOs';
+  if (hasGlobalActiveLfos.value) return 'Pause LFOs';
+  return 'Resume LFOs';
+});
+
+function pauseResumeAllGlobalLfos() {
+  // If there are any active LFOs globally, pause ALL active ones across all channels
+  // Otherwise, resume ALL paused ones across all channels
+  // This ensures consistent behavior and prevents mixed-state issues
+  if (hasGlobalActiveLfos.value) {
+    // Pause all active LFOs
+    channelRefs.value.forEach((channelStrip) => {
+      if (channelStrip) {
+        channelStrip.pauseAllLfos?.();
+      }
+    });
+  } else {
+    // Resume all paused LFOs
+    channelRefs.value.forEach((channelStrip) => {
+      if (channelStrip) {
+        channelStrip.resumeAllLfos?.();
+      }
+    });
+  }
 }
 
 async function toggleDebugDrawer() {
@@ -120,6 +158,29 @@ function onDebugDrawerToggle() {
   debugDrawerExpanded.value = !debugDrawerExpanded.value;
 }
 
+function toggleAdvancedSettings() {
+  showAdvancedSettings.value = !showAdvancedSettings.value;
+}
+
+function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], globalControls: GlobalControlsType, soundPads: SoundPad[] }) {
+  // Update the configuration
+  channelControls.value = data.channelControls;
+  globalControls.value = data.globalControls;
+  soundPads.value = data.soundPads;
+  
+  // Save to localStorage for persistence
+  try {
+    localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(data.channelControls));
+    localStorage.setItem('zoom-l6-global-controls', JSON.stringify(data.globalControls));
+    localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(data.soundPads));
+    console.log('✅ Advanced settings saved to localStorage');
+    alert('✅ Settings saved successfully!');
+  } catch (e) {
+    console.error('❌ Failed to save settings to localStorage:', e);
+    alert('❌ Failed to save settings. Please check browser storage permissions.');
+  }
+}
+
 // Global MIDI input handler for debugging and monitoring
 let globalMidiListener: ((cc: number, value: number, channel: number) => void) | null = null;
 
@@ -128,6 +189,28 @@ onMounted(() => {
   globalMidiListener = (cc, value, channel) => {
     console.log(`[App] Global MIDI received: CC${cc} = ${value} on channel ${channel}`);
   };
+  
+  // Load saved settings from localStorage if available
+  try {
+    const savedChannelControls = localStorage.getItem('zoom-l6-channel-controls');
+    const savedGlobalControls = localStorage.getItem('zoom-l6-global-controls');
+    const savedSoundPads = localStorage.getItem('zoom-l6-sound-pads');
+    
+    if (savedChannelControls) {
+      channelControls.value = JSON.parse(savedChannelControls);
+      console.log('Loaded channel controls from localStorage');
+    }
+    if (savedGlobalControls) {
+      globalControls.value = JSON.parse(savedGlobalControls);
+      console.log('Loaded global controls from localStorage');
+    }
+    if (savedSoundPads) {
+      soundPads.value = JSON.parse(savedSoundPads);
+      console.log('Loaded sound pads from localStorage');
+    }
+  } catch (e) {
+    console.error('Failed to load settings from localStorage:', e);
+  }
   
   // The listener will be added when MIDI connects via onMidiConnectionChanged
 });
@@ -159,14 +242,14 @@ onUnmounted(() => {
             Compact
           </button>
           
-          <!-- <button 
+          <button 
+            @click="toggleAdvancedSettings"
             class="header-button"
-            :class="{ active: appSettings.showAdvanced }"
-            disabled
-            title="Coming soon"
+            :class="{ active: showAdvancedSettings }"
+            title="Advanced MIDI Settings"
           >
             Advanced
-          </button> -->
+          </button>
           
           <button 
             @click="toggleDebugDrawer"
@@ -194,13 +277,17 @@ onUnmounted(() => {
                 Reset All
               </button>
               <button 
-                @click="disableAllGlobalLfos" 
-                class="section-button lfo-disable-button"
-                :class="{ disabled: !hasGlobalActiveLfos }"
-                :disabled="!hasGlobalActiveLfos"
-                :title="hasGlobalActiveLfos ? 'Disable all LFOs globally' : 'No active LFOs'"
+                @click="pauseResumeAllGlobalLfos" 
+                class="section-button lfo-control-button"
+                :class="{ 
+                  disabled: !hasGlobalActiveOrPausedLfos,
+                  pause: hasGlobalActiveLfos,
+                  resume: hasGlobalPausedLfos
+                }"
+                :disabled="!hasGlobalActiveOrPausedLfos"
+                :title="hasGlobalActiveLfos ? 'Pause all LFOs globally' : hasGlobalPausedLfos ? 'Resume all LFOs globally' : 'No active or paused LFOs'"
               >
-                {{ hasGlobalActiveLfos ? 'Disable LFOs' : 'No LFOs' }}
+                {{ globalLfoButtonText }}
               </button>
             </div>
           </div>
@@ -233,7 +320,7 @@ onUnmounted(() => {
         
         <!-- Sound Pads -->
         <section class="soundpads-section">
-          <SoundPads />
+          <SoundPads :soundPads="soundPads" />
         </section>
         
         <!-- Preset Management (if advanced mode is enabled) -->
@@ -264,7 +351,7 @@ onUnmounted(() => {
             <li>Click "Auto-Connect Zoom" or manually select the device</li>
             <li>Start controlling your mixer!</li>
           </ul>
-          <p>Note: Right now we're using the default Zoom L6 MIDI mappings. We'll add configuration options soon. See <a href="https://github.com/philmillman/zoom-l6-companion" target="_blank">the README</a> for more information.</p>
+          <p>The app uses the default Zoom L6 MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</p>
         </div>
       </div>
     </main>
@@ -281,6 +368,16 @@ onUnmounted(() => {
       :isVisible="debugDrawerExpanded"
       :debugData="debugData"
       @toggle="onDebugDrawerToggle"
+    />
+    
+    <!-- Advanced Settings Dialog -->
+    <AdvancedSettings 
+      :isVisible="showAdvancedSettings"
+      :currentChannelControls="channelControls"
+      :currentGlobalControls="globalControls"
+      :currentSoundPads="soundPads"
+      @close="showAdvancedSettings = false"
+      @save="handleAdvancedSettingsSave"
     />
   </div>
 </template>
@@ -461,26 +558,46 @@ body {
   border-color: #f44336;
 }
 
-.lfo-disable-button {
+.lfo-control-button {
   background: #ff9800;
   color: white;
 }
 
-.lfo-disable-button:hover {
+.lfo-control-button.pause {
+  background: #4a90e2;
+  border-color: #3a7bc8;
+}
+
+.lfo-control-button.resume {
+  background: #f5a623;
+  border-color: #e09512;
+}
+
+.lfo-control-button:hover {
   background: #fb8c00;
   border-color: #fb8c00;
 }
 
-.lfo-disable-button.disabled,
-.lfo-disable-button:disabled {
+.lfo-control-button.pause:hover {
+  background: #5a9ff2;
+  border-color: #4a8dd8;
+}
+
+.lfo-control-button.resume:hover {
+  background: #f7b84d;
+  border-color: #f0a733;
+}
+
+.lfo-control-button.disabled,
+.lfo-control-button:disabled {
   background: #666;
   border-color: #555;
   color: #999;
   cursor: not-allowed;
 }
 
-.lfo-disable-button.disabled:hover,
-.lfo-disable-button:disabled:hover {
+.lfo-control-button.disabled:hover,
+.lfo-control-button:disabled:hover {
   background: #666;
   border-color: #555;
 }

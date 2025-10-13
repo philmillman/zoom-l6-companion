@@ -5,7 +5,7 @@
     </div>
     <div class="pads-grid">
       <button
-        v-for="pad in pads"
+        v-for="pad in soundPads"
         :key="pad.id"
         class="pad-button"
         @mousedown="noteOn(pad)"
@@ -21,11 +21,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { soundPads } from '../config/midiConfig';
+import type { SoundPad } from '../config/midiConfig';
 import { midiService } from '../services/midiService';
 
-const pads = computed(() => soundPads);
+interface Props {
+  soundPads: SoundPad[];
+}
+
+const props = defineProps<Props>();
 
 function noteOn(pad: { note: number; channel: number }) {
   midiService.sendNoteOn(pad.note, pad.channel, 100);

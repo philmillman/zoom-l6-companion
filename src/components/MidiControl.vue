@@ -34,7 +34,7 @@
     </div>
     
     <!-- LFO toggle button (bottom-right of container) -->
-    <button v-if="control.type === 'knob' && !compact" class="lfo-btn" :class="{ active: lfo.enabled }" @click.stop="openPopover" :title="lfo.enabled ? 'LFO active' : 'Open LFO'" @dblclick.stop.prevent="resetToDefault">
+    <button v-if="control.type === 'knob' && !compact" class="lfo-btn" :class="{ active: lfo.state === 'active', paused: lfo.state === 'paused' }" @click.stop="openPopover" :title="lfo.state === 'disabled' ? 'Open LFO' : `LFO ${lfo.state}`" @dblclick.stop.prevent="resetToDefault">
       <span class="lfo-dot" :style="lfoDotStyle"></span>
     </button>
     
@@ -102,7 +102,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import type { MIDIControl } from '../config/midiConfig';
 import { midiService } from '../services/midiService';
-import LFOControl, { type LFOConfig, type LFOShape, type LFOMode } from './LFOControl.vue';
+import LFOControl, { type LFOConfig, type LFOShape, type LFOMode, type LFOState } from './LFOControl.vue';
 
 interface Props {
   control: MIDIControl;
@@ -144,7 +144,7 @@ const knobRotation = computed(() => {
 
 // LFO state
 const showPopover = ref(false);
-const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', mode: 'bipolar', enabled: false });
+const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', mode: 'bipolar', state: 'disabled' });
 const lfoPhaseVal = ref(0);
 const lfoBaseValue = ref(props.control.defaultValue);
 let lfoRafId = 0;
@@ -158,9 +158,19 @@ function updateLfoConfig(cfg: LFOConfig) {
   lfo.value = cfg;
 }
 
-const lfoDotStyle = computed(() => ({
-  transform: `scale(${lfo.value.enabled ? 1 + 0.2 * Math.abs(lfoPhaseVal.value) : 1})`,
-}));
+const lfoDotStyle = computed(() => {
+  const isActive = lfo.value.state === 'active';
+  const isPaused = lfo.value.state === 'paused';
+  
+  let backgroundColor = '#666'; // grey for disabled
+  if (isActive) backgroundColor = '#4a90e2'; // blue for active
+  if (isPaused) backgroundColor = '#f5a623'; // yellow/orange for paused
+  
+  return {
+    backgroundColor,
+    transform: `scale(${isActive ? 1 + 0.2 * Math.abs(lfoPhaseVal.value) : 1})`,
+  };
+});
 
 function lfoShapeSample(shape: LFOShape, p: number): number {
   switch (shape) {
@@ -192,7 +202,7 @@ function lfoLoop() {
   const now = performance.now();
   const dt = (now - lfoLastTime) / 1000;
   lfoLastTime = now;
-  if (lfo.value.enabled && lfo.value.rate > 0) {
+  if (lfo.value.state === 'active' && lfo.value.rate > 0) {
     lfoPhase = (lfoPhase + dt * lfo.value.rate) % 1;
     const rawValue = lfoShapeSample(lfo.value.shape, lfoPhase);
     const modeValue = applyLFOMode(rawValue, lfo.value.mode);
@@ -215,20 +225,20 @@ function stopLfo() {
   cancelAnimationFrame(lfoRafId);
 }
 
-watch(() => lfo.value.enabled, (enabled) => {
-  if (enabled) startLfo(); else stopLfo();
+watch(() => lfo.value.state, (state) => {
+  if (state === 'active') startLfo(); else stopLfo();
 }, { immediate: true });
 
 // Update base value when user manually changes the control
 watch(() => currentValue.value, (newValue) => {
-  if (!lfo.value.enabled) {
+  if (lfo.value.state !== 'active') {
     lfoBaseValue.value = newValue;
   }
 });
 
 // Update base value when LFO is disabled
-watch(() => lfo.value.enabled, (enabled) => {
-  if (!enabled) {
+watch(() => lfo.value.state, (state) => {
+  if (state === 'disabled') {
     lfoBaseValue.value = currentValue.value;
   }
 });
@@ -313,8 +323,8 @@ function stopDrag() {
 function resetToDefault() {
   const value = props.control.defaultValue;
   updateValue(value);
-  // When LFO is disabled, also update base value
-  if (!lfo.value.enabled) {
+  // When LFO is not active, also update base value
+  if (lfo.value.state !== 'active') {
     lfoBaseValue.value = value;
   }
 }
@@ -357,15 +367,38 @@ onMounted(() => {
   midiService.addControlChangeListener(midiListener);
 });
 
-// Method to disable LFO
+// Methods to control LFO state
 function disableLfo() {
-  lfo.value.enabled = false;
+  lfo.value.state = 'disabled';
   stopLfo();
+}
+
+function pauseLfo() {
+  if (lfo.value.state === 'active') {
+    lfo.value.state = 'paused';
+  }
+}
+
+function resumeLfo() {
+  if (lfo.value.state === 'paused') {
+    lfo.value.state = 'active';
+  }
+}
+
+function pauseResumeLfo() {
+  if (lfo.value.state === 'active') {
+    lfo.value.state = 'paused';
+  } else if (lfo.value.state === 'paused') {
+    lfo.value.state = 'active';
+  }
 }
 
 // Expose methods and state for external access
 defineExpose({
   disableLfo,
+  pauseLfo,
+  resumeLfo,
+  pauseResumeLfo,
   lfo
 });
 
@@ -511,11 +544,12 @@ onUnmounted(() => {
   cursor: pointer;
 }
 .lfo-btn.active { border-color: #4a90e2; box-shadow: 0 0 6px rgba(74,144,226,0.6); }
+.lfo-btn.paused { border-color: #f5a623; box-shadow: 0 0 6px rgba(245,166,35,0.6); }
 .lfo-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #4a90e2;
+  background: #666; /* Default grey, overridden by inline style */
   transition: transform 0.05s linear;
 }
 
@@ -632,12 +666,12 @@ onUnmounted(() => {
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .midi-control {
-    min-width: 50px;
+    min-width: 60px;
     padding: 6px;
   }
   
   .midi-control.compact {
-    min-width: 30px;
+    min-width: 35px;
     padding: 2px;
   }
   
@@ -669,10 +703,12 @@ onUnmounted(() => {
   
   .value-display {
     font-size: 9px;
+    margin-top: 12px; /* Add more space between knob and value to avoid LFO overlap */
   }
   
   .compact .value-display {
     font-size: 8px;
+    margin-top: 10px;
   }
   
   .compact .knob-label {
