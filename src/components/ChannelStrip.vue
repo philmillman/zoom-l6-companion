@@ -667,10 +667,10 @@ defineExpose({
 
 .reset-button {
   padding: 6px 12px;
-  background: #f44336;
-  border: 1px solid #d32f2f;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
-  color: white;
+  color: #ccc;
   font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
@@ -682,8 +682,9 @@ defineExpose({
 }
 
 .reset-button:hover {
-  background: #e53935;
-  border-color: #c62828;
+  background: #f44336;
+  border-color: #f44336;
+  color: white;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
 }
