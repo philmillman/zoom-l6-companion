@@ -381,8 +381,9 @@ onUnmounted(() => {
             <li>Ensure the device is powered on</li>
             <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
             <li>Start controlling your mixer!</li>
+            <li>Note: You may need to bridge the MIDI in and out ports (plug a cable between the two) on the Zoom L6 to get MIDI to work in both directions.</li>
+            <li>The app uses the default Zoom L6 MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</li>
           </ul>
-          <p>The app uses the default Zoom L6 MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</p>
         </div>
       </div>
     </main>
@@ -789,11 +790,15 @@ body {
   text-align: left;
   color: #aaa;
   font-size: 14px;
+  padding-left: 0;
+  margin-left: 0;
+  list-style-position: inside;
 }
 
 .setup-steps li {
   margin-bottom: 8px;
-  padding-left: 8px;
+  padding-left: 0;
+  list-style-type: none;
 }
 
 /* Footer */
