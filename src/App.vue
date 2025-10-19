@@ -10,6 +10,26 @@ import { channelControls as defaultChannelControls, globalControls as defaultGlo
 import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
 import { midiService } from './services/midiService';
 
+// Platform detection
+function detectPlatform() {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMac = /macintosh|mac os x/.test(userAgent);
+  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
+  
+  return {
+    isMac,
+    isIOS,
+    isSafari,
+    isSafariMac: isMac && isSafari,
+    isIOSDevice: isIOS
+  };
+}
+
+// Platform-specific prompts
+const platformInfo = ref(detectPlatform());
+const showPlatformPrompt = ref(false);
+
 // Reactive state
 const midiConnected = ref(false);
 const appSettings = reactive({
@@ -195,6 +215,11 @@ onMounted(() => {
     console.log(`[App] Global MIDI received: CC${cc} = ${value} on channel ${channel}`);
   };
   
+  // Check for platform-specific prompts
+  if (platformInfo.value.isSafariMac || platformInfo.value.isIOSDevice) {
+    showPlatformPrompt.value = true;
+  }
+  
   // Load saved settings from localStorage if available
   try {
     const savedChannelControls = localStorage.getItem('zoom-l6-channel-controls');
@@ -352,15 +377,70 @@ onUnmounted(() => {
           <h2>Connect Your Zoom L6</h2>
           <p>Please connect your Zoom L6 via USB and select it from the MIDI connection panel above.</p>
           <ul class="setup-steps">
-            <li>Connect your Zoom L6 to your computer via USB</li>
+            <li>Connect your Zoom L6 to your device via USB</li>
             <li>Ensure the device is powered on</li>
-            <li>Click "Auto-Connect Zoom" or manually select the device</li>
+            <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
             <li>Start controlling your mixer!</li>
           </ul>
           <p>The app uses the default Zoom L6 MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</p>
         </div>
       </div>
     </main>
+
+    <!-- Platform-specific prompts -->
+    <div v-if="showPlatformPrompt" class="platform-prompt-overlay">
+      <div class="platform-prompt">
+        <!-- Safari macOS prompt -->
+        <div v-if="platformInfo.isSafariMac" class="platform-notice safari-mac">
+          <div class="notice-header">
+            <h3>🔌 Jazz Plugin Required for Safari</h3>
+            <button @click="showPlatformPrompt = false" class="close-button">×</button>
+          </div>
+          <div class="notice-content">
+            <p>Safari requires the Jazz Plugin to access MIDI devices. Please install it to use this app:</p>
+            <ol>
+              <li>Download the Jazz Plugin from <a href="https://jazz-soft.net/download/Jazz-Plugin/" target="_blank">jazz-soft.net</a></li>
+              <li>Run the installer and follow the setup instructions</li>
+              <li>Restart Safari after installation</li>
+              <li>Reload this page</li>
+            </ol>
+            <div class="notice-actions">
+              <a href="https://jazz-soft.net/download/Jazz-Plugin/" target="_blank" class="download-button">
+                Download Jazz Plugin
+              </a>
+              <button @click="showPlatformPrompt = false" class="skip-button">
+                Skip for now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- iOS prompt -->
+        <div v-if="platformInfo.isIOSDevice" class="platform-notice ios">
+          <div class="notice-header">
+            <h3>📱 iOS WebMIDI Limitation</h3>
+            <button @click="showPlatformPrompt = false" class="close-button">×</button>
+          </div>
+          <div class="notice-content">
+            <p>Unfortunately, Apple does not support the Web MIDI API on iOS devices. This web app cannot directly control your Zoom L6 from iOS.</p>
+            <div class="ios-info">
+              <p><strong>Good news:</strong> We're working on a native iOS app that will provide full Zoom L6 control!</p>
+              <p>For now, you can use this app on:</p>
+              <ul>
+                <li>macOS (Safari with Jazz Plugin, or Chrome/Firefox)</li>
+                <li>Windows (Chrome, Firefox, Edge)</li>
+                <li>Linux (Chrome, Firefox)</li>
+              </ul>
+            </div>
+            <div class="notice-actions">
+              <button @click="showPlatformPrompt = false" class="continue-button">
+                Continue anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <footer class="app-footer">
       <div class="footer-content">
@@ -853,6 +933,224 @@ body {
   .section-header {
     margin-bottom: 8px;
     padding-bottom: 4px;
+  }
+}
+
+/* Platform Prompt Styles */
+.platform-prompt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.platform-prompt {
+  max-width: 500px;
+  width: 100%;
+}
+
+.platform-notice {
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #333;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border-bottom: 1px solid #333;
+}
+
+.notice-header h3 {
+  color: #4a90e2;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.notice-content {
+  padding: 24px;
+}
+
+.notice-content p {
+  color: #ccc;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.notice-content ol {
+  color: #aaa;
+  margin: 16px 0;
+  padding-left: 20px;
+}
+
+.notice-content li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.notice-content a {
+  color: #4a90e2;
+  text-decoration: none;
+}
+
+.notice-content a:hover {
+  text-decoration: underline;
+}
+
+.ios-info {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ios-info p {
+  margin-bottom: 12px;
+}
+
+.ios-info ul {
+  color: #aaa;
+  margin: 12px 0;
+  padding-left: 20px;
+}
+
+.ios-info li {
+  margin-bottom: 6px;
+}
+
+.notice-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.download-button,
+.skip-button,
+.continue-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.download-button {
+  background: #4a90e2 !important;
+  color: white !important;
+}
+
+.download-button:hover {
+  background: #3a7bc8 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.skip-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.skip-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.continue-button {
+  background: #4caf50;
+  color: white;
+}
+
+.continue-button:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+/* Safari Mac specific styling */
+.platform-notice.safari-mac .notice-header {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.platform-notice.safari-mac .notice-header h3 {
+  color: white;
+}
+
+/* iOS specific styling */
+.platform-notice.ios .notice-header {
+  background: linear-gradient(135deg, #4a90e2 0%, #3a7bc8 100%);
+}
+
+.platform-notice.ios .notice-header h3 {
+  color: white;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .platform-prompt-overlay {
+    padding: 10px;
+  }
+  
+  .notice-header {
+    padding: 16px 20px;
+  }
+  
+  .notice-header h3 {
+    font-size: 16px;
+  }
+  
+  .notice-content {
+    padding: 20px;
+  }
+  
+  .notice-actions {
+    flex-direction: column;
+  }
+  
+  .download-button,
+  .skip-button,
+  .continue-button {
+    width: 100%;
   }
 }
 </style>
