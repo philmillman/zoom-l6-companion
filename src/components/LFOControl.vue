@@ -72,7 +72,8 @@
       </select>
     </div>
     <div class="lfo-actions">
-      <button class="toggle" :class="getButtonClass()" @click="toggle">{{ getButtonText() }}</button>
+      <button class="toggle enable-btn" :class="getEnableButtonClass()" @click="toggleEnable">{{ getEnableButtonText() }}</button>
+      <button class="toggle pause-btn" :class="getPauseButtonClass()" @click="togglePause" :disabled="isPauseButtonDisabled">{{ getPauseButtonText() }}</button>
     </div>
   </div>
 </template>
@@ -135,34 +136,46 @@ function emitConfig() {
   emit('update:config', { ...local.value });
 }
 
-function toggle() {
-  // Cycle through states: disabled -> active -> paused -> active (resume)
+function toggleEnable() {
   if (local.value.state === 'disabled') {
     local.value.state = 'active';
-  } else if (local.value.state === 'active') {
-    local.value.state = 'paused';
   } else {
-    // paused -> active (resume)
+    local.value.state = 'disabled';
+  }
+  emitConfig();
+}
+
+function togglePause() {
+  if (local.value.state === 'active') {
+    local.value.state = 'paused';
+  } else if (local.value.state === 'paused') {
     local.value.state = 'active';
   }
   emitConfig();
 }
 
-function getButtonText(): string {
-  switch (local.value.state) {
-    case 'disabled': return 'Enable';
-    case 'active': return 'Pause';
-    case 'paused': return 'Resume';
-  }
+function getEnableButtonText(): string {
+  return local.value.state === 'disabled' ? 'Enable' : 'Disable';
 }
 
-function getButtonClass(): string {
-  switch (local.value.state) {
-    case 'active': return 'active';
-    case 'paused': return 'paused';
-    default: return '';
-  }
+function getPauseButtonText(): string {
+  return local.value.state === 'active' ? 'Pause' : 'Resume';
 }
+
+function getEnableButtonClass(): string {
+  return local.value.state !== 'disabled' ? 'active' : '';
+}
+
+function getPauseButtonClass(): string {
+  return local.value.state === 'paused' ? 'paused' : '';
+}
+
+const isPauseButtonDisabled = ref(false);
+
+// Update disabled state when local state changes
+watch(() => local.value.state, (newState) => {
+  isPauseButtonDisabled.value = newState === 'disabled';
+}, { immediate: true });
 
 // Knob angle calculations
 function getRateAngle(): number {
@@ -369,7 +382,8 @@ select:focus {
 /* Actions */
 .lfo-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 8px;
   margin-top: 4px;
 }
 
@@ -410,6 +424,18 @@ select:focus {
 .toggle.paused:hover {
   background: #f7b84d;
   border-color: #f7b84d;
+}
+
+.toggle:disabled {
+  background: #1a1a1a;
+  border-color: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.toggle:disabled:hover {
+  background: #1a1a1a;
+  border-color: #333;
 }
 </style>
 
