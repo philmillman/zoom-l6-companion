@@ -63,7 +63,7 @@ interface MidiLog {
   id: string;
   timestamp: Date;
   direction: 'in' | 'out';
-  type: 'cc' | 'note' | 'other';
+  type: 'cc' | 'note' | 'pc' | 'other';
   channel: number;
   data: any;
   description: string;
@@ -227,10 +227,16 @@ function setupMidiMonitoring() {
     addMidiLog('in', 'note', channel, { note, velocity, type: 'off' }, `Note Off: ${note} (vel: ${velocity}) on channel ${channel}`);
   };
 
+  // Monitor MIDI input - Program Change
+  const midiProgramChangeListener = (program: number, channel: number) => {
+    addMidiLog('in', 'pc', channel, { program }, `Program Change: ${program} on channel ${channel}`);
+  };
+
   // Monitor MIDI output (we'll need to patch the midiService methods)
   const originalSendControlChange = midiService.sendControlChange;
   const originalSendNoteOn = midiService.sendNoteOn;
   const originalSendNoteOff = midiService.sendNoteOff;
+  const originalSendProgramChange = midiService.sendProgramChange;
 
   // Patch sendControlChange
   midiService.sendControlChange = function(control: any, value: number) {
@@ -250,11 +256,18 @@ function setupMidiMonitoring() {
     return originalSendNoteOff.call(this, note, channel, release);
   };
 
+  // Patch sendProgramChange
+  midiService.sendProgramChange = function(program: number, channel: number) {
+    addMidiLog('out', 'pc', channel, { program }, `Program Change: ${program} on channel ${channel}`);
+    return originalSendProgramChange.call(this, program, channel);
+  };
+
   // Add MIDI input listeners
   if (midiService.isConnected) {
     midiService.addControlChangeListener(midiCCListener);
     midiService.addNoteOnListener(midiNoteOnListener);
     midiService.addNoteOffListener(midiNoteOffListener);
+    midiService.addProgramChangeListener(midiProgramChangeListener);
   }
 
   // Watch for MIDI connection changes
@@ -263,10 +276,12 @@ function setupMidiMonitoring() {
       midiService.addControlChangeListener(midiCCListener);
       midiService.addNoteOnListener(midiNoteOnListener);
       midiService.addNoteOffListener(midiNoteOffListener);
+      midiService.addProgramChangeListener(midiProgramChangeListener);
     } else {
       midiService.removeControlChangeListener(midiCCListener);
       midiService.removeNoteOnListener(midiNoteOnListener);
       midiService.removeNoteOffListener(midiNoteOffListener);
+      midiService.removeProgramChangeListener(midiProgramChangeListener);
     }
   });
 
@@ -275,9 +290,11 @@ function setupMidiMonitoring() {
     midiService.removeControlChangeListener(midiCCListener);
     midiService.removeNoteOnListener(midiNoteOnListener);
     midiService.removeNoteOffListener(midiNoteOffListener);
+    midiService.removeProgramChangeListener(midiProgramChangeListener);
     midiService.sendControlChange = originalSendControlChange;
     midiService.sendNoteOn = originalSendNoteOn;
     midiService.sendNoteOff = originalSendNoteOff;
+    midiService.sendProgramChange = originalSendProgramChange;
     stopWatching();
   };
 }
@@ -436,7 +453,7 @@ watch(() => props.isVisible, (visible) => {
               v-for="log in midiLogs" 
               :key="log.id"
               class="log-entry midi-log"
-              :class="getMidiDirectionClass(log.direction)"
+              :class="[getMidiDirectionClass(log.direction), { 'midi-pc': log.type === 'pc' }]"
             >
               <div class="log-header">
                 <span class="log-timestamp">{{ formatTimestamp(log.timestamp) }}</span>
@@ -765,6 +782,11 @@ watch(() => props.isVisible, (visible) => {
 .log-entry.midi-out {
   border-left-color: #9c27b0;
   background: rgba(156, 39, 176, 0.1);
+}
+
+.log-entry.midi-pc {
+  border-left-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
 }
 
 .log-header {

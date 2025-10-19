@@ -116,6 +116,7 @@ export class MidiService {
   private controlChangeListeners: Set<(cc: number, value: number, channel: number) => void> = new Set();
   private noteOnListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
   private noteOffListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
+  private programChangeListeners: Set<(program: number, channel: number) => void> = new Set();
 
   addControlChangeListener(callback: (cc: number, value: number, channel: number) => void): void {
     if (!this.input) {
@@ -249,6 +250,39 @@ export class MidiService {
     this.noteOffListeners.delete(callback);
   }
 
+  addProgramChangeListener(callback: (program: number, channel: number) => void): void {
+    if (!this.input) {
+      console.warn('No MIDI input connected');
+      return;
+    }
+
+    // Add callback to our set of listeners
+    this.programChangeListeners.add(callback);
+
+    // If this is the first listener, set up the MIDI input listener
+    if (this.programChangeListeners.size === 1) {
+      this.input.addListener('programchange', (event: any) => {
+        const program = event.value;
+        const channel = event.message.channel;
+
+        console.log(`Received MIDI Program Change: ${program} on channel ${channel}`);
+
+        // Notify all listeners
+        this.programChangeListeners.forEach(listener => {
+          try {
+            listener(program, channel);
+          } catch (error) {
+            console.error('Error in Program Change listener callback:', error);
+          }
+        });
+      });
+    }
+  }
+
+  removeProgramChangeListener(callback: (program: number, channel: number) => void): void {
+    this.programChangeListeners.delete(callback);
+  }
+
   // Note helpers for sound pads
   sendNoteOn(note: number, channel: number, velocity = 100): void {
     if (!this.output) {
@@ -276,6 +310,23 @@ export class MidiService {
     }
   }
 
+  sendProgramChange(program: number, channel: number): void {
+    if (!this.output) {
+      console.warn('No MIDI output connected');
+      return;
+    }
+
+    // Clamp program to valid range (0-127)
+    const clampedProgram = Math.max(0, Math.min(127, program));
+
+    try {
+      this.output.sendProgramChange(clampedProgram, { channels: channel });
+      console.log(`Sent Program Change: ${clampedProgram} on channel ${channel}`);
+    } catch (error) {
+      console.error('Failed to send Program Change:', error);
+    }
+  }
+
   removeAllListeners(): void {
     if (this.input) {
       this.input.removeListener();
@@ -283,6 +334,7 @@ export class MidiService {
     this.controlChangeListeners.clear();
     this.noteOnListeners.clear();
     this.noteOffListeners.clear();
+    this.programChangeListeners.clear();
   }
 
   disconnect(): void {

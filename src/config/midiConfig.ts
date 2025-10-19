@@ -190,3 +190,18 @@ export const soundPads: SoundPad[] = [
   { id: 3, name: 'Pad 3', note: 64, channel: 1 },
   { id: 4, name: 'Pad 4', note: 65, channel: 1 },
 ];
+
+// Scene Controls (Program Change messages)
+export interface SceneControl {
+  id: string;
+  name: string;
+  program: number; // MIDI Program Change number (0-127)
+  channel: number;
+  description?: string;
+}
+
+export const sceneControls: SceneControl[] = [
+  { id: 'A', name: 'Scene A', program: 0, channel: 1, description: 'A' },
+  { id: 'B', name: 'Scene B', program: 1, channel: 1, description: 'B' },
+  { id: 'C', name: 'Scene C', program: 2, channel: 1, description: 'C' },
+];

@@ -74,6 +74,11 @@ function onGlobalControlChange(section: string, control: string, value: number) 
   console.log(`Global ${section} - ${control}: ${value}`);
 }
 
+function onSceneChanged(scene: any) {
+  console.log(`Scene changed to: ${scene.name} (Program ${scene.program})`);
+  // Additional scene change handling can be added here if needed
+}
+
 function resetAllChannels() {
   // Call resetToDefaults on each ChannelStrip instance
   channelRefs.value.forEach((instance) => {
@@ -315,6 +320,7 @@ onUnmounted(() => {
           <GlobalControls
             :globalData="globalControls"
             @controlChange="onGlobalControlChange"
+            @sceneChanged="onSceneChanged"
           />
         </section>
         

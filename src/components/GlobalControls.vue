@@ -21,6 +21,10 @@
           />
         </div>
       </div>
+      
+      <div class="control-section">
+        <SceneControls @sceneChanged="onSceneChanged" />
+      </div>
     </div>
   </div>
 </template>
@@ -28,6 +32,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import MidiControl from './MidiControl.vue';
+import SceneControls from './SceneControls.vue';
 import type { GlobalControls } from '../config/midiConfig';
 
 interface Props {
@@ -36,6 +41,7 @@ interface Props {
 
 interface Emits {
   (e: 'controlChange', section: string, control: string, value: number): void;
+  (e: 'sceneChanged', scene: any): void;
 }
 
 const props = defineProps<Props>();
@@ -49,6 +55,10 @@ const values = reactive({
 
 function onControlChange(section: string, control: string, value: number) {
   emit('controlChange', section, control, value);
+}
+
+function onSceneChanged(scene: any) {
+  emit('sceneChanged', scene);
 }
 
 
@@ -92,10 +102,10 @@ defineExpose({
 }
 
 .controls-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .control-section {
@@ -103,7 +113,7 @@ defineExpose({
   padding: 16px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 25%; /* Match channel strip section width */
+  width: 100%;
 }
 
 .section-title {
@@ -115,7 +125,7 @@ defineExpose({
   letter-spacing: 1px;
   font-weight: 600;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(74, 144, 226, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .master-controls,
@@ -174,14 +184,12 @@ defineExpose({
 /* Responsive Design */
 @media (max-width: 1024px) {
   .controls-container {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .controls-container {
-    grid-template-columns: 1fr;
     gap: 12px;
   }
   
