@@ -6,6 +6,7 @@ import GlobalControls from './components/GlobalControls.vue';
 import SoundPads from './components/SoundPads.vue';
 import DebugDrawer from './components/DebugDrawer.vue';
 import AdvancedSettings from './components/AdvancedSettings.vue';
+import PresetsManager from './components/PresetsManager.vue';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from './config/midiConfig';
 import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
 import { midiService } from './services/midiService';
@@ -40,6 +41,9 @@ const showDebugDrawer = ref(false);
 const debugDrawerExpanded = ref(true); // Start with panel open by default
 const showAdvancedSettings = ref(false);
 
+// Scene state for preset tracking
+const currentScene = ref<any>(null);
+
 // MIDI configuration state (can be overridden by advanced settings)
 const channelControls = ref<ChannelControls[]>(JSON.parse(JSON.stringify(defaultChannelControls)));
 const globalControls = ref<GlobalControlsType>(JSON.parse(JSON.stringify(defaultGlobalControls)));
@@ -64,9 +68,14 @@ const debugData = reactive({
   }
 });
 
+
 // Refs to channel components for resetting and LFO control
 type ChannelStripInstance = InstanceType<typeof ChannelStrip> | null;
 const channelRefs = ref<ChannelStripInstance[]>([]);
+
+// Ref to global controls component
+type GlobalControlsInstance = InstanceType<typeof GlobalControls> | null;
+const globalControlsRef = ref<GlobalControlsInstance>(null);
 
 // Event handlers
 function onMidiConnectionChanged(connected: boolean) {
@@ -96,7 +105,8 @@ function onGlobalControlChange(section: string, control: string, value: number) 
 
 function onSceneChanged(scene: any) {
   console.log(`Scene changed to: ${scene.name} (Program ${scene.program})`);
-  // Additional scene change handling can be added here if needed
+  // Update current scene state for preset tracking
+  currentScene.value = scene;
 }
 
 function resetAllChannels() {
@@ -106,14 +116,52 @@ function resetAllChannels() {
   });
 }
 
-function savePreset() {
-  console.log('Saving current preset');
-  // Implementation for saving presets
-}
-
-function loadPreset() {
-  console.log('Loading preset');
-  // Implementation for loading presets
+// Preset loading handler
+function onPresetLoaded(presetData: {
+  channelControls: ChannelControls[];
+  globalControls: GlobalControlsType;
+  soundPads: SoundPad[];
+  lfoStates: any[];
+  currentScene?: any;
+}) {
+  // Load the preset data
+  channelControls.value = JSON.parse(JSON.stringify(presetData.channelControls));
+  globalControls.value = JSON.parse(JSON.stringify(presetData.globalControls));
+  soundPads.value = JSON.parse(JSON.stringify(presetData.soundPads));
+  
+  // Restore scene if it exists in the preset data
+  if (presetData.currentScene) {
+    currentScene.value = presetData.currentScene;
+    
+    // Update the SceneControls component to reflect the restored scene
+    if (globalControlsRef.value?.sceneControlsRef) {
+      globalControlsRef.value.sceneControlsRef.setScene(presetData.currentScene);
+    }
+    
+    // Send the scene change to the hardware if MIDI is connected
+    if (midiConnected.value) {
+      try {
+        midiService.sendProgramChange(presetData.currentScene.program, presetData.currentScene.channel);
+        console.log(`✅ Scene change sent to hardware: ${presetData.currentScene.name} (Program ${presetData.currentScene.program})`);
+      } catch (error) {
+        console.error('Failed to send scene change to hardware:', error);
+      }
+    } else {
+      console.log('⚠️ MIDI not connected, scene change not sent to hardware');
+    }
+  }
+  
+  // Restore LFO states
+  nextTick(() => {
+    presetData.lfoStates.forEach((lfoState, index) => {
+      const channelStrip = channelRefs.value[index];
+      if (channelStrip && channelStrip.setLfoStates && lfoState) {
+        channelStrip.setLfoStates(lfoState);
+      }
+    });
+  });
+  
+  console.log('✅ Preset loaded');
 }
 
 // Computed property to check if there are any active LFOs globally
@@ -294,8 +342,20 @@ onUnmounted(() => {
     </header>
 
     <main class="app-main">
-      <!-- MIDI Connection -->
+      <!-- Configuration -->
       <MidiConnection @connectionChanged="onMidiConnectionChanged" />
+      
+      <!-- Presets Section -->
+      <PresetsManager 
+        :channelControls="channelControls"
+        :globalControls="globalControls"
+        :soundPads="soundPads"
+        :channelRefs="channelRefs"
+        :globalControlsRef="globalControlsRef"
+        :currentScene="currentScene"
+        :isConnected="midiConnected"
+        @presetLoaded="onPresetLoaded"
+      />
       
       <div v-if="midiConnected" class="mixer-container">
         <!-- Channel Strips -->
@@ -344,6 +404,7 @@ onUnmounted(() => {
         <section class="global-section">
           <GlobalControls
             :globalData="globalControls"
+            ref="globalControlsRef"
             @controlChange="onGlobalControlChange"
             @sceneChanged="onSceneChanged"
           />
@@ -354,21 +415,6 @@ onUnmounted(() => {
           <SoundPads :soundPads="soundPads" />
         </section>
         
-        <!-- Preset Management (if advanced mode is enabled) -->
-        <section v-if="appSettings.showAdvanced" class="presets-section">
-          <div class="section-header">
-            <h2 class="section-title">Presets</h2>
-          </div>
-          
-          <div class="presets-controls">
-            <button @click="savePreset" class="preset-button save-button">
-              Save Preset
-            </button>
-            <button @click="loadPreset" class="preset-button load-button">
-              Load Preset
-            </button>
-          </div>
-        </section>
       </div>
       
       <!-- Connection prompt -->
@@ -710,51 +756,6 @@ body {
   margin-top: 24px;
 }
 
-/* Presets Section */
-.presets-section {
-  margin-top: 24px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.presets-controls {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-.preset-button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.save-button {
-  background: #4caf50;
-  color: white;
-}
-
-.save-button:hover {
-  background: #45a049;
-  transform: translateY(-2px);
-}
-
-.load-button {
-  background: #2196f3;
-  color: white;
-}
-
-.load-button:hover {
-  background: #1976d2;
-  transform: translateY(-2px);
-}
 
 /* Connection Prompt */
 .connection-prompt {
@@ -855,10 +856,6 @@ body {
     padding: 8px;
   }
   
-  .presets-controls {
-    flex-direction: column;
-    align-items: center;
-  }
   
   .prompt-content {
     padding: 24px;

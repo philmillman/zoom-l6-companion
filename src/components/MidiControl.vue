@@ -394,11 +394,34 @@ function pauseResumeLfo() {
 }
 
 // Expose methods and state for external access
+// LFO state management for presets
+function getLfoState() {
+  return {
+    state: lfo.value.state,
+    rate: lfo.value.rate,
+    depth: lfo.value.depth,
+    shape: lfo.value.shape,
+    mode: lfo.value.mode
+  };
+}
+
+function setLfoState(lfoState: any) {
+  if (lfoState) {
+    lfo.value.state = lfoState.state;
+    lfo.value.rate = lfoState.rate;
+    lfo.value.depth = lfoState.depth;
+    lfo.value.shape = lfoState.shape;
+    lfo.value.mode = lfoState.mode;
+  }
+}
+
 defineExpose({
   disableLfo,
   pauseLfo,
   resumeLfo,
   pauseResumeLfo,
+  getLfoState,
+  setLfoState,
   lfo
 });
 

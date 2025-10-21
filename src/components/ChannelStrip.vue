@@ -397,6 +397,27 @@ function resumeAllLfos() {
   });
 }
 
+// LFO state management for presets
+function getLfoStates() {
+  const allRefs = getAllControlRefs();
+  return allRefs.map((controlRef) => {
+    if (controlRef && controlRef.getLfoState) {
+      return controlRef.getLfoState();
+    }
+    return null;
+  });
+}
+
+function setLfoStates(lfoStates: any[]) {
+  const allRefs = getAllControlRefs();
+  lfoStates.forEach((lfoState, index) => {
+    const controlRef = allRefs[index];
+    if (controlRef && controlRef.setLfoState && lfoState) {
+      controlRef.setLfoState(lfoState);
+    }
+  });
+}
+
 // Expose methods
 defineExpose({
   resetToDefaults,
@@ -405,6 +426,8 @@ defineExpose({
   resumeAllLfos,
   hasActiveLfos,
   hasActiveOrPausedLfos,
+  getLfoStates,
+  setLfoStates,
   values
 });
 </script>

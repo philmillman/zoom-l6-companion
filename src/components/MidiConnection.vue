@@ -1,14 +1,17 @@
 <template>
   <div class="midi-connection">
-    <div class="connection-header">
-      <h3 class="connection-title">MIDI Connection</h3>
-      <div class="connection-status" :class="{ connected: isConnected, error: hasError }">
-        <span class="status-dot"></span>
-        {{ connectionStatus }}
+    <div class="connection-header" @click="toggleSection('configuration')">
+      <h3 class="connection-title">Configuration</h3>
+      <div class="header-right">
+        <div class="connection-status" :class="{ connected: isConnected, error: hasError }">
+          <span class="status-dot"></span>
+          {{ connectionStatus }}
+        </div>
+        <span class="toggle-icon">{{ expandedSections.configuration ? '▼' : '▶' }}</span>
       </div>
     </div>
     
-    <div class="connection-content" v-if="isInitialized">
+    <div v-if="expandedSections.configuration && isInitialized" class="connection-content">
       <!-- Input Selection -->
       <div class="device-section">
         <label class="device-label">MIDI Input:</label>
@@ -74,7 +77,7 @@
       </div>
     </div>
     
-    <div class="connection-content" v-else-if="hasError">
+    <div v-if="expandedSections.configuration && hasError" class="connection-content">
       <div class="error-message">
         <p>WebMIDI is not supported in this browser or failed to initialize.</p>
         <p>Please use a modern browser like Chrome, Edge, or Firefox.</p>
@@ -84,7 +87,7 @@
       </div>
     </div>
     
-    <div class="connection-content" v-else>
+    <div v-if="expandedSections.configuration && !isInitialized && !hasError" class="connection-content">
       <div class="loading-message">
         <p>Initializing MIDI...</p>
       </div>
@@ -93,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { midiService } from '../services/midiService';
 import type { Input, Output } from 'webmidi';
 
@@ -110,6 +113,11 @@ const selectedInput = ref('');
 const selectedOutput = ref('');
 const availableInputs = ref<Input[]>([]);
 const availableOutputs = ref<Output[]>([]);
+
+// Collapsible section state
+const expandedSections = reactive({
+  configuration: true,
+});
 
 const isConnected = computed(() => {
   return midiService.connectionState.value;
@@ -239,6 +247,10 @@ function autoConnect() {
   }
 }
 
+// Toggle section expansion
+function toggleSection(section: keyof typeof expandedSections) {
+  expandedSections[section] = !expandedSections[section];
+}
 
 onMounted(() => {
   initializeMidi();
@@ -265,8 +277,28 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  padding-bottom: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
   border-bottom: 1px solid #333;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.connection-header:hover {
+  background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle-icon {
+  color: #4a90e2;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .connection-title {

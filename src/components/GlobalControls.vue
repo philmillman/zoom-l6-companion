@@ -23,14 +23,14 @@
       </div>
       
       <div class="control-section">
-        <SceneControls @sceneChanged="onSceneChanged" />
+        <SceneControls ref="sceneControlsRef" @sceneChanged="onSceneChanged" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import MidiControl from './MidiControl.vue';
 import SceneControls from './SceneControls.vue';
 import type { GlobalControls } from '../config/midiConfig';
@@ -53,6 +53,9 @@ const values = reactive({
   compressor: props.globalData.compressor.defaultValue,
 });
 
+// Ref to SceneControls component
+const sceneControlsRef = ref<InstanceType<typeof SceneControls> | null>(null);
+
 function onControlChange(section: string, control: string, value: number) {
   emit('controlChange', section, control, value);
 }
@@ -71,7 +74,8 @@ function resetToDefaults() {
 // Expose methods
 defineExpose({
   resetToDefaults,
-  values
+  values,
+  sceneControlsRef
 });
 </script>
 
