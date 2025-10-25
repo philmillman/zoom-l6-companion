@@ -51,6 +51,18 @@ function updateConnectionState() {
   isConnected.value = midiService.isConnected;
 }
 
+// Method to set scene from external source (e.g., preset loading)
+function setScene(scene: SceneControl) {
+  currentScene.value = scene;
+  console.log(`Scene set externally: ${scene.name} (Program ${scene.program})`);
+}
+
+// Expose methods for external control
+defineExpose({
+  setScene,
+  currentScene
+});
+
 // Lifecycle
 onMounted(() => {
   // Set up MIDI Program Change listener

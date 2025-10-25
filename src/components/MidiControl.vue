@@ -147,9 +147,11 @@ const showPopover = ref(false);
 const lfo = ref<LFOConfig>({ rate: 1, depth: 0.3, shape: 'sine', mode: 'bipolar', state: 'disabled' });
 const lfoPhaseVal = ref(0);
 const lfoBaseValue = ref(props.control.defaultValue);
+const lfoStaticValue = ref(props.control.defaultValue); // Store the static value when LFO is disabled
 let lfoRafId = 0;
 let lfoLastTime = performance.now();
 let lfoPhase = 0; // 0..1
+let isChangingLfoState = false; // Flag to prevent watchers during LFO state changes
 
 function openPopover() { showPopover.value = true; }
 function closePopover() { showPopover.value = false; }
@@ -231,16 +233,41 @@ watch(() => lfo.value.state, (state) => {
 
 // Update base value when user manually changes the control
 watch(() => currentValue.value, (newValue) => {
+  // Skip if we're in the middle of changing LFO state
+  if (isChangingLfoState) return;
+  
   if (lfo.value.state !== 'active') {
     lfoBaseValue.value = newValue;
+    // Also update the static value when LFO is not active
+    lfoStaticValue.value = newValue;
   }
 });
 
-// Update base value when LFO is disabled
+// Update base value when LFO is disabled and store/restore static value
 watch(() => lfo.value.state, (state) => {
+  // Set flag to prevent other watchers from triggering
+  isChangingLfoState = true;
+  
   if (state === 'disabled') {
-    lfoBaseValue.value = currentValue.value;
+    // Return to the stored static value when LFO is disabled
+    lfoBaseValue.value = lfoStaticValue.value;
+    // Don't call updateValue here as it would trigger preset modifications
+    // Just set the current value directly
+    currentValue.value = lfoStaticValue.value;
+    emit('update:modelValue', lfoStaticValue.value);
+  } else if (state === 'active' || state === 'paused') {
+    // When LFO is enabled, use the static value as the base
+    lfoBaseValue.value = lfoStaticValue.value;
+    // Don't call updateValue here as it would trigger preset modifications
+    // Just set the current value directly
+    currentValue.value = lfoStaticValue.value;
+    emit('update:modelValue', lfoStaticValue.value);
   }
+  
+  // Clear flag after a brief delay to allow the value change to complete
+  setTimeout(() => {
+    isChangingLfoState = false;
+  }, 10);
 });
 
 // Methods
@@ -323,9 +350,10 @@ function stopDrag() {
 function resetToDefault() {
   const value = props.control.defaultValue;
   updateValue(value);
-  // When LFO is not active, also update base value
+  // When LFO is not active, also update base value and static value
   if (lfo.value.state !== 'active') {
     lfoBaseValue.value = value;
+    lfoStaticValue.value = value;
   }
 }
 
@@ -347,7 +375,6 @@ onMounted(() => {
   // Listen for MIDI input to update control
   midiListener = (cc, value, channel) => {
     if (cc === props.control.cc && channel === props.control.channel) {
-      console.log(`Updating control ${props.control.name} from MIDI: CC${cc} = ${value}`);
       
       // Validate the MIDI value
       if (value === undefined || value === null || isNaN(value)) {
@@ -357,7 +384,6 @@ onMounted(() => {
       
       // Ensure value is in valid range
       const validValue = Math.max(0, Math.min(127, Math.round(value)));
-      console.log(`Validated MIDI value: ${value} -> ${validValue}`);
       
       // Use updateValue with fromMidi=true to avoid feedback loop
       updateValue(validValue, true);
@@ -394,11 +420,39 @@ function pauseResumeLfo() {
 }
 
 // Expose methods and state for external access
+// LFO state management for presets
+function getLfoState() {
+  return {
+    state: lfo.value.state,
+    rate: lfo.value.rate,
+    depth: lfo.value.depth,
+    shape: lfo.value.shape,
+    mode: lfo.value.mode,
+    staticValue: lfoStaticValue.value
+  };
+}
+
+function setLfoState(lfoState: any) {
+  if (lfoState) {
+    lfo.value.state = lfoState.state;
+    lfo.value.rate = lfoState.rate;
+    lfo.value.depth = lfoState.depth;
+    lfo.value.shape = lfoState.shape;
+    lfo.value.mode = lfoState.mode;
+    // Restore static value if it exists
+    if (lfoState.staticValue !== undefined) {
+      lfoStaticValue.value = lfoState.staticValue;
+    }
+  }
+}
+
 defineExpose({
   disableLfo,
   pauseLfo,
   resumeLfo,
   pauseResumeLfo,
+  getLfoState,
+  setLfoState,
   lfo
 });
 
