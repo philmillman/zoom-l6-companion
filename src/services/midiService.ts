@@ -107,7 +107,6 @@ export class MidiService {
     try {
       // WebMidi v3: third argument is options object, not a channel number
       this.output.sendControlChange(control.cc, clampedValue, { channels: control.channel });
-      console.log(`Sent CC${control.cc} = ${clampedValue} on channel ${control.channel}`);
     } catch (error) {
       console.error('Failed to send MIDI CC:', error);
     }
@@ -158,13 +157,6 @@ export class MidiService {
           rawValue = Math.round(normalizedValue * 127);
         }
 
-        console.log(`Received MIDI CC: CC${cc} = ${rawValue} (raw) / ${normalizedValue} (normalized) on channel ${channel}`);
-        console.log('MIDI Value Sources:', {
-          controllerValue: controllerValue,
-          normalizedValue: normalizedValue,
-          messageData: messageData,
-          finalRawValue: rawValue
-        });
 
         // Use the raw MIDI value (0-127) for our controls
         this.controlChangeListeners.forEach(listener => {
@@ -198,7 +190,6 @@ export class MidiService {
         const velocity = event.velocity || 0;
         const channel = event.message.channel;
 
-        console.log(`Received MIDI Note On: ${note} (vel: ${velocity}) on channel ${channel}`);
 
         // Notify all listeners
         this.noteOnListeners.forEach(listener => {
@@ -232,7 +223,6 @@ export class MidiService {
         const velocity = event.velocity || 0;
         const channel = event.message.channel;
 
-        console.log(`Received MIDI Note Off: ${note} (vel: ${velocity}) on channel ${channel}`);
 
         // Notify all listeners
         this.noteOffListeners.forEach(listener => {
@@ -265,7 +255,6 @@ export class MidiService {
         const program = event.value;
         const channel = event.message.channel;
 
-        console.log(`Received MIDI Program Change: ${program} on channel ${channel}`);
 
         // Notify all listeners
         this.programChangeListeners.forEach(listener => {
@@ -321,7 +310,6 @@ export class MidiService {
 
     try {
       this.output.sendProgramChange(clampedProgram, { channels: channel });
-      console.log(`Sent Program Change: ${clampedProgram} on channel ${channel}`);
     } catch (error) {
       console.error('Failed to send Program Change:', error);
     }

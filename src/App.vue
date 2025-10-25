@@ -96,7 +96,6 @@ function onMidiConnectionChanged(connected: boolean) {
 }
 
 function onChannelControlChange(channel: number, control: string, value: number) {
-  console.log(`Channel ${channel} - ${control}: ${value}`);
 }
 
 function onGlobalControlChange(section: string, control: string, value: number) {

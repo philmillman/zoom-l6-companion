@@ -428,6 +428,7 @@ defineExpose({
   hasActiveOrPausedLfos,
   getLfoStates,
   setLfoStates,
+  getAllControlRefs,
   values
 });
 </script>

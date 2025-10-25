@@ -267,10 +267,39 @@ function captureCurrentState() {
     return null;
   });
   
-  // Capture actual current values from channel strips
+  // Capture values from channel strips - use static values when LFO is active
   const channelValues = props.channelRefs.map((channelStrip, index) => {
     if (channelStrip && channelStrip.values) {
-      return JSON.parse(JSON.stringify(channelStrip.values));
+      // Get the current values object
+      const currentValues = JSON.parse(JSON.stringify(channelStrip.values));
+      
+      // If there are LFO states, we need to get static values for controls with active LFOs
+      if (lfoStates[index]) {
+        const lfoStatesForChannel = lfoStates[index];
+        const staticValues = { ...currentValues };
+        
+        // Get all control refs for this channel
+        const controlRefs = channelStrip.getAllControlRefs ? channelStrip.getAllControlRefs() : [];
+        
+        // For each control ref, check if it has an active LFO and use static value
+        controlRefs.forEach((controlRef: any, controlIndex: number) => {
+          if (controlRef && lfoStatesForChannel[controlIndex]) {
+            const lfoState = lfoStatesForChannel[controlIndex];
+            // If LFO is active or paused, use the static value
+            if (lfoState && (lfoState.state === 'active' || lfoState.state === 'paused') && lfoState.staticValue !== undefined) {
+              // Find the corresponding property in the values object
+              const controlName = controlRef.control?.name;
+              if (controlName && staticValues.hasOwnProperty(controlName)) {
+                staticValues[controlName] = lfoState.staticValue;
+              }
+            }
+          }
+        });
+        
+        return staticValues;
+      }
+      
+      return currentValues;
     }
     return null;
   });
@@ -308,17 +337,54 @@ function checkForModifications() {
     return;
   }
   
-  const currentState = captureCurrentState();
-  const isEqual = compareStates(currentState, activePreset.data);
-  isModified.value = !isEqual;
-  
-  console.log('Checking modifications:', {
-    activePresetId: activePresetId.value,
-    isModified: isModified.value,
-    isEqual: isEqual,
-    currentState: currentState,
-    storedState: activePreset.data
+  // Check if any LFOs are currently active
+  const hasActiveLfos = props.channelRefs.some(channelStrip => {
+    if (!channelStrip) return false;
+    
+    // Try computed properties first
+    const hasActive = channelStrip.hasActiveLfos && channelStrip.hasActiveLfos.value;
+    const hasActiveOrPaused = channelStrip.hasActiveOrPausedLfos && channelStrip.hasActiveOrPausedLfos.value;
+    
+    // Fallback to direct LFO state checking if computed properties fail
+    let directCheck = false;
+    if (channelStrip.getLfoStates) {
+      const lfoStates = channelStrip.getLfoStates();
+      directCheck = lfoStates.some((lfoState: any) => 
+        lfoState && (lfoState.state === 'active' || lfoState.state === 'paused')
+      );
+    }
+    
+    return hasActive || hasActiveOrPaused || directCheck;
   });
+  
+  // If LFOs are active, only check for LFO setting changes, not value changes
+  if (hasActiveLfos) {
+    // Only compare LFO states and other non-value settings
+    const currentLfoStates = props.channelRefs.map((channelStrip, index) => {
+      if (channelStrip && channelStrip.getLfoStates) {
+        return channelStrip.getLfoStates();
+      }
+      return null;
+    });
+    
+    const storedLfoStates = activePreset.data.lfoStates;
+    const lfoStatesEqual = JSON.stringify(currentLfoStates) === JSON.stringify(storedLfoStates);
+    
+    // Also check other non-value settings
+    const otherSettingsEqual = 
+      JSON.stringify(props.channelControls) === JSON.stringify(activePreset.data.channelControls) &&
+      JSON.stringify(props.globalControls) === JSON.stringify(activePreset.data.globalControls) &&
+      JSON.stringify(props.soundPads) === JSON.stringify(activePreset.data.soundPads);
+    
+    isModified.value = !lfoStatesEqual || !otherSettingsEqual;
+  } else {
+    // No active LFOs, do full comparison including values
+    const currentState = captureCurrentState();
+    const isEqual = compareStates(currentState, activePreset.data);
+    isModified.value = !isEqual;
+  }
+  
+  // Debug logging removed - LFO system is now working correctly
 }
 
 function editPreset(presetId: string, newName?: string) {
