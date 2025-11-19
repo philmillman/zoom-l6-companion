@@ -237,7 +237,7 @@ watch(() => props.isVisible, (visible) => {
               class="setting-select"
             >
               <option value="l6">L6 (8 channels, 3 scenes)</option>
-              <option value="l6max">L6Max (10 channels, 4 scenes, subMix sends)</option>
+              <option value="l6max">L6Max (8 channels: 4 mono + 4 stereo, 4 scenes, subMix sends)</option>
             </select>
             <p class="setting-hint">Override the auto-detected mixer type. Changing this will affect available controls.</p>
           </div>
