@@ -31,6 +31,7 @@ export interface ChannelControls {
     monoX2?: MIDIControl; // Only for channels 3 and 4
     usb12?: MIDIControl;  // Only for channel 5
     usb34?: MIDIControl;  // Only for channel 6
+    subMix?: MIDIControl; // Only for L6Max (all channels)
   };
 }
 
@@ -205,3 +206,14 @@ export const sceneControls: SceneControl[] = [
   { id: 'B', name: 'Scene B', program: 1, channel: 1, description: 'B' },
   { id: 'C', name: 'Scene C', program: 2, channel: 1, description: 'C' },
 ];
+
+// Mixer type detection
+export type MixerType = 'l6' | 'l6max';
+
+export function detectMixerType(deviceName: string): MixerType {
+  const nameLower = deviceName.toLowerCase();
+  if (nameLower.includes('l6max')) {
+    return 'l6max';
+  }
+  return 'l6';
+}

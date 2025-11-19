@@ -23,7 +23,7 @@
       </div>
       
       <div class="control-section">
-        <SceneControls @sceneChanged="onSceneChanged" />
+        <SceneControls :mixerType="mixerType" @sceneChanged="onSceneChanged" />
       </div>
     </div>
   </div>
@@ -37,6 +37,7 @@ import type { GlobalControls } from '../config/midiConfig';
 
 interface Props {
   globalData: GlobalControls;
+  mixerType?: 'l6' | 'l6max';
 }
 
 interface Emits {
@@ -44,7 +45,9 @@ interface Emits {
   (e: 'sceneChanged', scene: any): void;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  mixerType: 'l6'
+});
 const emit = defineEmits<Emits>();
 
 // Reactive values for simplified global controls

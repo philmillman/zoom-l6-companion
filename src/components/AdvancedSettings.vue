@@ -1,25 +1,30 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue';
-import type { ChannelControls, GlobalControls, SoundPad } from '../config/midiConfig';
+import type { ChannelControls, GlobalControls, SoundPad, MixerType } from '../config/midiConfig';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from '../config/midiConfig';
+import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from '../config/midiConfigL6Max';
 
 interface Props {
   isVisible: boolean;
   currentChannelControls: ChannelControls[];
   currentGlobalControls: GlobalControls;
   currentSoundPads: SoundPad[];
+  currentMixerType: MixerType;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'save', data: { channelControls: ChannelControls[], globalControls: GlobalControls, soundPads: SoundPad[] }): void;
+  (e: 'save', data: { channelControls: ChannelControls[], globalControls: GlobalControls, soundPads: SoundPad[], mixerType: MixerType }): void;
 }>();
 
 // Deep clone the configurations for editing (use current values, not defaults)
 const editableChannelControls = reactive<ChannelControls[]>(JSON.parse(JSON.stringify(props.currentChannelControls)));
 const editableGlobalControls = reactive<GlobalControls>(JSON.parse(JSON.stringify(props.currentGlobalControls)));
 const editableSoundPads = reactive<SoundPad[]>(JSON.parse(JSON.stringify(props.currentSoundPads)));
+
+// Mixer type override (can be set regardless of detection)
+const mixerTypeOverride = ref<MixerType>(props.currentMixerType);
 
 // Global MIDI channel setting (initialized from first channel control)
 const globalMidiChannel = ref(editableChannelControls[0]?.controls.volume.channel || 1);
@@ -56,6 +61,7 @@ const hasDuplicateCCs = computed(() => {
       channel.controls.aux1.cc,
       channel.controls.aux2.cc,
       channel.controls.efxSend.cc,
+      channel.controls.subMix?.cc,
       channel.controls.mute.cc,
       channel.controls.monoX2?.cc,
       channel.controls.usb12?.cc,
@@ -93,10 +99,23 @@ const hasDuplicateNotes = computed(() => {
 // Reset to defaults
 function resetToDefaults() {
   if (confirm('Are you sure you want to reset all MIDI mappings to their defaults? This will also clear your saved settings.')) {
+    // Use defaults based on selected mixer type
+    const defaults = mixerTypeOverride.value === 'l6max' 
+      ? {
+          channelControls: channelControlsL6Max,
+          globalControls: globalControlsL6Max,
+          soundPads: soundPadsL6Max
+        }
+      : {
+          channelControls: defaultChannelControls,
+          globalControls: defaultGlobalControls,
+          soundPads: defaultSoundPads
+        };
+    
     // Deep clone defaults again
-    Object.assign(editableChannelControls, JSON.parse(JSON.stringify(defaultChannelControls)));
-    Object.assign(editableGlobalControls, JSON.parse(JSON.stringify(defaultGlobalControls)));
-    Object.assign(editableSoundPads, JSON.parse(JSON.stringify(defaultSoundPads)));
+    Object.assign(editableChannelControls, JSON.parse(JSON.stringify(defaults.channelControls)));
+    Object.assign(editableGlobalControls, JSON.parse(JSON.stringify(defaults.globalControls)));
+    Object.assign(editableSoundPads, JSON.parse(JSON.stringify(defaults.soundPads)));
     
     // Reset global MIDI channel
     globalMidiChannel.value = 1;
@@ -106,6 +125,7 @@ function resetToDefaults() {
       localStorage.removeItem('zoom-l6-channel-controls');
       localStorage.removeItem('zoom-l6-global-controls');
       localStorage.removeItem('zoom-l6-sound-pads');
+      localStorage.removeItem('zoom-l6-mixer-type');
       console.log('✅ Cleared saved settings from localStorage');
     } catch (e) {
       console.error('Failed to clear localStorage:', e);
@@ -153,6 +173,7 @@ function saveChanges() {
     channelControls: JSON.parse(JSON.stringify(editableChannelControls)),
     globalControls: JSON.parse(JSON.stringify(editableGlobalControls)),
     soundPads: JSON.parse(JSON.stringify(editableSoundPads)),
+    mixerType: mixerTypeOverride.value,
   });
   emit('close');
 }
@@ -168,6 +189,12 @@ function toggleSection(section: keyof typeof expandedSections) {
   expandedSections[section] = !expandedSections[section];
 }
 
+// Watch for mixer type changes to update defaults if needed
+watch(mixerTypeOverride, (newType) => {
+  // Optionally reload defaults when mixer type changes
+  // User can manually change this or use reset to defaults
+});
+
 // Watch for dialog open to reload current settings
 watch(() => props.isVisible, (visible) => {
   if (visible) {
@@ -175,6 +202,7 @@ watch(() => props.isVisible, (visible) => {
     Object.assign(editableChannelControls, JSON.parse(JSON.stringify(props.currentChannelControls)));
     Object.assign(editableGlobalControls, JSON.parse(JSON.stringify(props.currentGlobalControls)));
     Object.assign(editableSoundPads, JSON.parse(JSON.stringify(props.currentSoundPads)));
+    mixerTypeOverride.value = props.currentMixerType;
     
     // Update MIDI channel from current settings
     globalMidiChannel.value = editableChannelControls[0]?.controls.volume.channel || 1;
@@ -200,13 +228,27 @@ watch(() => props.isVisible, (visible) => {
             💾 Custom settings loaded from browser storage
           </p>
           
+          <!-- Mixer Type Override -->
+          <div class="global-setting">
+            <label for="mixer-type">Mixer Type Override</label>
+            <select 
+              id="mixer-type"
+              v-model="mixerTypeOverride"
+              class="setting-select"
+            >
+              <option value="l6">L6 (8 channels, 3 scenes)</option>
+              <option value="l6max">L6Max (8 channels: 4 mono + 4 stereo, 4 scenes, subMix sends)</option>
+            </select>
+            <p class="setting-hint">Override the auto-detected mixer type. Changing this will affect available controls.</p>
+          </div>
+          
           <!-- Global MIDI Channel Setting -->
-          <div class="global-midi-channel">
+          <div class="global-setting">
             <label for="midi-channel">MIDI Channel (applies to all controls)</label>
             <select 
               id="midi-channel"
               v-model.number="globalMidiChannel"
-              class="midi-channel-select"
+              class="setting-select"
             >
               <option v-for="ch in 16" :key="ch" :value="ch">Channel {{ ch }}</option>
             </select>
@@ -326,6 +368,18 @@ watch(() => props.isVisible, (visible) => {
                     <input 
                       type="number" 
                       v-model.number="channel.controls.efxSend.cc"
+                      min="0" 
+                      max="127"
+                      class="cc-input"
+                    />
+                  </div>
+                  
+                  <!-- SUB MIX (if exists) -->
+                  <div v-if="channel.controls.subMix" class="control-row">
+                    <label>SUB MIX (CC)</label>
+                    <input 
+                      type="number" 
+                      v-model.number="channel.controls.subMix.cc"
                       min="0" 
                       max="127"
                       class="cc-input"
@@ -573,19 +627,18 @@ export { getMidiNoteName };
   font-size: 14px;
 }
 
-.global-midi-channel {
+.global-setting {
   background: rgba(74, 144, 226, 0.15);
   border: 2px solid rgba(74, 144, 226, 0.4);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 24px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.global-midi-channel label {
+.global-setting label {
   color: #4a90e2;
   font-size: 14px;
   font-weight: 600;
@@ -593,7 +646,7 @@ export { getMidiNoteName };
   letter-spacing: 0.5px;
 }
 
-.midi-channel-select {
+.setting-select {
   background: rgba(0, 0, 0, 0.5);
   border: 2px solid #4a90e2;
   border-radius: 6px;
@@ -613,21 +666,28 @@ export { getMidiNoteName };
   padding-right: 40px;
 }
 
-.midi-channel-select:focus {
+.setting-select:focus {
   outline: none;
   border-color: #6aa0f2;
   background-color: rgba(0, 0, 0, 0.7);
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-.midi-channel-select:hover {
+.setting-select:hover {
   border-color: #6aa0f2;
 }
 
-.midi-channel-select option {
+.setting-select option {
   background: #1a1a1a;
   color: #fff;
   padding: 8px;
+}
+
+.setting-hint {
+  color: #888;
+  font-size: 12px;
+  margin: 0;
+  font-style: italic;
 }
 
 .settings-section {

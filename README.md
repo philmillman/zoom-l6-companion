@@ -9,8 +9,11 @@
 
 ![full channel view](/images/channel-full.png)
 
-
 A web-based companion application for the Zoom L6 mixer built with Vue.js and WebMIDI.js. This app allows you to control your Zoom L6 mixer directly from your browser using MIDI over USB. 
+
+**Now supports the Zoom L6Max!**
+- Autodetects and automatically adds the additional channels, scenes, send, and AI Noise Reduction controls
+- Can manually select in Advanced Settings and override any MIDI mappings
 
 ## Features
 

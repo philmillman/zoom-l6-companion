@@ -42,10 +42,17 @@
         @change="onControlChange('aux2', $event)"
         :compact="true"
       />
-      <MidiControl
+          <MidiControl
         :control="createCompactControl(channelData.controls.efxSend, 'efx')"
         v-model="values.efxSend"
         @change="onControlChange('efxSend', $event)"
+        :compact="true"
+      />
+      <MidiControl
+        v-if="mixerType === 'l6max' && channelData.controls.subMix"
+        :control="createCompactControl(channelData.controls.subMix, 'sub')"
+        v-model="values.subMix"
+        @change="onControlChange('subMix', $event)"
         :compact="true"
       />
       <MidiControl
@@ -146,6 +153,13 @@
             @change="onControlChange('efxSend', $event)"
             ref="efxSendRef"
           />
+          <MidiControl
+            v-if="mixerType === 'l6max' && channelData.controls.subMix"
+            :control="channelData.controls.subMix"
+            v-model="values.subMix"
+            @change="onControlChange('subMix', $event)"
+            ref="subMixRef"
+          />
         </div>
       </div>
       
@@ -230,6 +244,7 @@ import type { ChannelControls } from '../config/midiConfig';
 interface Props {
   channelData: ChannelControls;
   compactMode?: boolean;
+  mixerType?: 'l6' | 'l6max';
 }
 
 interface Emits {
@@ -237,7 +252,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  compactMode: false
+  compactMode: false,
+  mixerType: 'l6'
 });
 const emit = defineEmits<Emits>();
 
@@ -249,6 +265,7 @@ const eqLowRef = ref<any>(null);
 const aux1Ref = ref<any>(null);
 const aux2Ref = ref<any>(null);
 const efxSendRef = ref<any>(null);
+const subMixRef = ref<any>(null);
 const panRef = ref<any>(null);
 const volumeRef = ref<any>(null);
 const muteRef = ref<any>(null);
@@ -267,6 +284,7 @@ const values = reactive({
   aux1: props.channelData.controls.aux1.defaultValue,
   aux2: props.channelData.controls.aux2.defaultValue,
   efxSend: props.channelData.controls.efxSend.defaultValue,
+  subMix: props.channelData.controls.subMix?.defaultValue ?? 0,
   mute: props.channelData.controls.mute.defaultValue,
   monoX2: props.channelData.controls.monoX2?.defaultValue ?? 0,
   usb12: props.channelData.controls.usb12?.defaultValue ?? 0,
@@ -296,6 +314,9 @@ function resetToDefaults() {
   values.aux1 = props.channelData.controls.aux1.defaultValue;
   values.aux2 = props.channelData.controls.aux2.defaultValue;
   values.efxSend = props.channelData.controls.efxSend.defaultValue;
+  if (props.channelData.controls.subMix) {
+    values.subMix = props.channelData.controls.subMix.defaultValue;
+  }
   values.mute = props.channelData.controls.mute.defaultValue;
   if (props.channelData.controls.monoX2) {
     values.monoX2 = props.channelData.controls.monoX2.defaultValue;
@@ -310,7 +331,7 @@ function resetToDefaults() {
   // Also disable all LFOs when resetting
   const allRefs = [
     eqHighRef.value, eqMidRef.value, eqMidFreqRef.value, eqLowRef.value,
-    aux1Ref.value, aux2Ref.value, efxSendRef.value,
+    aux1Ref.value, aux2Ref.value, efxSendRef.value, subMixRef.value,
     panRef.value, volumeRef.value, muteRef.value,
     monoX2Ref.value, usb12Ref.value, usb34Ref.value
   ];
@@ -326,7 +347,7 @@ function resetToDefaults() {
 function getAllControlRefs() {
   return [
     eqHighRef.value, eqMidRef.value, eqMidFreqRef.value, eqLowRef.value,
-    aux1Ref.value, aux2Ref.value, efxSendRef.value,
+    aux1Ref.value, aux2Ref.value, efxSendRef.value, subMixRef.value,
     panRef.value, volumeRef.value, muteRef.value,
     monoX2Ref.value, usb12Ref.value, usb34Ref.value
   ];
