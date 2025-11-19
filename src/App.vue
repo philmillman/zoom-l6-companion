@@ -430,15 +430,15 @@ onUnmounted(() => {
       <!-- Connection prompt -->
       <div v-else class="connection-prompt">
         <div class="prompt-content">
-          <h2>Connect Your Zoom L6</h2>
-          <p>Please connect your Zoom L6 via USB and select it from the MIDI connection panel above.</p>
+          <h2>Connect Your Zoom L6 or L6Max</h2>
+          <p>Please connect your Zoom L6 or L6Max via USB and select it from the MIDI connection panel above.</p>
           <ul class="setup-steps">
-            <li>Connect your Zoom L6 to your device via USB</li>
+            <li>Connect your Zoom L6 or L6Max to your device via USB</li>
             <li>Ensure the device is powered on</li>
-            <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
+            <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 or L6Max devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
             <li>Start controlling your mixer!</li>
-            <li>Note: You may need to bridge the MIDI in and out ports (plug a cable between the two) on the Zoom L6 to get MIDI to work in both directions.</li>
-            <li>The app uses the default Zoom L6 MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</li>
+            <li>Note: You may need to bridge the MIDI in and out ports (plug a cable between the two) on the Zoom L6 or L6Max to get MIDI to work in both directions.</li>
+            <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</li>
           </ul>
         </div>
       </div>
