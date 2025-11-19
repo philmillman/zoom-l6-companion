@@ -6,7 +6,8 @@ import GlobalControls from './components/GlobalControls.vue';
 import SoundPads from './components/SoundPads.vue';
 import DebugDrawer from './components/DebugDrawer.vue';
 import AdvancedSettings from './components/AdvancedSettings.vue';
-import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from './config/midiConfig';
+import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads, detectMixerType, type MixerType } from './config/midiConfig';
+import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from './config/midiConfigL6Max';
 import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
 import { midiService } from './services/midiService';
 
@@ -32,6 +33,7 @@ const showPlatformPrompt = ref(false);
 
 // Reactive state
 const midiConnected = ref(false);
+const mixerType = ref<MixerType>('l6');
 const appSettings = reactive({
   showAdvanced: false,
   compactMode: false,
@@ -44,6 +46,19 @@ const showAdvancedSettings = ref(false);
 const channelControls = ref<ChannelControls[]>(JSON.parse(JSON.stringify(defaultChannelControls)));
 const globalControls = ref<GlobalControlsType>(JSON.parse(JSON.stringify(defaultGlobalControls)));
 const soundPads = ref<SoundPad[]>(JSON.parse(JSON.stringify(defaultSoundPads)));
+
+// Function to load config based on mixer type
+function loadConfigForMixerType(type: MixerType) {
+  if (type === 'l6max') {
+    channelControls.value = JSON.parse(JSON.stringify(channelControlsL6Max));
+    globalControls.value = JSON.parse(JSON.stringify(globalControlsL6Max));
+    soundPads.value = JSON.parse(JSON.stringify(soundPadsL6Max));
+  } else {
+    channelControls.value = JSON.parse(JSON.stringify(defaultChannelControls));
+    globalControls.value = JSON.parse(JSON.stringify(defaultGlobalControls));
+    soundPads.value = JSON.parse(JSON.stringify(defaultSoundPads));
+  }
+}
 
 // Debug data storage (persists between toggles)
 const debugData = reactive({
@@ -73,6 +88,28 @@ function onMidiConnectionChanged(connected: boolean) {
   midiConnected.value = connected;
   if (connected) {
     console.log('MIDI connected successfully');
+    
+    // Check if there's a saved mixer type override first
+    const savedMixerType = localStorage.getItem('zoom-l6-mixer-type') as MixerType | null;
+    
+    if (!savedMixerType || (savedMixerType !== 'l6' && savedMixerType !== 'l6max')) {
+      // No override found, detect from device name
+      const deviceName = midiService.inputName || midiService.outputName || '';
+      const detectedType = detectMixerType(deviceName);
+      if (detectedType !== mixerType.value) {
+        mixerType.value = detectedType;
+        loadConfigForMixerType(detectedType);
+        console.log(`Mixer type detected: ${detectedType}`);
+      }
+    } else {
+      // Use saved override
+      if (savedMixerType !== mixerType.value) {
+        mixerType.value = savedMixerType;
+        loadConfigForMixerType(savedMixerType);
+        console.log(`Mixer type using saved override: ${savedMixerType}`);
+      }
+    }
+    
     // Add global MIDI listener when connected
     if (globalMidiListener) {
       midiService.addControlChangeListener(globalMidiListener);
@@ -187,8 +224,14 @@ function toggleAdvancedSettings() {
   showAdvancedSettings.value = !showAdvancedSettings.value;
 }
 
-function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], globalControls: GlobalControlsType, soundPads: SoundPad[] }) {
-  // Update the configuration
+function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], globalControls: GlobalControlsType, soundPads: SoundPad[], mixerType: MixerType }) {
+  // Update the mixer type if provided
+  if (data.mixerType && data.mixerType !== mixerType.value) {
+    mixerType.value = data.mixerType;
+    console.log(`Mixer type updated to: ${data.mixerType}`);
+  }
+  
+  // Update the configuration (these may be custom or defaults for the selected mixer type)
   channelControls.value = data.channelControls;
   globalControls.value = data.globalControls;
   soundPads.value = data.soundPads;
@@ -198,6 +241,9 @@ function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], 
     localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(data.channelControls));
     localStorage.setItem('zoom-l6-global-controls', JSON.stringify(data.globalControls));
     localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(data.soundPads));
+    if (data.mixerType) {
+      localStorage.setItem('zoom-l6-mixer-type', data.mixerType);
+    }
     console.log('✅ Advanced settings saved to localStorage');
     alert('✅ Settings saved successfully!');
   } catch (e) {
@@ -222,6 +268,14 @@ onMounted(() => {
   
   // Load saved settings from localStorage if available
   try {
+    // Load mixer type override first
+    const savedMixerType = localStorage.getItem('zoom-l6-mixer-type') as MixerType | null;
+    if (savedMixerType && (savedMixerType === 'l6' || savedMixerType === 'l6max')) {
+      mixerType.value = savedMixerType;
+      loadConfigForMixerType(savedMixerType);
+      console.log(`Loaded mixer type from localStorage: ${savedMixerType}`);
+    }
+    
     const savedChannelControls = localStorage.getItem('zoom-l6-channel-controls');
     const savedGlobalControls = localStorage.getItem('zoom-l6-global-controls');
     const savedSoundPads = localStorage.getItem('zoom-l6-sound-pads');
@@ -334,6 +388,7 @@ onUnmounted(() => {
               :key="channel.channel"
               :channelData="channel"
               :compactMode="appSettings.compactMode"
+              :mixerType="mixerType"
               ref="channelRefs"
               @controlChange="onChannelControlChange"
             />
@@ -344,6 +399,7 @@ onUnmounted(() => {
         <section class="global-section">
           <GlobalControls
             :globalData="globalControls"
+            :mixerType="mixerType"
             @controlChange="onGlobalControlChange"
             @sceneChanged="onSceneChanged"
           />
@@ -457,12 +513,13 @@ onUnmounted(() => {
       @toggle="onDebugDrawerToggle"
     />
     
-    <!-- Advanced Settings Dialog -->
+        <!-- Advanced Settings Dialog -->
     <AdvancedSettings 
       :isVisible="showAdvancedSettings"
       :currentChannelControls="channelControls"
       :currentGlobalControls="globalControls"
       :currentSoundPads="soundPads"
+      :currentMixerType="mixerType"
       @close="showAdvancedSettings = false"
       @save="handleAdvancedSettingsSave"
     />

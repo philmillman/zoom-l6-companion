@@ -1,12 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { midiService } from '../services/midiService';
 import { sceneControls, type SceneControl } from '../config/midiConfig';
+import { sceneControlsL6Max } from '../config/midiConfigL6Max';
+
+interface Props {
+  mixerType?: 'l6' | 'l6max';
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  mixerType: 'l6'
+});
 
 // Emits
 const emit = defineEmits<{
   sceneChanged: [scene: SceneControl];
 }>();
+
+// Use appropriate scene controls based on mixer type
+const activeSceneControls = computed(() => {
+  return props.mixerType === 'l6max' ? sceneControlsL6Max : sceneControls;
+});
 
 // Reactive state
 const currentScene = ref<SceneControl | null>(null);
@@ -38,7 +52,7 @@ function selectScene(scene: SceneControl) {
 // MIDI Program Change listener
 function handleProgramChange(program: number, channel: number) {
   // Find the scene that matches this program change
-  const scene = sceneControls.find(s => s.program === program && s.channel === channel);
+  const scene = activeSceneControls.value.find(s => s.program === program && s.channel === channel);
   if (scene) {
     currentScene.value = scene;
     emit('sceneChanged', scene);
@@ -60,8 +74,8 @@ onMounted(() => {
   updateConnectionState();
   
   // Set initial scene to first one
-  if (sceneControls.length > 0) {
-    currentScene.value = sceneControls[0]!;
+  if (activeSceneControls.value.length > 0) {
+    currentScene.value = activeSceneControls.value[0]!;
   }
 });
 
@@ -76,7 +90,7 @@ onUnmounted(() => {
     <div class="section-title">Scenes</div>
     <div class="scene-buttons">
       <button
-        v-for="scene in sceneControls"
+        v-for="scene in activeSceneControls"
         :key="scene.id"
         class="scene-button"
         :class="{ 
