@@ -110,8 +110,9 @@ function onMidiConnectionChanged(connected: boolean) {
       }
     }
     
-    // Add global MIDI listener when connected
+    // Re-attach after hotplug without duplicating callbacks
     if (globalMidiListener) {
+      midiService.removeControlChangeListener(globalMidiListener);
       midiService.addControlChangeListener(globalMidiListener);
     }
   } else {
@@ -330,7 +331,7 @@ onUnmounted(() => {
             @click="toggleAdvancedSettings"
             class="header-button"
             :class="{ active: showAdvancedSettings }"
-            title="Advanced MIDI Settings"
+            title="Advanced Settings"
           >
             Advanced
           </button>

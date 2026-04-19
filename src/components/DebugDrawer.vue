@@ -63,7 +63,7 @@ interface MidiLog {
   id: string;
   timestamp: Date;
   direction: 'in' | 'out';
-  type: 'cc' | 'note' | 'pc' | 'other';
+  type: 'cc' | 'note' | 'pc' | 'sysex' | 'other';
   channel: number;
   data: any;
   description: string;
@@ -142,6 +142,10 @@ function updateSystemInfo() {
   props.debugData.systemInfo.viewportSize = `${window.innerWidth}x${window.innerHeight}`;
   props.debugData.systemInfo.onLine = navigator.onLine;
   props.debugData.systemInfo.timestamp = new Date();
+}
+
+function formatSysexHex(bytes: readonly number[]): string {
+  return bytes.map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
 }
 
 function formatTimestamp(date: Date): string {
@@ -237,6 +241,7 @@ function setupMidiMonitoring() {
   const originalSendNoteOn = midiService.sendNoteOn;
   const originalSendNoteOff = midiService.sendNoteOff;
   const originalSendProgramChange = midiService.sendProgramChange;
+  const originalSendSysexRaw = midiService.sendSysexRaw.bind(midiService);
 
   // Patch sendControlChange
   midiService.sendControlChange = function(control: any, value: number) {
@@ -262,26 +267,46 @@ function setupMidiMonitoring() {
     return originalSendProgramChange.call(this, program, channel);
   };
 
+  // Patch sendSysexRaw (mass storage and other SysEx)
+  midiService.sendSysexRaw = function (bytes: readonly number[]) {
+    const hex = formatSysexHex(bytes);
+    addMidiLog('out', 'sysex', 0, { hex, bytes: [...bytes] }, `SysEx out: ${hex}`);
+    return originalSendSysexRaw(bytes);
+  };
+
+  const midiSysexListener = (bytes: readonly number[]) => {
+    const hex = formatSysexHex(bytes);
+    addMidiLog('in', 'sysex', 0, { hex, bytes: [...bytes] }, `SysEx in: ${hex}`);
+  };
+
   // Add MIDI input listeners
   if (midiService.isConnected) {
     midiService.addControlChangeListener(midiCCListener);
     midiService.addNoteOnListener(midiNoteOnListener);
     midiService.addNoteOffListener(midiNoteOffListener);
     midiService.addProgramChangeListener(midiProgramChangeListener);
+    midiService.addSysexListener(midiSysexListener);
   }
 
   // Watch for MIDI connection changes
   const stopWatching = watch(() => midiService.connectionState.value, (connected) => {
     if (connected) {
+      midiService.removeControlChangeListener(midiCCListener);
+      midiService.removeNoteOnListener(midiNoteOnListener);
+      midiService.removeNoteOffListener(midiNoteOffListener);
+      midiService.removeProgramChangeListener(midiProgramChangeListener);
+      midiService.removeSysexListener(midiSysexListener);
       midiService.addControlChangeListener(midiCCListener);
       midiService.addNoteOnListener(midiNoteOnListener);
       midiService.addNoteOffListener(midiNoteOffListener);
       midiService.addProgramChangeListener(midiProgramChangeListener);
+      midiService.addSysexListener(midiSysexListener);
     } else {
       midiService.removeControlChangeListener(midiCCListener);
       midiService.removeNoteOnListener(midiNoteOnListener);
       midiService.removeNoteOffListener(midiNoteOffListener);
       midiService.removeProgramChangeListener(midiProgramChangeListener);
+      midiService.removeSysexListener(midiSysexListener);
     }
   });
 
@@ -291,10 +316,12 @@ function setupMidiMonitoring() {
     midiService.removeNoteOnListener(midiNoteOnListener);
     midiService.removeNoteOffListener(midiNoteOffListener);
     midiService.removeProgramChangeListener(midiProgramChangeListener);
+    midiService.removeSysexListener(midiSysexListener);
     midiService.sendControlChange = originalSendControlChange;
     midiService.sendNoteOn = originalSendNoteOn;
     midiService.sendNoteOff = originalSendNoteOff;
     midiService.sendProgramChange = originalSendProgramChange;
+    midiService.sendSysexRaw = originalSendSysexRaw;
     stopWatching();
   };
 }
@@ -453,13 +480,16 @@ watch(() => props.isVisible, (visible) => {
               v-for="log in midiLogs" 
               :key="log.id"
               class="log-entry midi-log"
-              :class="[getMidiDirectionClass(log.direction), { 'midi-pc': log.type === 'pc' }]"
+              :class="[
+                getMidiDirectionClass(log.direction),
+                { 'midi-pc': log.type === 'pc', 'midi-sysex': log.type === 'sysex' },
+              ]"
             >
               <div class="log-header">
                 <span class="log-timestamp">{{ formatTimestamp(log.timestamp) }}</span>
                 <span class="log-direction">{{ log.direction.toUpperCase() }}</span>
                 <span class="log-type">{{ log.type.toUpperCase() }}</span>
-                <span class="log-channel">CH{{ log.channel }}</span>
+                <span class="log-channel">{{ log.type === 'sysex' ? 'SYSEX' : `CH${log.channel}` }}</span>
               </div>
               <div class="log-message">{{ log.description }}</div>
               <div class="log-data" v-if="log.data">
@@ -535,7 +565,8 @@ watch(() => props.isVisible, (visible) => {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1000;
+  /* Above Advanced Settings (10000) and platform prompt (1000) */
+  z-index: 11000;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 12px;
 }
@@ -787,6 +818,12 @@ watch(() => props.isVisible, (visible) => {
 .log-entry.midi-pc {
   border-left-color: #ff9800;
   background: rgba(255, 152, 0, 0.1);
+}
+
+.log-entry.midi-sysex .log-message {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  word-break: break-all;
 }
 
 .log-header {
