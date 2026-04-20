@@ -1,6 +1,7 @@
 import { WebMidi, Input, Output } from 'webmidi';
-import { ref, computed } from 'vue';
+import { ref, type Ref } from 'vue';
 import type { MIDIControl } from '../config/midiConfig';
+import { sendCompleteSysex } from '../midi/sysex/rawSysex';
 
 export class MidiService {
   private input: Input | null = null;
@@ -11,14 +12,21 @@ export class MidiService {
   private _isConnected = ref(false);
   private _inputName = ref('No input connected');
   private _outputName = ref('No output connected');
+  private _midiOutputConnected = ref(false);
+  private _midiInputConnected = ref(false);
+  private _sysexEnabled = ref(false);
 
   // Device state change callback
   private onDeviceStateChangeCallback: (() => void) | null = null;
 
   async initialize(): Promise<boolean> {
     try {
-      await WebMidi.enable();
+      await WebMidi.enable({ sysex: true });
       this.isInitialized = true;
+      this._sysexEnabled.value = WebMidi.sysexEnabled;
+      if (!WebMidi.sysexEnabled) {
+        console.warn('WebMIDI started without SysEx permission; mass storage and other SysEx features will be unavailable.');
+      }
 
       // Listen for device state changes
       WebMidi.addListener('connected', (event) => {
@@ -36,10 +44,58 @@ export class MidiService {
   }
 
   private onDeviceStateChange() {
-    // Notify the component to refresh devices
     if (this.onDeviceStateChangeCallback) {
       this.onDeviceStateChangeCallback();
     }
+  }
+
+  /**
+   * After USB re-enumeration (e.g. mass storage toggle), WebMidi port objects go stale while the UI
+   * still shows a connection. Drop dead ports and re-open by saved name so CC/SysEx work again.
+   */
+  /** Zoom file-transfer SysEx is observed on the Editor pair in `zooml6_fs.py`; Mixer Control carries CC. */
+  hasZoomEditorSysexOutput(): boolean {
+    return this.findZoomEditorOutput() !== null;
+  }
+
+  hasZoomEditorSysexInput(): boolean {
+    return this.findZoomEditorInput() !== null;
+  }
+
+  syncPortsAfterHotplug(): boolean {
+    let didChange = false;
+    const savedInName = this._inputName.value;
+    const savedOutName = this._outputName.value;
+
+    if (this.input && this.input.state === 'disconnected') {
+      this.removeAllListeners();
+      this.input = null;
+      this._midiInputConnected.value = false;
+      didChange = true;
+    }
+
+    if (this.output && this.output.state === 'disconnected') {
+      this.output = null;
+      this._midiOutputConnected.value = false;
+      didChange = true;
+    }
+
+    this._isConnected.value = this.input !== null || this.output !== null;
+
+    if (savedInName !== 'No input connected' && !this.input) {
+      if (this.connectInput(savedInName)) {
+        didChange = true;
+      }
+    }
+
+    if (savedOutName !== 'No output connected' && !this.output) {
+      if (this.connectOutput(savedOutName)) {
+        didChange = true;
+      }
+    }
+
+    this._isConnected.value = this.input !== null || this.output !== null;
+    return didChange;
   }
 
   // Method to set the device state change callback
@@ -70,8 +126,22 @@ export class MidiService {
 
     if (!targetInput) return false;
 
+    if (this.input !== null && (this.input.id !== targetInput.id || this.input.state === 'disconnected')) {
+      this.removeAllListeners();
+      this.input = null;
+      this._midiInputConnected.value = false;
+    }
+
+    if (this.input !== null && this.input.id === targetInput.id && this.input.state === 'connected') {
+      this._inputName.value = targetInput.name;
+      this._midiInputConnected.value = true;
+      this._isConnected.value = this.input !== null || this.output !== null;
+      return true;
+    }
+
     this.input = targetInput;
     this._inputName.value = targetInput.name;
+    this._midiInputConnected.value = true;
     this._isConnected.value = this.input !== null || this.output !== null;
     return true;
   }
@@ -89,13 +159,29 @@ export class MidiService {
 
     if (!targetOutput) return false;
 
+    if (this.output !== null && (this.output.id !== targetOutput.id || this.output.state === 'disconnected')) {
+      this.output = null;
+      this._midiOutputConnected.value = false;
+    }
+
+    if (this.output !== null && this.output.id === targetOutput.id && this.output.state === 'connected') {
+      this._outputName.value = targetOutput.name;
+      this._midiOutputConnected.value = true;
+      this._isConnected.value = this.input !== null || this.output !== null;
+      return true;
+    }
+
     this.output = targetOutput;
     this._outputName.value = targetOutput.name;
+    this._midiOutputConnected.value = true;
     this._isConnected.value = this.input !== null || this.output !== null;
     return true;
   }
 
   sendControlChange(control: MIDIControl, value: number): void {
+    if (this.output?.state === 'disconnected') {
+      this.syncPortsAfterHotplug();
+    }
     if (!this.output) {
       console.warn('No MIDI output connected');
       return;
@@ -113,10 +199,115 @@ export class MidiService {
     }
   }
 
+  /**
+   * Sends a full SysEx message (0xF0 … 0xF7). Prefer adding named builders under `src/midi/sysex/`
+   * and calling this from there or from feature code.
+   *
+   * Uses the Zoom **Editor** output when listed (same as Magicking/L6-MassStorage), otherwise the
+   * selected mixer output.
+   */
+  sendSysexRaw(bytes: readonly number[]): void {
+    this.syncPortsAfterHotplug();
+    const editorOut = this.findZoomEditorOutput();
+    const out = editorOut ?? this.output;
+    if (!out) {
+      throw new Error('No MIDI output available for SysEx (connect Mixer Control or ensure an Editor output exists).');
+    }
+    if (out.state === 'disconnected') {
+      throw new Error('MIDI output port is disconnected; wait for USB to settle then reconnect or pick the port again.');
+    }
+    sendCompleteSysex(out, bytes);
+  }
+
+  /** True when the browser granted SysEx (see WebMidi.enable({ sysex: true })). */
+  get sysexEnabled(): Ref<boolean> {
+    return this._sysexEnabled;
+  }
+
+  /** True when a MIDI output port is selected (SysEx sends use this port). */
+  get midiOutputConnected(): Ref<boolean> {
+    return this._midiOutputConnected;
+  }
+
+  /** True when a MIDI input port is selected (needed to observe SysEx replies). */
+  get midiInputConnected(): Ref<boolean> {
+    return this._midiInputConnected;
+  }
+
+  /**
+   * Resolves with the next inbound SysEx payload (full bytes including F0/F7), or null on timeout.
+   * Listens on the Zoom **Editor** input when present (SysEx replies for file transfer), else the
+   * selected mixer input — matches Magicking/L6-MassStorage `wait_for_sysex` pairing.
+   */
+  waitForSysexOnce(timeoutMs: number): Promise<readonly number[] | null> {
+    this.syncPortsAfterHotplug();
+    const inputPort = this.findZoomEditorInput() ?? this.input;
+    if (!inputPort || inputPort.state === 'disconnected') {
+      return Promise.resolve(null);
+    }
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (data: readonly number[] | null) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timer);
+        inputPort.removeListener('sysex', onSysex);
+        resolve(data);
+      };
+      const timer = window.setTimeout(() => finish(null), timeoutMs);
+      const onSysex = (event: { message: { data: number[] } }) => {
+        const data = event.message?.data;
+        if (!data?.length) return;
+        finish(Array.from(data));
+      };
+      inputPort.addListener('sysex', onSysex as (e: unknown) => void);
+    });
+  }
+
+  private nameLooksZoomish(lower: string): boolean {
+    return (
+      lower.includes('zoom') ||
+      lower.includes('l-6') ||
+      lower.includes('l6') ||
+      lower.includes('livetrak')
+    );
+  }
+
+  private findZoomEditorInput(): Input | null {
+    const inputs = this.getAvailableInputs();
+    for (const p of inputs) {
+      if (p.state === 'disconnected') continue;
+      const n = p.name.toLowerCase();
+      if (!n.includes('editor')) continue;
+      if (this.nameLooksZoomish(n)) return p;
+    }
+    for (const p of inputs) {
+      if (p.state === 'disconnected') continue;
+      if (p.name.toLowerCase().includes('editor')) return p;
+    }
+    return null;
+  }
+
+  private findZoomEditorOutput(): Output | null {
+    const outputs = this.getAvailableOutputs();
+    for (const p of outputs) {
+      if (p.state === 'disconnected') continue;
+      const n = p.name.toLowerCase();
+      if (!n.includes('editor')) continue;
+      if (this.nameLooksZoomish(n)) return p;
+    }
+    for (const p of outputs) {
+      if (p.state === 'disconnected') continue;
+      if (p.name.toLowerCase().includes('editor')) return p;
+    }
+    return null;
+  }
+
   private controlChangeListeners: Set<(cc: number, value: number, channel: number) => void> = new Set();
   private noteOnListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
   private noteOffListeners: Set<(note: number, velocity: number, channel: number) => void> = new Set();
   private programChangeListeners: Set<(program: number, channel: number) => void> = new Set();
+  private sysexListeners: Set<(data: readonly number[]) => void> = new Set();
 
   addControlChangeListener(callback: (cc: number, value: number, channel: number) => void): void {
     if (!this.input) {
@@ -283,8 +474,39 @@ export class MidiService {
     this.programChangeListeners.delete(callback);
   }
 
+  addSysexListener(callback: (data: readonly number[]) => void): void {
+    if (!this.input) {
+      console.warn('No MIDI input connected');
+      return;
+    }
+
+    this.sysexListeners.add(callback);
+
+    if (this.sysexListeners.size === 1) {
+      this.input.addListener('sysex', (event: { message: { data: number[] } }) => {
+        const data = event.message?.data;
+        if (!data?.length) return;
+        const bytes = Array.from(data);
+        this.sysexListeners.forEach((listener) => {
+          try {
+            listener(bytes);
+          } catch (error) {
+            console.error('Error in SysEx listener callback:', error);
+          }
+        });
+      });
+    }
+  }
+
+  removeSysexListener(callback: (data: readonly number[]) => void): void {
+    this.sysexListeners.delete(callback);
+  }
+
   // Note helpers for sound pads
   sendNoteOn(note: number, channel: number, velocity = 100): void {
+    if (this.output?.state === 'disconnected') {
+      this.syncPortsAfterHotplug();
+    }
     if (!this.output) {
       console.warn('No MIDI output connected');
       return;
@@ -299,6 +521,9 @@ export class MidiService {
   }
 
   sendNoteOff(note: number, channel: number, release = 0): void {
+    if (this.output?.state === 'disconnected') {
+      this.syncPortsAfterHotplug();
+    }
     if (!this.output) {
       console.warn('No MIDI output connected');
       return;
@@ -311,6 +536,9 @@ export class MidiService {
   }
 
   sendProgramChange(program: number, channel: number): void {
+    if (this.output?.state === 'disconnected') {
+      this.syncPortsAfterHotplug();
+    }
     if (!this.output) {
       console.warn('No MIDI output connected');
       return;
@@ -335,12 +563,15 @@ export class MidiService {
     this.noteOnListeners.clear();
     this.noteOffListeners.clear();
     this.programChangeListeners.clear();
+    this.sysexListeners.clear();
   }
 
   disconnect(): void {
     this.removeAllListeners();
     this.input = null;
     this.output = null;
+    this._midiOutputConnected.value = false;
+    this._midiInputConnected.value = false;
     this._inputName.value = 'No input connected';
     this._outputName.value = 'No output connected';
     this._isConnected.value = false;

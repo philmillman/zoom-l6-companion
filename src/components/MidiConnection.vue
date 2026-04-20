@@ -186,56 +186,38 @@ function disconnect() {
   emit('connectionChanged', false);
 }
 
+/**
+ * Prefer Mixer Control for normal CC/notes (companion default), then Editor (SysEx-focused),
+ * then other Zoom/LiveTrak-style names.
+ */
+function pickZoomPreferredPort<T extends { name: string }>(devices: T[]): T | undefined {
+  if (devices.length === 0) return undefined;
+  const lower = (s: string) => s.toLowerCase();
+  const zoomish = (name: string) => {
+    const n = lower(name);
+    return n.includes('zoom') || n.includes('l-6') || n.includes('l6') || n.includes('livetrak');
+  };
+  const candidates = devices.filter((d) => zoomish(d.name));
+  const pool = candidates.length > 0 ? candidates : devices;
+  const mixer = pool.find((d) => lower(d.name).includes('mixer control'));
+  if (mixer) return mixer;
+  const editor = pool.find((d) => lower(d.name).includes('editor'));
+  if (editor) return editor;
+  return pool[0];
+}
+
 function autoConnect() {
-  // Priority 1: Look for "mixer control port" devices
-  const mixerInput = availableInputs.value.find(device => 
-    device.name.toLowerCase().includes('mixer control port')
-  );
-  
-  const mixerOutput = availableOutputs.value.find(device => 
-    device.name.toLowerCase().includes('mixer control port')
-  );
-  
-  // Priority 2: Look for Zoom/L6 devices
-  const zoomInput = availableInputs.value.find(device => 
-    device.name.toLowerCase().includes('zoom') || 
-    device.name.toLowerCase().includes('l6')
-  );
-  
-  const zoomOutput = availableOutputs.value.find(device => 
-    device.name.toLowerCase().includes('zoom') || 
-    device.name.toLowerCase().includes('l6')
-  );
-  
-  // Connect input (prioritize mixer control port)
-  const targetInput = mixerInput || zoomInput;
+  const targetInput = pickZoomPreferredPort(availableInputs.value);
+  const targetOutput = pickZoomPreferredPort(availableOutputs.value);
+
   if (targetInput) {
     selectedInput.value = targetInput.name;
     connectInput();
   }
-  
-  // Connect output (prioritize mixer control port)
-  const targetOutput = mixerOutput || zoomOutput;
+
   if (targetOutput) {
     selectedOutput.value = targetOutput.name;
     connectOutput();
-  }
-  
-  // Fallback: connect to first available devices
-  if (!targetInput && availableInputs.value.length > 0) {
-    const firstIn = availableInputs.value[0];
-    if (firstIn) {
-      selectedInput.value = firstIn.name;
-      connectInput();
-    }
-  }
-  
-  if (!targetOutput && availableOutputs.value.length > 0) {
-    const firstOut = availableOutputs.value[0];
-    if (firstOut) {
-      selectedOutput.value = firstOut.name;
-      connectOutput();
-    }
   }
 }
 
@@ -243,9 +225,12 @@ function autoConnect() {
 onMounted(() => {
   initializeMidi();
   
-  // Set up device state change callback
+  // Set up device state change callback (USB re-enumeration → rebind stale ports)
   midiService.setDeviceStateChangeCallback(() => {
     refreshDevices();
+    if (midiService.syncPortsAfterHotplug()) {
+      emit('connectionChanged', midiService.connectionState.value);
+    }
   });
 });
 </script>

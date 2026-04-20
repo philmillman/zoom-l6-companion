@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, onUnmounted } from 'vue';
 import type { ChannelControls, GlobalControls, SoundPad, MixerType } from '../config/midiConfig';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from '../config/midiConfig';
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from '../config/midiConfigL6Max';
+import { midiService } from '../services/midiService';
+import { runZoomL6FileTransferHandshake } from '../midi/sysex';
 
 interface Props {
   isVisible: boolean;
@@ -43,7 +45,41 @@ const expandedSections = reactive({
   channels: true,
   global: false,
   soundPads: false,
+  nonMidi: false,
 });
+
+const massStorageBusy = ref(false);
+const massStorageCooldown = ref(false);
+let massStorageCooldownTimer: ReturnType<typeof window.setTimeout> | undefined;
+
+const massStorageNotice = ref('');
+const massStorageNoticeVariant = ref<'success' | 'error'>('success');
+
+const massStorageButtonsLocked = computed(
+  () => massStorageBusy.value || massStorageCooldown.value,
+);
+
+function startMassStorageCooldown() {
+  massStorageCooldown.value = true;
+  window.clearTimeout(massStorageCooldownTimer);
+  massStorageCooldownTimer = window.setTimeout(() => {
+    massStorageCooldown.value = false;
+    massStorageCooldownTimer = undefined;
+  }, 3000);
+}
+
+const midiOutputReady = computed(() => midiService.midiOutputConnected.value);
+const midiInputReady = computed(() => midiService.midiInputConnected.value);
+const sysexReady = computed(() => midiService.sysexEnabled.value);
+/** SysEx can use the Editor output even when Mixer Control is selected for CC. */
+const massStorageOutReady = computed(
+  () => midiOutputReady.value || midiService.hasZoomEditorSysexOutput(),
+);
+const massStorageHandshakeWaitReady = computed(
+  () =>
+    sysexReady.value &&
+    (midiInputReady.value || midiService.hasZoomEditorSysexInput()),
+);
 
 // Check for duplicate CCs
 const hasDuplicateCCs = computed(() => {
@@ -189,6 +225,41 @@ function toggleSection(section: keyof typeof expandedSections) {
   expandedSections[section] = !expandedSections[section];
 }
 
+async function applyMassStorage(enable: boolean) {
+  massStorageNotice.value = '';
+  if (!massStorageOutReady.value) {
+    massStorageNoticeVariant.value = 'error';
+    massStorageNotice.value =
+      'No MIDI output available for SysEx. Connect Mixer Control or ensure a Zoom “Editor” output appears in the device list.';
+    return;
+  }
+  if (!sysexReady.value) {
+    massStorageNoticeVariant.value = 'error';
+    massStorageNotice.value =
+      'System Exclusive is not enabled. Reload the app and allow SysEx when the browser prompts.';
+    return;
+  }
+  startMassStorageCooldown();
+  massStorageBusy.value = true;
+  try {
+    const useInboundWait = massStorageHandshakeWaitReady.value;
+    await runZoomL6FileTransferHandshake((msg) => midiService.sendSysexRaw(msg), enable, {
+      waitForInboundSysex: useInboundWait
+        ? (timeoutMs: number) => midiService.waitForSysexOnce(timeoutMs)
+        : undefined,
+    });
+    massStorageNoticeVariant.value = 'success';
+    massStorageNotice.value = enable
+      ? 'Command sent. The L6 should appear as a USB drive (SD card access) in the host file manager.'
+      : 'Command sent. The L6 USB storage will disconnect.';
+  } catch (e) {
+    massStorageNoticeVariant.value = 'error';
+    massStorageNotice.value = e instanceof Error ? e.message : String(e);
+  } finally {
+    massStorageBusy.value = false;
+  }
+}
+
 // Watch for mixer type changes to update defaults if needed
 watch(mixerTypeOverride, (newType) => {
   // Optionally reload defaults when mixer type changes
@@ -196,6 +267,10 @@ watch(mixerTypeOverride, (newType) => {
 });
 
 // Watch for dialog open to reload current settings
+onUnmounted(() => {
+  window.clearTimeout(massStorageCooldownTimer);
+});
+
 watch(() => props.isVisible, (visible) => {
   if (visible) {
     // Reload settings from current props when dialog opens
@@ -206,6 +281,15 @@ watch(() => props.isVisible, (visible) => {
     
     // Update MIDI channel from current settings
     globalMidiChannel.value = editableChannelControls[0]?.controls.volume.channel || 1;
+
+    massStorageNotice.value = '';
+    window.clearTimeout(massStorageCooldownTimer);
+    massStorageCooldown.value = false;
+    massStorageCooldownTimer = undefined;
+  } else {
+    window.clearTimeout(massStorageCooldownTimer);
+    massStorageCooldown.value = false;
+    massStorageCooldownTimer = undefined;
   }
 });
 </script>
@@ -215,7 +299,7 @@ watch(() => props.isVisible, (visible) => {
     <div v-if="isVisible" class="advanced-settings-overlay" @click.self="cancel">
       <div class="advanced-settings-dialog">
         <div class="dialog-header">
-          <h2>Advanced MIDI Settings</h2>
+          <h2>Advanced Settings</h2>
           <button class="close-button" @click="cancel" title="Close">×</button>
         </div>
         
@@ -252,6 +336,61 @@ watch(() => props.isVisible, (visible) => {
             >
               <option v-for="ch in 16" :key="ch" :value="ch">Channel {{ ch }}</option>
             </select>
+          </div>
+
+          <!-- Non-MIDI (SysEx device features) -->
+          <div class="settings-section">
+            <div class="section-header" @click="toggleSection('nonMidi')">
+              <h3>Non-MIDI</h3>
+              <span class="toggle-icon">{{ expandedSections.nonMidi ? '▼' : '▶' }}</span>
+            </div>
+
+            <div v-if="expandedSections.nonMidi" class="section-content">
+              <p class="non-midi-intro">
+                Toggle USB file transfer (SD card as a drive) with SysEx over the same MIDI port as mixer control. The device will disconnect and re-enumerate on USB when you switch modes. If it gets stuck try ejecting the device on the host or disable from the official Zoom L6 app. 
+              </p>
+              <p v-if="!sysexReady" class="mass-storage-hint mass-storage-hint--warn">
+                SysEx permission was not granted. Reload and approve System Exclusive access for this site.
+              </p>
+              <p v-else-if="!massStorageOutReady" class="mass-storage-hint">
+                Connect a MIDI output (Mixer Control) or ensure a Zoom Editor output appears in the list.
+              </p>
+              <p
+                v-else-if="!massStorageHandshakeWaitReady"
+                class="mass-storage-hint mass-storage-hint--warn"
+              >
+                SysEx replies won’t be waited on: allow SysEx and connect a MIDI input or ensure an Editor
+                input exists. Commands still send with fixed delays.
+              </p>
+              <div class="mass-storage-actions">
+                <button
+                  type="button"
+                  class="mass-storage-button mass-storage-button--on"
+                  :disabled="massStorageButtonsLocked || !massStorageOutReady || !sysexReady"
+                  @click="applyMassStorage(true)"
+                >
+                  {{ massStorageBusy ? 'Sending…' : massStorageCooldown ? 'Wait…' : 'Enable mass storage' }}
+                </button>
+                <button
+                  type="button"
+                  class="mass-storage-button mass-storage-button--off"
+                  :disabled="massStorageButtonsLocked || !massStorageOutReady || !sysexReady"
+                  @click="applyMassStorage(false)"
+                >
+                  {{ massStorageBusy ? 'Sending…' : massStorageCooldown ? 'Wait…' : 'Disable mass storage' }}
+                </button>
+              </div>
+              <p
+                v-if="massStorageNotice"
+                class="mass-storage-notice"
+                :class="{
+                  'mass-storage-notice--success': massStorageNoticeVariant === 'success',
+                  'mass-storage-notice--error': massStorageNoticeVariant === 'error',
+                }"
+              >
+                {{ massStorageNotice }}
+              </p>
+            </div>
           </div>
           
           <!-- Channel Controls Section -->
@@ -797,6 +936,90 @@ export { getMidiNoteName };
   color: #4a90e2;
   font-size: 12px;
   font-weight: 600;
+}
+
+.non-midi-intro {
+  color: #bbb;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.non-midi-intro a {
+  color: #6aa0f2;
+}
+
+.mass-storage-hint {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 12px 0;
+}
+
+.mass-storage-hint--warn {
+  color: #ffb74d;
+}
+
+.mass-storage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.mass-storage-button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mass-storage-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mass-storage-button--on {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.mass-storage-button--on:not(:disabled):hover {
+  background: #1b5e20;
+}
+
+.mass-storage-button--off {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.mass-storage-button--off:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.mass-storage-notice {
+  font-size: 13px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ccc;
+}
+
+.mass-storage-notice--success {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: #a5d6a7;
+}
+
+.mass-storage-notice--error {
+  background: rgba(244, 67, 54, 0.12);
+  border: 1px solid rgba(244, 67, 54, 0.35);
+  color: #ffcdd2;
 }
 
 .dialog-footer {

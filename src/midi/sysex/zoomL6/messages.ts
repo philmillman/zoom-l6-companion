@@ -1,0 +1,12 @@
+/**
+ * Zoom LiveTrak L6 SysEx constants (reverse-engineered; see Magicking/L6-MassStorage).
+ */
+
+export const zoomL6Sysex = {
+  identityRequest: Object.freeze([0xf0, 0x7e, 0x00, 0x06, 0x01, 0xf7] as const),
+  editorOpen: Object.freeze([0xf0, 0x52, 0x00, 0x00, 0x2b, 0xf7] as const),
+  /** Editor keep-alive (~100 ms in real Zoom editor); primes session before file-transfer OFF in FS mode. */
+  heartbeat: Object.freeze([0xf0, 0x52, 0x00, 0x00, 0x31, 0x0b, 0xf7] as const),
+  activateFileTransfer: Object.freeze([0xf0, 0x52, 0x00, 0x00, 0x31, 0x09, 0x01, 0xf7] as const),
+  deactivateFileTransfer: Object.freeze([0xf0, 0x52, 0x00, 0x00, 0x31, 0x09, 0x00, 0xf7] as const),
+} as const;
