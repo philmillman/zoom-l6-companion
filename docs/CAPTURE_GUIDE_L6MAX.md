@@ -8,7 +8,11 @@ official **ZOOM L6 Editor 2.0.0 or newer** installed (the L6max needs 2.0.0+).
 If you would rather capture everything from scratch, the full procedure is in
 [CAPTURE_GUIDE.md](CAPTURE_GUIDE.md); this file is the short L6max-only list.
 
-## 1. Set up MIDI Monitor (macOS)
+**A Mac is much easier for this** (MIDI Monitor, option 1A). Windows works too but needs a USB
+capture (option 1B), because on Windows the official editor opens the MIDI port exclusively, so no
+app can "listen in" — you have to capture one level lower, at the USB bus.
+
+### 1A. macOS — MIDI Monitor (recommended)
 
 1. Install **MIDI Monitor** from <https://www.snoize.com/MIDIMonitor/> (free). Launch it once so it
    installs its spy driver (it will ask for permission).
@@ -19,13 +23,41 @@ If you would rather capture everything from scratch, the full procedure is in
    - Leave the MIDI I/O and Mixer Control ports unchecked.
 4. Set the event-count field (bottom of the window) to **20000**.
 
-On Windows you can use a USB analyzer instead, but MIDI Monitor on a Mac is by far the easiest.
+Output is plain text you paste into a file (see section 2).
+
+### 1B. Windows — Wireshark + USBPcap
+
+Windows MIDI ports are exclusive, so a MIDI monitor app can't see the editor's traffic. Capture the
+raw USB instead — it records the editor↔mixer SysEx regardless of which app owns the port.
+
+1. Install **Wireshark** from <https://www.wireshark.org/download.html>. During setup, tick
+   **Install USBPcap** (the USB capture driver). Reboot if it asks.
+2. Plug the L6max in and turn it on, but **do not launch the editor yet**.
+3. Start Wireshark. In the capture-interfaces list, double-click the **USBPcap** interface the
+   L6max is on (often **USBPcap1**). If you're not sure which, capture on each briefly and watch for
+   traffic when you touch the mixer, or just capture on all USBPcap interfaces.
+4. In the display-filter bar at the top type `usb.data_flag == "present"` and press Enter to hide the
+   empty polling packets (optional but makes the file smaller/cleaner). Leave capturing running.
+5. Now do the scenarios in section 2 (launch the editor, wait for CONNECTED, perform the steps). You
+   do **not** copy/paste per scenario on Windows — instead do all scenarios in one capture and note
+   the wall-clock time of each so we can line them up, **or** stop and save one file per scenario.
+6. Stop the capture (red square) and **File ▸ Save As** a `.pcapng` file, e.g. `maxAll.pcapng`.
+
+The `.pcapng` is a binary USB capture, not the plain-text format the Mac produces, so on Windows you
+**send us the `.pcapng` file(s)** and we decode them here — you don't need to interpret the bytes.
+Keep the notes about what you did and the values the editor showed (section 2); those are what make
+the capture usable. If files get large, one capture per scenario (steps 5–6 repeated) is easiest to
+match up.
 
 ## 2. Record one scenario per file
 
-For each row: with MIDI Monitor already running, launch ZOOM L6 Editor, wait for **CONNECTED**, do
-the steps, then click the event list, ⌘A, ⌘C, and paste into a text file with the given name. Press
-⌘K to clear before the next one. Move slowly, about a second between clicks.
+For each row: with your capture running, launch ZOOM L6 Editor, wait for **CONNECTED**, and do the
+steps. Move slowly, about a second between clicks.
+
+- **macOS**: after each scenario, click the event list, ⌘A, ⌘C, and paste into a text file with the
+  given name; press ⌘K to clear before the next one.
+- **Windows**: either save one `.pcapng` per scenario (named as below), or do them all in one capture
+  and note the time of each — see section 1B.
 
 **Write down, next to each step, the exact value the editor showed** — the mixer's own numbers are
 the only ground truth we have. Put those notes in `notes-l6max.md`.
@@ -48,8 +80,10 @@ just note "device-menu only, editor shows nothing" for that file — that is sti
 
 ## 3. Send it back
 
-Zip the `max*.txt` files plus `notes-l6max.md` and send them over, or open a pull request adding
-them under `captures/` in the repo. Each file is small plain text. That is everything — thank you!
+Zip your captures — the `max*.txt` files (macOS) or `max*.pcapng` files (Windows) — plus
+`notes-l6max.md`, and send them over or open a pull request adding them under `captures/`. macOS
+text files are tiny; Windows `.pcapng` files are larger but compress well. That is everything —
+thank you!
 
 ## What we already have (so you don't need to recapture it)
 
