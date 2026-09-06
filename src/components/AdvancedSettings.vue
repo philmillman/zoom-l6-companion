@@ -5,6 +5,9 @@ import { channelControls as defaultChannelControls, globalControls as defaultGlo
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from '../config/midiConfigL6Max';
 import { midiService } from '../services/midiService';
 import { runZoomL6FileTransferHandshake } from '../midi/sysex';
+import DeviceNotice from './DeviceNotice.vue';
+import DeviceSettingsPanel from './DeviceSettingsPanel.vue';
+import { useDeviceSettings, type DeviceLinkState } from '../composables/useDeviceSettings';
 
 interface Props {
   isVisible: boolean;
@@ -46,6 +49,40 @@ const expandedSections = reactive({
   global: false,
   soundPads: false,
   nonMidi: false,
+  device: false,
+});
+
+// ── Editor link (SysEx session) ─────────────────────────────────────────────
+const deviceSettings = useDeviceSettings();
+const { link: deviceLink, linkEnabled, showExperimental, firmware: deviceFirmware } = deviceSettings;
+
+const LINK_LABELS: Record<DeviceLinkState, string> = {
+  'no-sysex': 'SysEx not allowed',
+  'no-editor-port': 'No Editor port',
+  closed: 'Closed',
+  opening: 'Opening…',
+  open: 'Open',
+  stale: 'Stale',
+  suspended: 'Suspended',
+  error: 'Error',
+};
+
+const linkLabel = computed(() => LINK_LABELS[deviceLink.value]);
+const linkTone = computed<'success' | 'warn' | 'error' | 'idle'>(() => {
+  switch (deviceLink.value) {
+    case 'open':
+      return 'success';
+    case 'opening':
+    case 'stale':
+    case 'suspended':
+      return 'warn';
+    case 'error':
+    case 'no-sysex':
+    case 'no-editor-port':
+      return 'error';
+    default:
+      return 'idle';
+  }
 });
 
 const massStorageBusy = ref(false);
@@ -242,6 +279,10 @@ async function applyMassStorage(enable: boolean) {
   startMassStorageCooldown();
   massStorageBusy.value = true;
   try {
+    // The handshake sends its own identity/editor-open/heartbeat sequence: the session's
+    // heartbeat must not run alongside it. USB re-enumeration follows, so it stays suspended
+    // until the device reconnects.
+    await deviceSettings.suspend();
     const useInboundWait = massStorageHandshakeWaitReady.value;
     await runZoomL6FileTransferHandshake((msg) => midiService.sendSysexRaw(msg), enable, {
       waitForInboundSysex: useInboundWait
@@ -255,6 +296,9 @@ async function applyMassStorage(enable: boolean) {
   } catch (e) {
     massStorageNoticeVariant.value = 'error';
     massStorageNotice.value = e instanceof Error ? e.message : String(e);
+    // The handshake failed, so no USB re-enumeration will fire the reconnect watcher that
+    // normally clears the suspension. Resume the editor link here or it stays wedged shut.
+    await deviceSettings.resume();
   } finally {
     massStorageBusy.value = false;
   }
@@ -346,22 +390,46 @@ watch(() => props.isVisible, (visible) => {
             </div>
 
             <div v-if="expandedSections.nonMidi" class="section-content">
+              <!-- Editor link (SysEx session) -->
+              <div class="editor-link">
+                <div class="editor-link-row">
+                  <label class="editor-link-toggle">
+                    <input type="checkbox" v-model="linkEnabled" />
+                    <span>Editor link (SysEx)</span>
+                  </label>
+                  <span class="link-pill" :class="`link-pill--${linkTone}`">
+                    {{ linkLabel }}
+                    <template v-if="deviceLink === 'open' && deviceFirmware">
+                      · fw {{ deviceFirmware }}
+                    </template>
+                  </span>
+                </div>
+                <p class="setting-hint">
+                  Turn off before launching the official ZOOM L6 Editor.
+                </p>
+                <label class="editor-link-toggle editor-link-toggle--secondary">
+                  <input type="checkbox" v-model="showExperimental" />
+                  <span>Show experimental (unverified) device settings</span>
+                </label>
+              </div>
+
               <p class="non-midi-intro">
-                Toggle USB file transfer (SD card as a drive) with SysEx over the same MIDI port as mixer control. The device will disconnect and re-enumerate on USB when you switch modes. If it gets stuck try ejecting the device on the host or disable from the official Zoom L6 app. 
+                Toggle USB file transfer (SD card as a drive) with SysEx over the same MIDI port as mixer control. The device will disconnect and re-enumerate on USB when you switch modes. If it gets stuck try ejecting the device on the host or disable from the official Zoom L6 app.
               </p>
-              <p v-if="!sysexReady" class="mass-storage-hint mass-storage-hint--warn">
+              <DeviceNotice v-if="!sysexReady" subtle variant="warn">
                 SysEx permission was not granted. Reload and approve System Exclusive access for this site.
-              </p>
-              <p v-else-if="!massStorageOutReady" class="mass-storage-hint">
+              </DeviceNotice>
+              <DeviceNotice v-else-if="!massStorageOutReady" subtle variant="info">
                 Connect a MIDI output (Mixer Control) or ensure a Zoom Editor output appears in the list.
-              </p>
-              <p
+              </DeviceNotice>
+              <DeviceNotice
                 v-else-if="!massStorageHandshakeWaitReady"
-                class="mass-storage-hint mass-storage-hint--warn"
+                subtle
+                variant="warn"
               >
                 SysEx replies won’t be waited on: allow SysEx and connect a MIDI input or ensure an Editor
                 input exists. Commands still send with fixed delays.
-              </p>
+              </DeviceNotice>
               <div class="mass-storage-actions">
                 <button
                   type="button"
@@ -380,19 +448,26 @@ watch(() => props.isVisible, (visible) => {
                   {{ massStorageBusy ? 'Sending…' : massStorageCooldown ? 'Wait…' : 'Disable mass storage' }}
                 </button>
               </div>
-              <p
+              <DeviceNotice
                 v-if="massStorageNotice"
-                class="mass-storage-notice"
-                :class="{
-                  'mass-storage-notice--success': massStorageNoticeVariant === 'success',
-                  'mass-storage-notice--error': massStorageNoticeVariant === 'error',
-                }"
-              >
-                {{ massStorageNotice }}
-              </p>
+                :variant="massStorageNoticeVariant"
+                :text="massStorageNotice"
+              />
             </div>
           </div>
-          
+
+          <!-- Device settings (SysEx) -->
+          <div class="settings-section">
+            <div class="section-header" @click="toggleSection('device')">
+              <h3>Device settings (SysEx)</h3>
+              <span class="toggle-icon">{{ expandedSections.device ? '▼' : '▶' }}</span>
+            </div>
+
+            <div v-if="expandedSections.device" class="section-content">
+              <DeviceSettingsPanel :expanded="expandedSections.device" :mixerType="mixerTypeOverride" />
+            </div>
+          </div>
+
           <!-- Channel Controls Section -->
           <div class="settings-section">
             <div class="section-header" @click="toggleSection('channels')">
@@ -949,14 +1024,78 @@ export { getMidiNoteName };
   color: #6aa0f2;
 }
 
-.mass-storage-hint {
-  font-size: 13px;
-  color: #888;
-  margin: 0 0 12px 0;
+.editor-link {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(74, 144, 226, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.mass-storage-hint--warn {
-  color: #ffb74d;
+.editor-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.editor-link-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  color: #ccc;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.editor-link-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #4a90e2;
+  cursor: pointer;
+}
+
+.editor-link-toggle--secondary {
+  font-weight: 500;
+  color: #bbb;
+}
+
+.link-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ccc;
+  white-space: nowrap;
+}
+
+.link-pill--success {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.15);
+  color: #a5d6a7;
+}
+
+.link-pill--warn {
+  border-color: rgba(255, 152, 0, 0.5);
+  background: rgba(255, 152, 0, 0.12);
+  color: #ffcc80;
+}
+
+.link-pill--error {
+  border-color: rgba(244, 67, 54, 0.5);
+  background: rgba(244, 67, 54, 0.12);
+  color: #ffcdd2;
 }
 
 .mass-storage-actions {
@@ -999,27 +1138,6 @@ export { getMidiNoteName };
 
 .mass-storage-button--off:not(:disabled):hover {
   background: rgba(255, 255, 255, 0.18);
-}
-
-.mass-storage-notice {
-  font-size: 13px;
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #ccc;
-}
-
-.mass-storage-notice--success {
-  background: rgba(76, 175, 80, 0.15);
-  border: 1px solid rgba(76, 175, 80, 0.35);
-  color: #a5d6a7;
-}
-
-.mass-storage-notice--error {
-  background: rgba(244, 67, 54, 0.12);
-  border: 1px solid rgba(244, 67, 54, 0.35);
-  color: #ffcdd2;
 }
 
 .dialog-footer {

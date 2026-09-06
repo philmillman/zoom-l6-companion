@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue';
 import { midiService } from '../services/midiService';
+import { bytesToHex } from '../midi/sysex';
+import SysexExplorer from './debug/SysexExplorer.vue';
 
 // Props
 interface Props {
@@ -8,7 +10,7 @@ interface Props {
   debugData?: {
     errorLogs: any[];
     midiLogs: any[];
-    activeTab: 'errors' | 'midi' | 'system';
+    activeTab: 'errors' | 'midi' | 'system' | 'sysex';
     systemInfo: any;
   };
 }
@@ -43,7 +45,7 @@ const emit = defineEmits<{
 const isExpanded = ref(false);
 const activeTab = computed({
   get: () => props.debugData.activeTab,
-  set: (value: 'errors' | 'midi' | 'system') => {
+  set: (value: 'errors' | 'midi' | 'system' | 'sysex') => {
     props.debugData.activeTab = value;
   }
 });
@@ -142,10 +144,6 @@ function updateSystemInfo() {
   props.debugData.systemInfo.viewportSize = `${window.innerWidth}x${window.innerHeight}`;
   props.debugData.systemInfo.onLine = navigator.onLine;
   props.debugData.systemInfo.timestamp = new Date();
-}
-
-function formatSysexHex(bytes: readonly number[]): string {
-  return bytes.map((b) => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
 }
 
 function formatTimestamp(date: Date): string {
@@ -267,15 +265,28 @@ function setupMidiMonitoring() {
     return originalSendProgramChange.call(this, program, channel);
   };
 
+  // The editor session emits a heartbeat (F0 52 00 00 31 0B F7) and receives its ack
+  // (F0 52 00 00 00 0B F7) ~10×/s while open; logging them would flush the 50-entry MIDI ring
+  // buffer within seconds and bury real traffic. The SysEx explorer filters them for the same
+  // reason. Match the two fixed patterns and skip them.
+  const isHeartbeatTraffic = (b: readonly number[]) =>
+    b.length === 7 &&
+    b[0] === 0xf0 && b[1] === 0x52 && b[2] === 0x00 && b[3] === 0x00 &&
+    ((b[4] === 0x31 && b[5] === 0x0b) || (b[4] === 0x00 && b[5] === 0x0b)) &&
+    b[6] === 0xf7;
+
   // Patch sendSysexRaw (mass storage and other SysEx)
   midiService.sendSysexRaw = function (bytes: readonly number[]) {
-    const hex = formatSysexHex(bytes);
-    addMidiLog('out', 'sysex', 0, { hex, bytes: [...bytes] }, `SysEx out: ${hex}`);
+    if (!isHeartbeatTraffic(bytes)) {
+      const hex = bytesToHex(bytes);
+      addMidiLog('out', 'sysex', 0, { hex, bytes: [...bytes] }, `SysEx out: ${hex}`);
+    }
     return originalSendSysexRaw(bytes);
   };
 
   const midiSysexListener = (bytes: readonly number[]) => {
-    const hex = formatSysexHex(bytes);
+    if (isHeartbeatTraffic(bytes)) return;
+    const hex = bytesToHex(bytes);
     addMidiLog('in', 'sysex', 0, { hex, bytes: [...bytes] }, `SysEx in: ${hex}`);
   };
 
@@ -431,12 +442,19 @@ watch(() => props.isVisible, (visible) => {
           MIDI
           <span class="tab-badge" v-if="midiCount > 0">{{ midiCount }}</span>
         </button>
-        <button 
+        <button
           class="debug-tab"
           :class="{ active: activeTab === 'system' }"
           @click="activeTab = 'system'"
         >
           System
+        </button>
+        <button
+          class="debug-tab"
+          :class="{ active: activeTab === 'sysex' }"
+          @click="activeTab = 'sysex'"
+        >
+          SysEx
         </button>
       </div>
 
@@ -554,6 +572,11 @@ watch(() => props.isVisible, (visible) => {
               <div class="info-value">{{ props.debugData.systemInfo.userAgent }}</div>
             </div>
           </div>
+        </div>
+
+        <!-- SysEx Tab -->
+        <div v-if="activeTab === 'sysex'" class="tab-panel">
+          <SysexExplorer />
         </div>
       </div>
     </div>

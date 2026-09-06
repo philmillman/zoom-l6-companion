@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick, watch } from 'vue';
 import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
@@ -10,6 +10,7 @@ import { channelControls as defaultChannelControls, globalControls as defaultGlo
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from './config/midiConfigL6Max';
 import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
 import { midiService } from './services/midiService';
+import { useDeviceSettings } from './composables/useDeviceSettings';
 
 // Platform detection
 function detectPlatform() {
@@ -64,7 +65,7 @@ function loadConfigForMixerType(type: MixerType) {
 const debugData = reactive({
   errorLogs: [] as any[],
   midiLogs: [] as any[],
-  activeTab: 'errors' as 'errors' | 'midi' | 'system',
+  activeTab: 'errors' as 'errors' | 'midi' | 'system' | 'sysex',
   systemInfo: {
     userAgent: navigator.userAgent,
     platform: navigator.platform,
@@ -77,6 +78,13 @@ const debugData = reactive({
     webMidiSupported: false,
     timestamp: new Date()
   }
+});
+
+// SysEx device settings (editor session) — keep the mixer type in sync
+const deviceSettings = useDeviceSettings();
+deviceSettings.mixerType.value = mixerType.value;
+watch(mixerType, (type) => {
+  deviceSettings.mixerType.value = type;
 });
 
 // Refs to channel components for resetting and LFO control
@@ -117,6 +125,8 @@ function onMidiConnectionChanged(connected: boolean) {
     }
   } else {
     console.log('MIDI disconnected');
+    // Close the SysEx editor session (heartbeats would keep firing at a dead port)
+    deviceSettings.close();
     // Remove global MIDI listener when disconnected
     if (globalMidiListener) {
       midiService.removeControlChangeListener(globalMidiListener);
@@ -401,6 +411,7 @@ onUnmounted(() => {
           <GlobalControls
             :globalData="globalControls"
             :mixerType="mixerType"
+            :compact="appSettings.compactMode"
             @controlChange="onGlobalControlChange"
             @sceneChanged="onSceneChanged"
           />

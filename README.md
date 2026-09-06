@@ -53,6 +53,13 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
   - Reset to factory defaults
   - Persistent settings saved to browser storage
 
+- **Device settings & SysEx (experimental)** - Editor-only device control via the dedicated SysEx port:
+  - **Editor link**: Toggle the SysEx connection in Advanced Settings (turn off before using the official Zoom L6 Editor)
+  - **Experimental features**: Show experimental settings with the "Show experimental" toggle once parameter addresses are verified
+  - **Effect parameters**: Interactive knobs for Hall/Room/Spring/Delay/Echo effect parameters (Decay, Tone, Time, etc.) — appear once registered
+  - **SysEx explorer**: Debug drawer "SysEx" tab for live protocol inspection — sweep parameter groups, snapshot device state, and diff changes to identify new addresses
+  - See [docs/PROTOCOL.md](docs/PROTOCOL.md) for the protocol reference and [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to contribute reverse-engineering findings
+
 - **MIDI Integration** - WebMIDI.js powered features:
   - Auto-detection of Zoom L6 device
   - Real-time bidirectional MIDI communication
@@ -121,6 +128,19 @@ npm run dev
 ```bash
 npm run build
 ```
+
+### Testing
+```bash
+npm test
+```
+
+### Decoding SysEx Captures
+Reverse-engineering new parameter addresses? Decode MIDI Monitor captures from the official Zoom L6 Editor:
+```bash
+npm run decode captures/NN-scenario.txt
+npm run decode captures/NN-scenario.txt -- --diff captures/MM-baseline.txt
+```
+See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 
 ## Usage Tips
 

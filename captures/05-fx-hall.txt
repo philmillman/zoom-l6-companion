@@ -1,0 +1,794 @@
+0	To L6 for L6 Editor Port	SysEx		F0 7E 00 06 01 F7
+12:40:05.368	From L6 for L6 Editor Port	SysEx		F0 7E 00 06 02 52 72 00 0B 00 31 2E 30 30 F7
+12:40:05.369	From L6 for L6 Editor Port	SysEx		F0 52 00 00 2A 03 01 01 01 01 00 01 01 01 01 31 31 31 31 00 00 00 00 00 00 00 01 02 03 04 05 06 0B 0C 0D 0E 0F 10 15 16 17 18 19 1A 21 22 23 24 25 26 2B 2C 2D 2E 2F 30 35 36 37 38 39 3A 3F 40 41 42 43 44 49 4A 4B 4C 4D 4E 53 54 55 56 57 58 5D 5E 5F 66 67 68 6D 6E 71 72 75 77 3C 3E 40 41 00 00 00 00 28 00 32 00 32 00 32 00 5A 00 1E 00 3D 02 23 00 73 05 32 00 01 01 01 01 01 01 01 01 01 01 01 01 00 00 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 2B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 45 05 02 00 00 00 00 00 27 00 F7
+12:40:05.369	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 11 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 67 01 F7
+12:40:05.369	From L6 for L6 Editor Port	SysEx		F0 52 00 00 67 00 01 0B 28 03 00 00 38 58 73 00 00 00 00 00 00 00 00 1B 5C 03 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 00 00 F7
+12:40:05.369	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 00 00 00 01 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 00 01 F7
+12:40:05.371	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 00 01 00 01 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 00 02 F7
+12:40:05.373	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 00 02 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 00 03 F7
+12:40:05.374	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 00 03 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 01 00 00 00 F7
+12:40:05.375	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 01 00 00 00 27 00 00 32 00 36 00 30 00 33 00 00 30 00 33 00 5F 00 00 31 00 39 00 30 00 30 00 00 31 00 33 00 2E 00 00 57 00 41 00 56 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 01 01 00 00 F7
+12:40:05.377	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 01 01 00 00 27 00 00 32 00 36 00 30 00 33 00 00 30 00 33 00 5F 00 00 31 00 39 00 30 00 31 00 00 33 00 37 00 2E 00 00 57 00 41 00 56 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 02 00 F7
+12:40:05.378	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 02 00 00 00 27 00 00 32 00 36 00 30 00 33 00 00 30 00 33 00 5F 00 00 31 00 39 00 30 00 30 00 00 31 00 33 00 2E 00 00 57 00 41 00 56 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 02 01 F7
+12:40:05.379	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 02 01 00 00 27 00 00 32 00 36 00 30 00 33 00 00 30 00 33 00 5F 00 00 31 00 39 00 30 00 31 00 00 33 00 37 00 2E 00 00 57 00 41 00 56 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 02 02 F7
+12:40:05.382	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 02 02 7F 7F 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 46 02 03 F7
+12:40:05.384	From L6 for L6 Editor Port	SysEx		F0 52 00 00 45 02 03 7F 7F 00 00 F7
+12:40:05.385	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 00 1A 09 06 0C 28 05 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:05.386	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:05.906	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+12:40:06.397	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:06.914	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:07.415	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:07.922	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:08.417	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:08.928	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+12:40:09.419	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:09.935	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:10.439	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:10.943	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:11.446	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:11.947	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:12.449	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:12.957	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+12:40:13.446	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+12:40:13.860	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:13.860	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+12:40:13.879	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:13.880	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 24 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 22 00 F7
+12:40:13.898	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1D 00 F7
+12:40:13.917	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 17 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 18 00 F7
+12:40:13.938	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 16 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 12 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 14 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:13.954	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 11 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 11 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 10 00 F7
+12:40:13.973	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0E 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0C 00 F7
+12:40:13.991	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 09 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+12:40:14.010	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 07 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 06 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.029	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.056	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.066	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.085	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.085	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.103	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.104	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.122	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.139	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.157	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.173	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+12:40:14.189	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.205	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.221	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.237	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.237	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.237	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.238	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.238	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.238	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.238	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.239	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.240	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.240	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.240	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.240	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.241	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.241	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.241	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.241	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:14.255	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:14.599	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 02 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+12:40:15.015	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 06 00 F7
+12:40:15.031	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.031	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0C 00 F7
+12:40:15.047	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0C 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0D 00 F7
+12:40:15.063	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0E 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 11 00 F7
+12:40:15.079	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 10 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 11 00 F7
+12:40:15.095	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.096	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 13 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 15 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+12:40:15.114	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 15 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 17 00 F7
+12:40:15.130	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 17 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 18 00 F7
+12:40:15.149	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 19 00 F7
+12:40:15.167	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.168	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1C 00 F7
+12:40:15.189	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 20 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1D 00 F7
+12:40:15.211	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+12:40:15.221	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 20 00 F7
+12:40:15.240	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 22 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+12:40:15.258	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+12:40:15.274	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.274	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+12:40:15.293	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 28 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2A 00 F7
+12:40:15.316	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2D 00 F7
+12:40:15.325	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.325	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2F 00 F7
+12:40:15.325	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.325	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2F 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 30 00 F7
+12:40:15.342	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 30 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+12:40:15.361	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+12:40:15.379	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+12:40:15.398	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.398	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+12:40:15.417	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+12:40:15.435	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+12:40:15.454	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3B 00 F7
+12:40:15.473	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.473	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.491	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.514	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.514	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.530	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.549	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.567	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.583	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.602	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.603	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.625	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.625	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3A 00 F7
+12:40:15.642	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+12:40:15.661	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.661	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:15.679	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.680	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+12:40:15.698	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.699	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+12:40:15.720	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.720	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+12:40:15.720	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+12:40:15.740	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+12:40:15.757	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+12:40:15.775	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.776	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+12:40:15.794	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.823	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.823	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.823	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 30 00 F7
+12:40:15.831	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.850	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.869	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.869	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+12:40:15.887	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.906	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.919	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.919	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.919	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.926	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.945	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.945	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.945	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.945	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.963	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:15.982	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+12:40:16.203	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+12:40:16.235	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:16.235	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+12:40:16.270	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:16.373	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:16.889	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:17.393	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:17.894	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:18.401	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:18.902	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+12:40:19.057	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+12:40:19.074	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3C 00 F7
+12:40:19.091	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3F 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 44 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 50 00 F7
+12:40:19.110	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 43 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 47 00 F7
+12:40:19.129	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.129	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 48 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4B 00 F7
+12:40:19.148	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 54 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 56 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 58 00 F7
+12:40:19.163	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 59 00 F7
+12:40:19.179	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5C 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5F 00 F7
+12:40:19.208	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5D 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+12:40:19.211	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5F 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 60 00 F7
+12:40:19.227	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+12:40:19.243	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 63 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 62 00 F7
+12:40:19.259	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 63 00 F7
+12:40:19.275	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.291	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.309	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.323	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.324	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.339	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.355	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.371	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.387	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.403	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.419	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.435	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.436	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.436	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.451	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.467	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.483	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+12:40:19.509	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.515	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.516	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.516	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.516	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.517	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.517	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.517	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.517	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.518	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.518	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.518	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.518	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.519	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.519	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.520	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+12:40:19.520	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.520	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.521	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.521	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.521	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.521	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.522	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:19.522	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:20.036	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:20.539	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 31 00 F7
+12:40:20.921	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 30 00 F7
+12:40:20.921	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2E 00 F7
+12:40:20.923	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+12:40:20.931	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2C 00 F7
+12:40:20.934	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2A 00 F7
+12:40:20.950	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:20.959	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 28 00 F7
+12:40:20.965	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 29 00 F7
+12:40:20.973	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 24 00 F7
+12:40:20.981	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 26 00 F7
+12:40:20.987	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 22 00 F7
+12:40:20.995	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 17 00 F7
+12:40:21.002	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 11 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 01 00 F7
+12:40:21.014	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:21.015	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:21.029	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:21.029	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.031	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.039	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.047	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.058	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.062	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.070	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.078	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.085	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.095	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.101	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.120	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.120	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.121	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.131	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.138	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.145	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.153	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.162	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.167	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.178	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.182	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.197	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.221	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:21.221	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.227	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.234	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.246	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+12:40:21.265	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:21.545	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:22.052	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 02 00 F7
+12:40:22.413	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 01 00 F7
+12:40:22.413	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 03 00 F7
+12:40:22.414	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 03 00 F7
+12:40:22.421	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 05 00 F7
+12:40:22.431	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 06 00 F7
+12:40:22.446	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 06 00 F7
+12:40:22.449	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 07 00 F7
+12:40:22.457	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 08 00 F7
+12:40:22.465	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 08 00 F7
+12:40:22.471	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 09 00 F7
+12:40:22.487	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0A 00 F7
+12:40:22.497	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0B 00 F7
+12:40:22.511	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0C 00 F7
+12:40:22.513	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0D 00 F7
+12:40:22.518	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0D 00 F7
+12:40:22.527	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0E 00 F7
+12:40:22.531	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0E 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:22.539	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:22.539	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 10 00 F7
+12:40:22.547	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 10 00 F7
+12:40:22.554	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 11 00 F7
+12:40:22.570	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 12 00 F7
+12:40:22.579	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 13 00 F7
+12:40:22.585	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 14 00 F7
+12:40:22.595	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 14 00 F7
+12:40:22.615	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 14 00 F7
+12:40:22.615	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 15 00 F7
+12:40:22.615	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 15 00 F7
+12:40:22.623	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 16 00 F7
+12:40:22.630	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 17 00 F7
+12:40:22.646	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 18 00 F7
+12:40:22.667	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 19 00 F7
+12:40:22.682	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1A 00 F7
+12:40:22.698	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1B 00 F7
+12:40:22.713	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1B 00 F7
+12:40:22.719	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1C 00 F7
+12:40:22.730	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1D 00 F7
+12:40:22.749	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1E 00 F7
+12:40:22.765	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1F 00 F7
+12:40:22.787	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 20 00 F7
+12:40:22.847	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:22.869	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 21 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 22 00 F7
+12:40:22.884	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 23 00 F7
+12:40:22.899	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 24 00 F7
+12:40:22.931	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 25 00 F7
+12:40:22.945	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 26 00 F7
+12:40:22.963	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 27 00 F7
+12:40:22.982	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 28 00 F7
+12:40:22.997	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 29 00 F7
+12:40:23.021	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:23.045	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2A 00 F7
+12:40:23.071	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:23.117	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2B 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2C 00 F7
+12:40:23.155	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+12:40:23.185	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2E 00 F7
+12:40:23.217	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2F 00 F7
+12:40:23.282	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 30 00 F7
+12:40:23.298	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 31 00 F7
+12:40:23.330	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 32 00 F7
+12:40:23.381	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 33 00 F7
+12:40:23.422	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 34 00 F7
+12:40:23.431	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 35 00 F7
+12:40:23.506	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 36 00 F7
+12:40:23.538	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:23.547	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 35 00 F7
+12:40:23.863	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 33 00 F7
+12:40:23.867	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:24.050	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:24.565	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:25.072	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:25.573	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 36 00 F7
+12:40:26.014	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 37 00 F7
+12:40:26.014	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 3A 00 F7
+12:40:26.014	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 39 00 F7
+12:40:26.018	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 3E 00 F7
+12:40:26.026	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 48 00 F7
+12:40:26.033	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 48 00 F7
+12:40:26.041	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 4B 00 F7
+12:40:26.049	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 51 00 F7
+12:40:26.057	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 57 00 F7
+12:40:26.065	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:26.065	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 57 00 F7
+12:40:26.071	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 59 00 F7
+12:40:26.082	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 58 00 F7
+12:40:26.085	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:26.094	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5A 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5E 00 F7
+12:40:26.112	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5C 00 F7
+12:40:26.112	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5F 00 F7
+12:40:26.115	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5F 00 F7
+12:40:26.125	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 61 00 F7
+12:40:26.131	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 60 00 F7
+12:40:26.138	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 61 00 F7
+12:40:26.149	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 62 00 F7
+12:40:26.154	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 63 00 F7
+12:40:26.163	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.170	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 63 00 F7
+12:40:26.177	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.183	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.194	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.200	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.207	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.215	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.221	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.231	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.235	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.244	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.250	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.260	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.266	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.273	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.282	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.289	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.306	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.306	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.317	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+12:40:26.318	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+12:40:26.325	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 13 F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:26.582	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:27.087	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:27.588	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:28.097	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6 for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+12:40:28.596	From L6 for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
