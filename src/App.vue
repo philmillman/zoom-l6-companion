@@ -445,12 +445,12 @@ onUnmounted(() => {
           <h2>Connect Your Zoom L6 or L6Max</h2>
           <p>Please connect your Zoom L6 or L6Max via USB and select it from the MIDI connection panel above.</p>
           <ul class="setup-steps">
-            <li>Connect your Zoom L6 or L6Max to your device via USB</li>
-            <li>Ensure the device is powered on</li>
-            <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 or L6Max devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
-            <li>Start controlling your mixer!</li>
-            <li>Note: You may need to bridge the MIDI in and out ports (plug a cable between the two) on the Zoom L6 or L6Max to get MIDI to work in both directions.</li>
-            <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</li>
+            <li>Connect your Zoom L6 or L6Max to your device via USB and power it on.</li>
+            <li>Click "Auto-Connect Zoom", or in the Input and Output menus pick the port labeled "Mixer Control" (with multiple L6 devices it's usually the 2nd one). That port carries the faders, EQ, pans, mutes, sound pads, and scenes.</li>
+            <li>You don't need to also select the "Editor" port. The app detects it on its own and uses it automatically for the SysEx features — effect parameters, device settings, and mass storage — at the same time as Mixer Control. Just leave SysEx access allowed when the browser asks.</li>
+            <li>Start controlling your mixer! Effect-parameter knobs appear in the Effects section once the Editor port is detected.</li>
+            <li>Note: to send MIDI out of the L6/L6Max's MIDI OUT jack to other gear, you may need to bridge its MIDI IN and OUT ports with a cable.</li>
+            <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the CC mappings, and toggle the Editor link, in Advanced Settings.</li>
           </ul>
         </div>
       </div>
