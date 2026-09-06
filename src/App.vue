@@ -449,7 +449,7 @@ onUnmounted(() => {
             <li>Click "Auto-Connect Zoom", or in the Input and Output menus pick the port labeled "Mixer Control" (with multiple L6 devices it's usually the 2nd one). That port carries the faders, EQ, pans, mutes, sound pads, and scenes.</li>
             <li>You don't need to also select the "Editor" port. The app detects it on its own and uses it automatically for the SysEx features — effect parameters, device settings, and mass storage — at the same time as Mixer Control. Just leave SysEx access allowed when the browser asks.</li>
             <li>Start controlling your mixer! Effect-parameter knobs appear in the Effects section once the Editor port is detected.</li>
-            <li>Note: to send MIDI out of the L6/L6Max's MIDI OUT jack to other gear, you may need to bridge its MIDI IN and OUT ports with a cable.</li>
+            <li>Note: on some mobile setups (e.g. Android) only a single MIDI port is exposed. If controls or two-way MIDI aren't working there, bridge the L6/L6Max's MIDI IN and OUT jacks with a cable (a 3.5mm TRS cable between the two) so MIDI works in both directions.</li>
             <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the CC mappings, and toggle the Editor link, in Advanced Settings.</li>
           </ul>
         </div>
