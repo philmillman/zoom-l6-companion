@@ -106,6 +106,18 @@ export class UnverifiedParamError extends Error {
   }
 }
 
+/**
+ * Thrown by {@link ZoomL6EditorSession.getValue} for a `session`-scheme parameter: those are written
+ * with `31 <id> …` but the matching read encoding (`46 …`) is not yet decoded, so they are
+ * write-only. Callers (e.g. `useDeviceSettings`) skip these instead of surfacing an error.
+ */
+export class SessionReadUnsupportedError extends Error {
+  constructor(id: string) {
+    super(`Parameter "${id}" uses a session command (write-only); it cannot be read back yet`);
+    this.name = 'SessionReadUnsupportedError';
+  }
+}
+
 export const DEFAULT_HEARTBEAT_INTERVAL_MS = 100;
 export const DEFAULT_REQUEST_TIMEOUT_MS = 1000;
 export const DEFAULT_IDENTITY_TIMEOUT_MS = 2000;
@@ -338,7 +350,7 @@ export class ZoomL6EditorSession {
       return value;
     }
     if (def.address.scheme === 'session') {
-      throw new Error(`Parameter "${id}" uses a session command and cannot be read back`);
+      throw new SessionReadUnsupportedError(id);
     }
     const bytes = await this.getParam(def.address.group, def.address.index);
     // `decodeParamValue` already undoes `def.deviceOffset`.
@@ -367,7 +379,12 @@ export class ZoomL6EditorSession {
     // `encodeParamValue` clamps to `def.range` and applies `def.deviceOffset`.
     const values = encodeParamValue(def, value);
     if (def.address.scheme === 'session') {
-      await this.request(buildSessionCmd(def.address.id, ...values), 'genericAck');
+      const { id: cmdId, prefix = [] } = def.address;
+      // The device acks a session write with `00 <id>` echoing the command id.
+      await this.request(
+        buildSessionCmd(cmdId, ...prefix, ...values),
+        (m) => m.kind === 'genericAck' && m.code === cmdId,
+      );
       return;
     }
     await this.setParam(def.address.group, def.address.index, values);

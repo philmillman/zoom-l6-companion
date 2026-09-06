@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   RequestTimeoutError,
   SessionClosedError,
+  SessionReadUnsupportedError,
   UnverifiedParamError,
   ZoomL6EditorSession,
   type SysexTransport,
@@ -323,7 +324,8 @@ describe('ZoomL6EditorSession', () => {
       await openSession(transport, session);
       transport.sent.length = 0;
 
-      await expect(session.setValue('midiOutMode', 1)).rejects.toBeInstanceOf(UnverifiedParamError);
+      // `usbMixMinus` is still a placeholder (L6max-only, no capture).
+      await expect(session.setValue('usbMixMinus', 1)).rejects.toBeInstanceOf(UnverifiedParamError);
       expect(transport.commands).toHaveLength(0);
     });
 
@@ -332,11 +334,11 @@ describe('ZoomL6EditorSession', () => {
       await openSession(transport, session);
       transport.sent.length = 0;
 
-      const pending = session.setValue('midiOutMode', 1, { force: true });
+      const pending = session.setValue('usbMixMinus', 1, { force: true });
       await vi.advanceTimersByTimeAsync(0);
       const sent = transport.commands.at(-1)!;
-      expect(sent[4]).toBe(0x45); // SetParam
-      expect(sent.at(-2)).toBe(1); // encoded enum value
+      expect(sent[4]).toBe(0x45); // SetParam (still a placeholder param address)
+      expect(sent.at(-2)).toBe(1); // encoded bool value
 
       transport.receive(ack(0x45));
       await expect(pending).resolves.toBeUndefined();
@@ -346,6 +348,97 @@ describe('ZoomL6EditorSession', () => {
       const { transport, session } = makeSession();
       await openSession(transport, session);
       await expect(session.getValue('firmwareVersion')).resolves.toBeCloseTo(1.1);
+    });
+
+    it('rejects reading a write-only session parameter', async () => {
+      const { transport, session } = makeSession();
+      await openSession(transport, session);
+      await expect(session.getValue('midiOutMode')).rejects.toBeInstanceOf(SessionReadUnsupportedError);
+    });
+  });
+
+  describe('session-command writes', () => {
+    /** Drives a verified `setValue` and returns the exact non-heartbeat bytes it put on the wire. */
+    async function writeAndCapture(id: Parameters<ZoomL6EditorSession['setValue']>[0], value: number) {
+      const { transport, session } = makeSession();
+      await openSession(transport, session);
+      transport.sent.length = 0;
+
+      const pending = session.setValue(id, value);
+      await vi.advanceTimersByTimeAsync(0);
+      const sent = transport.commands.at(-1)!;
+      // Every verified session write is acked with `00 <id>` echoing the command id.
+      const cmdId = sent[5]!;
+      transport.receive(ack(cmdId));
+      await expect(pending).resolves.toBeUndefined();
+      return sent;
+    }
+
+    it('midiOutMode Thru → 31 0C 01', async () => {
+      expect(await writeAndCapture('midiOutMode', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x0c, 0x01, 0xf7]);
+    });
+
+    it('midiChannel 16 → 31 0D 0F (deviceOffset -1)', async () => {
+      expect(await writeAndCapture('midiChannel', 16)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x0d, 0x0f, 0xf7]);
+    });
+
+    it('mixerControlViaMidi on → 31 03 01', async () => {
+      expect(await writeAndCapture('mixerControlViaMidi', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x03, 0x01, 0xf7]);
+    });
+
+    it('batteryType Lithium → 31 01 02', async () => {
+      expect(await writeAndCapture('batteryType', 2)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x01, 0x02, 0xf7]);
+    });
+
+    it('recorderMode Master Only → 31 04 01', async () => {
+      expect(await writeAndCapture('recorderMode', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x04, 0x01, 0xf7]);
+    });
+
+    it('pad2.mode Loop → 31 06 01 01', async () => {
+      expect(await writeAndCapture('pad2.mode', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x06, 0x01, 0x01, 0xf7]);
+    });
+
+    it('pad1.level max → 31 07 00 3B', async () => {
+      expect(await writeAndCapture('pad1.level', 0x3b)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x07, 0x00, 0x3b, 0xf7]);
+    });
+
+    it('pad1.note 60 → 31 0F 00 3C 00 (mapped)', async () => {
+      expect(await writeAndCapture('pad1.note', 60)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x0f, 0x00, 0x3c, 0x00, 0xf7]);
+    });
+
+    it('pad1.note "Not Mapped" sentinel 128 → 31 0F 00 00 01', async () => {
+      expect(await writeAndCapture('pad1.note', 128)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x0f, 0x00, 0x00, 0x01, 0xf7]);
+    });
+
+    it('aux2SendPoint.ch6 Post → 31 14 05 01 01', async () => {
+      expect(await writeAndCapture('aux2SendPoint.ch6', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x14, 0x05, 0x01, 0x01, 0xf7]);
+    });
+
+    it('fx.delay.time 915 → 31 13 03 00 13 07 (u14le)', async () => {
+      expect(await writeAndCapture('fx.delay.time', 915)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x13, 0x03, 0x00, 0x13, 0x07, 0xf7]);
+    });
+
+    it('fx.hall.decay 100 → 31 13 00 00 64 00 (0-100 still sent as 2 bytes)', async () => {
+      expect(await writeAndCapture('fx.hall.decay', 100)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x13, 0x00, 0x00, 0x64, 0x00, 0xf7]);
+    });
+
+    it('only accepts the ack whose code echoes the command id', async () => {
+      const { transport, session } = makeSession();
+      await openSession(transport, session);
+      transport.sent.length = 0;
+
+      const pending = session.setValue('midiOutMode', 1);
+      await vi.advanceTimersByTimeAsync(0);
+
+      // A generic ack for a different id must not satisfy this write.
+      transport.receive(ack(0x45));
+      let settled = false;
+      void pending.then(() => (settled = true), () => (settled = true));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(settled).toBe(false);
+
+      transport.receive(ack(0x0c));
+      await expect(pending).resolves.toBeUndefined();
     });
   });
 

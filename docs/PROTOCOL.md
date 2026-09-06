@@ -103,9 +103,56 @@ Device: Heartbeat Ack (F0 52 00 00 00 0B F7)
 
 **Concurrent sessions:** The official ZOOM L6 Editor and this app must not both hold an open session. If they overlap, SysEx messages collide and both may malfunction. Always close one before opening the other; the CAPTURE_GUIDE.md recommends quitting the editor before using this app's editor link.
 
+## Session-Command Writes (`31 <id> …`) — the write path for editable settings
+
+Reverse-engineering the official editor's captures (`captures/`) showed that **every editable
+setting is written with a session command**, not the `45 <group> <index>` family originally assumed:
+
+```
+F0 52 00 00 31 <id> <prefix…> <value…> F7        (host → device)
+F0 52 00 00 00 <id> F7                            (device → host ack, id echoed)
+```
+
+`<prefix…>` is a fixed run of selector bytes; the encoded value bytes follow it. The `45/46` family
+is what the editor uses to **read** device state at connect (pad file names, a settings block); that
+read encoding is not yet decoded, so these session settings are treated as **write-only**.
+
+| id | setting | prefix | value | evidence |
+|----|---------|--------|-------|----------|
+| `00` | date/time push | — | `1A 09 06 0C <a> <b>` (clock) | sent once at connect (not modelled) |
+| `01` | battery type | — | `00` Alkaline / `01` Ni-MH / `02` Lithium | captures/12 |
+| `02` | auto power off | — | `00` 10 Hours / `01` Never | captures/12 |
+| `03` | mixer control via MIDI | — | `00` off / `01` on | captures/03 |
+| `04` | recorder mode | — | `00` Multi Track / `01` Master Only | captures/13 |
+| `06` | sound pad play mode | `[pad]` (0-3) | `00` One-shot / `01` Loop / `02` Hold | captures/11 |
+| `07` | sound pad level | `[pad]` (0-3) | `00`–`3B` (−∞ … +10 dB) | captures/11 |
+| `0C` | MIDI out mode | — | `00` Out / `01` Thru | captures/02 |
+| `0D` | MIDI channel | — | channel − 1 (`00`=CH1 … `0F`=CH16) | captures/04 |
+| `0F` | sound pad MIDI note | `[pad]` (0-3) | `<note>` then `<mapped-flag>` (0 mapped / 1 Not Mapped) | captures/11 |
+| `13` | internal effect parameter | `[effect, param]` | 14-bit LE (`lo` + `hi`·128) | captures/05-09 |
+| `14` | AUX send point | `[ch, aux]` (ch 0-5, aux 0/1) | `00` Pre / `01` Post | captures/10 |
+
+### Effect-parameter map (`31 13 <effect> <param> <lo> <hi>`)
+
+The two selector bytes are the effect index then the parameter index within that effect (0 = first
+knob, 1 = second). The value is always two bytes (14-bit little-endian), even for the 0–100 params:
+
+| effect | param 0 | param 1 | capture |
+|--------|---------|---------|---------|
+| `00` Hall   | Decay (0–100)     | Tone (0–100)     | captures/05-fx-hall.txt |
+| `01` Room   | Decay (0–100)     | Tone (0–100)     | captures/06-fx-room.txt |
+| `02` Spring | Dwell (0–100)     | Tone (0–100)     | captures/07-fx-spring.txt |
+| `03` Delay  | Time (10–2000 ms) | Feedback (0–100) | captures/08-fx-delay.txt |
+| `04` Echo   | Time (10–2000 ms) | Repeat (0–100)   | captures/09-fx-echo.txt |
+
+Example — delay TIME 915 ms: `F0 52 00 00 31 13 03 00 13 07 F7` (`lo` 0x13=19, `hi` 0x07=7 → 19+7·128=915).
+
+The pad-note write `31 0F <pad> <note> <flag>` is modelled as `u14le`: note N encodes to `[N, 0]`,
+and the "Not Mapped" sentinel value 128 encodes to `[0, 1]` — matching the observed bytes exactly.
+
 ## Parameter Registry
 
-Every editable setting on the L6 (MIDI routing, effect parameters, AUX send points, sound pads, device settings) is accessed via the **Get/Set Parameter** protocol (`46 <group> <index>` / `45 <group> <index> <values…>`). The companion app maintains a registry of known parameters in `src/midi/sysex/zoomL6/params.ts`.
+Every editable setting on the L6 (MIDI routing, effect parameters, AUX send points, sound pads, device settings) is accessed via the session-command write path above (`31 <id> <prefix…> <value…>`). The companion app maintains a registry of known parameters in `src/midi/sysex/zoomL6/params.ts`.
 
 ### Registry Entry Structure
 
@@ -115,8 +162,8 @@ Each parameter definition includes:
 - **label**: Human-readable name for the UI
 - **category**: `midi`, `fx`, `aux`, `pads`, `system`, `recorder`, `monitor`, or `info`
 - **address**: How to access it — either:
-  - `{scheme: 'param', group, index}`: read/write via `46/45 <group> <index>`
-  - `{scheme: 'session', id}`: accessed via session command (`31 <id> <value…>`)
+  - `{scheme: 'session', id, prefix?}`: **write** via the session command `31 <id> <prefix…> <value…>` (the path every editable setting uses; write-only for now). `prefix` is the fixed selector run, e.g. `[pad]`, `[ch, aux]`, `[effect, param]`.
+  - `{scheme: 'param', group, index}`: read/write via `46/45 <group> <index>` (used for the placeholder addresses of settings not yet decoded)
   - `{scheme: 'identity'}`: derived from the Identity Reply (firmware version only)
 - **encoding**: Byte representation — `u7`, `u14le`, `u28le`, `bool`, `enum`, or `ascii`
 - **range**: Min, max, optional step and unit
@@ -137,65 +184,70 @@ Other groups are unknown; the SysEx explorer can sweep ranges to discover new on
 
 ### Parameter Registry Table
 
-All entries as of this documentation date. Only `firmwareVersion` is **verified on hardware**; all others are placeholders pending reverse-engineering captures.
+All entries as of this documentation date. The **Address** column shows the session command that
+writes the setting: `31 <id>` optionally followed by a fixed argument prefix `+[…]` (the encoded
+value bytes follow the prefix on the wire). Forty settings are **verified** against the captures in
+`captures/` (write path only — see the write-only note above); `firmwareVersion` is verified via the
+identity reply. Entries marked `placeholder` are still unverified — L6max-only settings with no
+hardware to capture, plus `dateTime`/`sdInfo` whose encodings are undecoded.
 
-| ID | Label | Category | Models | Encoding | Range | Verified |
-|---|---|---|---|---|---|---|
-| `midiOutMode` | MIDI Out Mode | midi | l6, l6max | enum (1B) | 0–1 |  |
-| `mixerControlViaMidi` | Mixer Control via MIDI | midi | l6, l6max | bool (1B) | 0–1 |  |
-| `midiChannel` | MIDI Channel | midi | l6, l6max | u7 (1B) | 1–16 |  |
-| `fx.hall.decay` | Decay | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.hall.tone` | Tone | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.room.decay` | Decay | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.room.tone` | Tone | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.spring.dwell` | Dwell | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.spring.tone` | Tone | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.delay.time` | Time | fx | l6, l6max | u14le (2B) | 0–2000 ms |  |
-| `fx.delay.feedback` | Feedback | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `fx.echo.time` | Time | fx | l6, l6max | u14le (2B) | 0–2000 ms |  |
-| `fx.echo.repeat` | Repeat | fx | l6, l6max | u7 (1B) | 0–100 |  |
-| `batteryType` | Battery Type | system | l6, l6max | enum (1B) | 0–2 |  |
-| `autoPowerOff` | Auto Power Off | system | l6, l6max | enum (1B) | 0–1 |  |
-| `dateTime` | Date & Time | system | l6, l6max | ascii (12B) | N/A |  |
-| `recorderMode` | Recorder Mode | recorder | l6, l6max | enum (1B) | 0–1 |  |
-| `monitorPoint` | Monitor Point | monitor | l6max | enum (1B) | 0–2 |  |
-| `subOutPoint` | Sub-Out Point | monitor | l6max | enum (1B) | 0–2 |  |
-| `usbMixMinus` | USB Mix Minus | monitor | l6max | bool (1B) | 0–1 |  |
-| `usbAudioMode` | USB Audio Mode | monitor | l6max | enum (1B) | 0–1 |  |
-| `sdInfo` | microSD card | info | l6, l6max | ascii (0B) | N/A |  |
-| `firmwareVersion` | Firmware | info | l6, l6max | ascii (4B) | N/A | ✓ |
-| `aux1SendPoint.ch1` | AUX 1 send point (ch 1) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch2` | AUX 1 send point (ch 2) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch3` | AUX 1 send point (ch 3) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch4` | AUX 1 send point (ch 4) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch5` | AUX 1 send point (ch 5) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch6` | AUX 1 send point (ch 6) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch7` | AUX 1 send point (ch 7) | aux | l6max | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch8` | AUX 1 send point (ch 8) | aux | l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch1` | AUX 2 send point (ch 1) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch2` | AUX 2 send point (ch 2) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch3` | AUX 2 send point (ch 3) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch4` | AUX 2 send point (ch 4) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch5` | AUX 2 send point (ch 5) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch6` | AUX 2 send point (ch 6) | aux | l6, l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch7` | AUX 2 send point (ch 7) | aux | l6max | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch8` | AUX 2 send point (ch 8) | aux | l6max | enum (1B) | 0–1 |  |
-| `pad1.mode` | Pad 1 play mode | pads | l6, l6max | enum (1B) | 0–2 |  |
-| `pad1.level` | Pad 1 level | pads | l6, l6max | u7 (1B) | 0–127 dB |  |
-| `pad1.note` | Pad 1 MIDI note | pads | l6, l6max | u7 (1B) | 0–127 |  |
-| `pad1.clockSync` | Pad 1 MIDI clock sync | pads | l6max | bool (1B) | 0–1 |  |
-| `pad2.mode` | Pad 2 play mode | pads | l6, l6max | enum (1B) | 0–2 |  |
-| `pad2.level` | Pad 2 level | pads | l6, l6max | u7 (1B) | 0–127 dB |  |
-| `pad2.note` | Pad 2 MIDI note | pads | l6, l6max | u7 (1B) | 0–127 |  |
-| `pad2.clockSync` | Pad 2 MIDI clock sync | pads | l6max | bool (1B) | 0–1 |  |
-| `pad3.mode` | Pad 3 play mode | pads | l6, l6max | enum (1B) | 0–2 |  |
-| `pad3.level` | Pad 3 level | pads | l6, l6max | u7 (1B) | 0–127 dB |  |
-| `pad3.note` | Pad 3 MIDI note | pads | l6, l6max | u7 (1B) | 0–127 |  |
-| `pad3.clockSync` | Pad 3 MIDI clock sync | pads | l6max | bool (1B) | 0–1 |  |
-| `pad4.mode` | Pad 4 play mode | pads | l6, l6max | enum (1B) | 0–2 |  |
-| `pad4.level` | Pad 4 level | pads | l6, l6max | u7 (1B) | 0–127 dB |  |
-| `pad4.note` | Pad 4 MIDI note | pads | l6, l6max | u7 (1B) | 0–127 |  |
-| `pad4.clockSync` | Pad 4 MIDI clock sync | pads | l6max | bool (1B) | 0–1 |  |
+| ID | Label | Category | Models | Address | Encoding | Range | Verified |
+|---|---|---|---|---|---|---|---|
+| `midiOutMode` | MIDI Out Mode | midi | l6, l6max | `31 0C` | enum (1B) | 0–1 | ✓ |
+| `mixerControlViaMidi` | Mixer Control via MIDI | midi | l6, l6max | `31 03` | bool (1B) | 0–1 | ✓ |
+| `midiChannel` | MIDI Channel | midi | l6, l6max | `31 0D` | u7 (1B) | 1–16 | ✓ |
+| `fx.hall.decay` | Decay | fx | l6, l6max | `31 13 +[0,0]` | u14le (2B) | 0–100 | ✓ |
+| `fx.hall.tone` | Tone | fx | l6, l6max | `31 13 +[0,1]` | u14le (2B) | 0–100 | ✓ |
+| `fx.room.decay` | Decay | fx | l6, l6max | `31 13 +[1,0]` | u14le (2B) | 0–100 | ✓ |
+| `fx.room.tone` | Tone | fx | l6, l6max | `31 13 +[1,1]` | u14le (2B) | 0–100 | ✓ |
+| `fx.spring.dwell` | Dwell | fx | l6, l6max | `31 13 +[2,0]` | u14le (2B) | 0–100 | ✓ |
+| `fx.spring.tone` | Tone | fx | l6, l6max | `31 13 +[2,1]` | u14le (2B) | 0–100 | ✓ |
+| `fx.delay.time` | Time | fx | l6, l6max | `31 13 +[3,0]` | u14le (2B) | 0–2000 ms | ✓ |
+| `fx.delay.feedback` | Feedback | fx | l6, l6max | `31 13 +[3,1]` | u14le (2B) | 0–100 | ✓ |
+| `fx.echo.time` | Time | fx | l6, l6max | `31 13 +[4,0]` | u14le (2B) | 0–2000 ms | ✓ |
+| `fx.echo.repeat` | Repeat | fx | l6, l6max | `31 13 +[4,1]` | u14le (2B) | 0–100 | ✓ |
+| `batteryType` | Battery Type | system | l6, l6max | `31 01` | enum (1B) | 0–2 | ✓ |
+| `autoPowerOff` | Auto Power Off | system | l6, l6max | `31 02` | enum (1B) | 0–1 | ✓ |
+| `dateTime` | Date & Time | system | l6, l6max | `placeholder` | ascii (12B) | N/A |  |
+| `recorderMode` | Recorder Mode | recorder | l6, l6max | `31 04` | enum (1B) | 0–1 | ✓ |
+| `monitorPoint` | Monitor Point | monitor | l6max | `placeholder` | enum (1B) | 0–2 |  |
+| `subOutPoint` | Sub-Out Point | monitor | l6max | `placeholder` | enum (1B) | 0–2 |  |
+| `usbMixMinus` | USB Mix Minus | monitor | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `usbAudioMode` | USB Audio Mode | monitor | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `sdInfo` | microSD card | info | l6, l6max | `placeholder` | ascii (0B) | N/A |  |
+| `firmwareVersion` | Firmware | info | l6, l6max | `identity` | ascii (4B) | N/A | ✓ |
+| `aux1SendPoint.ch1` | AUX 1 send point (ch 1) | aux | l6, l6max | `31 14 +[0,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch2` | AUX 1 send point (ch 2) | aux | l6, l6max | `31 14 +[1,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch3` | AUX 1 send point (ch 3) | aux | l6, l6max | `31 14 +[2,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch4` | AUX 1 send point (ch 4) | aux | l6, l6max | `31 14 +[3,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch5` | AUX 1 send point (ch 5) | aux | l6, l6max | `31 14 +[4,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch6` | AUX 1 send point (ch 6) | aux | l6, l6max | `31 14 +[5,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch7` | AUX 1 send point (ch 7) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `aux1SendPoint.ch8` | AUX 1 send point (ch 8) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `aux2SendPoint.ch1` | AUX 2 send point (ch 1) | aux | l6, l6max | `31 14 +[0,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch2` | AUX 2 send point (ch 2) | aux | l6, l6max | `31 14 +[1,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch3` | AUX 2 send point (ch 3) | aux | l6, l6max | `31 14 +[2,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch4` | AUX 2 send point (ch 4) | aux | l6, l6max | `31 14 +[3,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch5` | AUX 2 send point (ch 5) | aux | l6, l6max | `31 14 +[4,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch6` | AUX 2 send point (ch 6) | aux | l6, l6max | `31 14 +[5,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch7` | AUX 2 send point (ch 7) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `aux2SendPoint.ch8` | AUX 2 send point (ch 8) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `pad1.mode` | Pad 1 play mode | pads | l6, l6max | `31 06 +[0]` | enum (1B) | 0–2 | ✓ |
+| `pad1.level` | Pad 1 level | pads | l6, l6max | `31 07 +[0]` | u7 (1B) | 0–59 dB | ✓ |
+| `pad1.note` | Pad 1 MIDI note | pads | l6, l6max | `31 0F +[0]` | u14le (2B) | 0–127 | ✓ |
+| `pad1.clockSync` | Pad 1 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad2.mode` | Pad 2 play mode | pads | l6, l6max | `31 06 +[1]` | enum (1B) | 0–2 | ✓ |
+| `pad2.level` | Pad 2 level | pads | l6, l6max | `31 07 +[1]` | u7 (1B) | 0–59 dB | ✓ |
+| `pad2.note` | Pad 2 MIDI note | pads | l6, l6max | `31 0F +[1]` | u14le (2B) | 0–127 | ✓ |
+| `pad2.clockSync` | Pad 2 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad3.mode` | Pad 3 play mode | pads | l6, l6max | `31 06 +[2]` | enum (1B) | 0–2 | ✓ |
+| `pad3.level` | Pad 3 level | pads | l6, l6max | `31 07 +[2]` | u7 (1B) | 0–59 dB | ✓ |
+| `pad3.note` | Pad 3 MIDI note | pads | l6, l6max | `31 0F +[2]` | u14le (2B) | 0–127 | ✓ |
+| `pad3.clockSync` | Pad 3 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad4.mode` | Pad 4 play mode | pads | l6, l6max | `31 06 +[3]` | enum (1B) | 0–2 | ✓ |
+| `pad4.level` | Pad 4 level | pads | l6, l6max | `31 07 +[3]` | u7 (1B) | 0–59 dB | ✓ |
+| `pad4.note` | Pad 4 MIDI note | pads | l6, l6max | `31 0F +[3]` | u14le (2B) | 0–127 | ✓ |
+| `pad4.clockSync` | Pad 4 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
 
 ## Value Encoding
 

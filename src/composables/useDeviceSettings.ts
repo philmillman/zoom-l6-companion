@@ -160,6 +160,15 @@ function isWritable(id: ParamId): boolean {
   return isAvailable(id) && link.value === 'open';
 }
 
+/**
+ * Session-command parameters (`31 <id> …`) are write-only: their read encoding is not decoded, so
+ * `getValue` would throw. `refresh`/`refreshAll` skip them and leave their status `idle`.
+ */
+function isReadable(id: ParamId): boolean {
+  const def = entry(id);
+  return def != null && def.address.scheme !== 'session';
+}
+
 // ── session lifecycle ─────────────────────────────────────────────────────────
 function canOpen(): boolean {
   return linkEnabled.value && !suspended.value && sysexReady.value && editorPortsReady.value;
@@ -257,7 +266,7 @@ async function readOne(id: ParamId): Promise<void> {
 }
 
 async function refresh(ids: ParamId[]): Promise<void> {
-  const targets = ids.filter((id) => isAvailable(id));
+  const targets = ids.filter((id) => isAvailable(id) && isReadable(id));
   if (targets.length === 0) return;
   if (!(await ensureOpen())) {
     const message = linkUnavailableMessage();
@@ -275,7 +284,7 @@ async function refresh(ids: ParamId[]): Promise<void> {
 
 function refreshableIds(): ParamId[] {
   return listParams({ model: mixerType.value as ZoomModel })
-    .filter((p) => !p.readOnly && isAvailable(p.id))
+    .filter((p) => !p.readOnly && isAvailable(p.id) && isReadable(p.id))
     .map((p) => p.id);
 }
 
