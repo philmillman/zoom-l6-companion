@@ -1,0 +1,1000 @@
+19:56:34.976	From L6max for L6 Editor Port	SysEx		F0 52 00 00 45 02 03 7F 7F 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 46 02 03 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 00 1A 0A 01 13 38 22 F7
+19:56:34.978	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:34.979	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:35.502	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:35.987	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:36.514	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:37.020	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:37.524	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:38.028	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:38.532	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:39.036	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:39.542	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:40.043	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:40.552	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:41.056	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:41.558	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:42.061	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:42.280	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:42.280	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:42.280	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+19:56:42.286	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:42.294	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:42.302	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:42.310	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 24 00 F7
+19:56:42.316	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:42.328	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+19:56:42.331	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:42.336	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+19:56:42.346	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 20 00 F7
+19:56:42.354	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+19:56:42.381	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1E 00 F7
+19:56:42.382	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1D 00 F7
+19:56:42.382	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1D 00 F7
+19:56:42.384	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1C 00 F7
+19:56:42.395	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1B 00 F7
+19:56:42.399	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1C 00 F7
+19:56:42.407	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+19:56:42.415	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1B 00 F7
+19:56:42.422	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 17 00 F7
+19:56:42.428	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 19 00 F7
+19:56:42.436	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 18 00 F7
+19:56:42.446	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 15 00 F7
+19:56:42.452	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:42.482	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 11 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0B 00 F7
+19:56:42.482	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 10 00 F7
+19:56:42.482	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0A 00 F7
+19:56:42.492	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0B 00 F7
+19:56:42.496	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0E 00 F7
+19:56:42.504	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0C 00 F7
+19:56:42.512	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 06 00 F7
+19:56:42.520	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+19:56:42.527	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.535	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.546	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:42.546	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.547	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.555	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.584	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.584	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.584	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.584	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.596	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.600	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.611	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.614	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.623	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.630	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.638	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.647	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.652	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.662	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.681	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.681	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.683	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.695	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.696	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.704	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.720	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.727	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:42.750	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:43.053	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+19:56:43.247	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 02 00 F7
+19:56:43.254	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 04 00 F7
+19:56:43.278	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 05 00 F7
+19:56:43.278	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 06 00 F7
+19:56:43.278	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0B 00 F7
+19:56:43.283	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0F 00 F7
+19:56:43.291	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 13 00 F7
+19:56:43.299	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 13 00 F7
+19:56:43.306	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 18 00 F7
+19:56:43.314	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1B 00 F7
+19:56:43.322	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1D 00 F7
+19:56:43.328	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:43.336	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:43.344	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:43.351	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:43.382	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+19:56:43.382	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+19:56:43.383	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 28 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+19:56:43.383	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:43.390	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2B 00 F7
+19:56:43.396	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+19:56:43.404	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2B 00 F7
+19:56:43.412	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2B 00 F7
+19:56:43.421	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2F 00 F7
+19:56:43.428	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2C 00 F7
+19:56:43.434	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2D 00 F7
+19:56:43.446	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2E 00 F7
+19:56:43.448	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:43.483	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2F 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 30 00 F7
+19:56:43.484	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+19:56:43.495	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:43.512	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+19:56:43.516	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:43.528	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:43.531	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+19:56:43.539	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:43.547	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:43.555	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:43.555	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+19:56:43.562	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+19:56:43.583	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+19:56:43.852	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:43.869	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:44.006	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:44.030	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:44.035	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+19:56:44.062	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:44.062	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+19:56:44.299	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:44.406	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 30 00 F7
+19:56:44.418	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:44.563	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+19:56:44.889	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:45.068	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+19:56:45.431	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 33 00 F7
+19:56:45.431	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:45.572	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:46.096	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:46.593	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.593	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:46.593	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.593	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:46.593	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+19:56:46.599	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3C 00 F7
+19:56:46.614	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3C 00 F7
+19:56:46.622	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 40 00 F7
+19:56:46.630	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3D 00 F7
+19:56:46.637	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.645	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 42 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3F 00 F7
+19:56:46.651	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 43 00 F7
+19:56:46.662	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 43 00 F7
+19:56:46.666	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.694	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 43 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 45 00 F7
+19:56:46.694	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 46 00 F7
+19:56:46.694	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 47 00 F7
+19:56:46.697	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 47 00 F7
+19:56:46.704	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4B 00 F7
+19:56:46.712	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 48 00 F7
+19:56:46.719	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4A 00 F7
+19:56:46.733	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.735	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4A 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4A 00 F7
+19:56:46.744	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4B 00 F7
+19:56:46.748	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4B 00 F7
+19:56:46.756	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4D 00 F7
+19:56:46.764	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4D 00 F7
+19:56:46.771	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4F 00 F7
+19:56:46.787	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 50 00 F7
+19:56:46.796	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 50 00 F7
+19:56:46.802	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 51 00 F7
+19:56:46.812	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 51 00 F7
+19:56:46.816	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 52 00 F7
+19:56:46.823	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 53 00 F7
+19:56:46.831	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 54 00 F7
+19:56:46.839	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 55 00 F7
+19:56:46.848	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 55 00 F7
+19:56:46.854	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+19:56:46.863	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 56 00 F7
+19:56:46.870	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 58 00 F7
+19:56:46.899	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+19:56:46.899	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.899	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5B 00 F7
+19:56:46.900	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:46.914	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5C 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5F 00 F7
+19:56:46.920	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+19:56:46.931	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 60 00 F7
+19:56:46.936	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:46.947	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+19:56:46.950	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 63 00 F7
+19:56:46.963	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 62 00 F7
+19:56:46.967	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 63 00 F7
+19:56:47.003	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:47.003	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.003	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.004	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.016	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.018	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.034	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.046	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.056	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.064	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.072	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:47.106	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:47.106	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.106	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.107	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.112	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.116	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.124	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.131	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.152	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.163	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.204	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 64 00 F7
+19:56:47.204	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:47.611	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 63 00 F7
+19:56:47.818	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 62 00 F7
+19:56:47.818	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 61 00 F7
+19:56:47.835	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:47.918	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 60 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5F 00 F7
+19:56:47.963	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5E 00 F7
+19:56:48.076	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5E 00 F7
+19:56:48.084	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:48.092	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5D 00 F7
+19:56:48.099	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5C 00 F7
+19:56:48.124	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5C 00 F7
+19:56:48.124	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5B 00 F7
+19:56:48.147	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5B 00 F7
+19:56:48.151	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 5A 00 F7
+19:56:48.163	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 59 00 F7
+19:56:48.167	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 59 00 F7
+19:56:48.174	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+19:56:48.182	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 57 00 F7
+19:56:48.188	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4D 00 F7
+19:56:48.198	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 55 00 F7
+19:56:48.221	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 52 00 F7
+19:56:48.221	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 52 00 F7
+19:56:48.221	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4F 00 F7
+19:56:48.235	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 51 00 F7
+19:56:48.242	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4F 00 F7
+19:56:48.248	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 50 00 F7
+19:56:48.256	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4E 00 F7
+19:56:48.264	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4C 00 F7
+19:56:48.280	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4C 00 F7
+19:56:48.286	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 48 00 F7
+19:56:48.299	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4A 00 F7
+19:56:48.301	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.328	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.328	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 4A 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 46 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 48 00 F7
+19:56:48.329	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 47 00 F7
+19:56:48.340	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 46 00 F7
+19:56:48.346	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 46 00 F7
+19:56:48.353	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 45 00 F7
+19:56:48.370	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 44 00 F7
+19:56:48.382	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 44 00 F7
+19:56:48.391	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 43 00 F7
+19:56:48.399	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 41 00 F7
+19:56:48.406	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.433	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 40 00 F7
+19:56:48.433	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 40 00 F7
+19:56:48.433	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3F 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3F 00 F7
+19:56:48.436	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3E 00 F7
+19:56:48.447	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3E 00 F7
+19:56:48.451	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3D 00 F7
+19:56:48.475	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 3C 00 F7
+19:56:48.499	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 39 00 F7
+19:56:48.504	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+19:56:48.534	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.534	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 38 00 F7
+19:56:48.534	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:48.534	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 37 00 F7
+19:56:48.541	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:48.548	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 36 00 F7
+19:56:48.556	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 35 00 F7
+19:56:48.563	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:48.599	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:48.610	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 34 00 F7
+19:56:48.634	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.634	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 32 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 31 00 F7
+19:56:48.648	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2E 00 F7
+19:56:48.654	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2D 00 F7
+19:56:48.668	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2C 00 F7
+19:56:48.680	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2B 00 F7
+19:56:48.744	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2B 00 F7
+19:56:48.759	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2A 00 F7
+19:56:48.782	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.839	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:48.842	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:48.851	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+19:56:48.856	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:48.863	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 22 00 F7
+19:56:48.872	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:48.880	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+19:56:48.887	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:48.896	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 21 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:49.129	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 23 00 F7
+19:56:49.285	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 24 00 F7
+19:56:49.299	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:49.319	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+19:56:49.334	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:49.631	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:49.732	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 28 00 F7
+19:56:49.749	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+19:56:49.771	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:49.836	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 2A 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:50.135	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 29 00 F7
+19:56:50.252	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:50.267	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 28 00 F7
+19:56:50.275	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:50.283	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 27 00 F7
+19:56:50.290	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 24 00 F7
+19:56:50.299	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 26 00 F7
+19:56:50.304	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 20 00 F7
+19:56:50.315	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 22 00 F7
+19:56:50.335	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 25 00 F7
+19:56:50.335	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1F 00 F7
+19:56:50.335	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1E 00 F7
+19:56:50.342	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 18 00 F7
+19:56:50.351	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 1A 00 F7
+19:56:50.356	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 12 00 F7
+19:56:50.371	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0E 00 F7
+19:56:50.380	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 0A 00 F7
+19:56:50.386	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 08 00 F7
+19:56:50.398	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 06 00 F7
+19:56:50.402	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.408	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.440	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.440	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.440	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:50.440	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.454	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.467	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.468	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.476	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.484	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.491	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.499	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.507	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:50.543	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.544	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.554	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 00 00 00 F7
+19:56:50.566	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:50.616	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:51.146	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:51.648	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:52.150	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:52.654	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:53.156	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:53.660	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:54.167	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:54.673	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:55.064	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 31 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 31 00 F7
+19:56:55.084	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+19:56:55.084	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 30 00 F7
+19:56:55.090	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2F 00 F7
+19:56:55.099	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2E 00 F7
+19:56:55.119	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:55.155	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:55.189	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+19:56:55.194	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2C 00 F7
+19:56:55.202	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 29 00 F7
+19:56:55.210	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 28 00 F7
+19:56:55.224	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 27 00 F7
+19:56:55.238	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 26 00 F7
+19:56:55.289	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 26 00 F7
+19:56:55.292	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 24 00 F7
+19:56:55.307	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 22 00 F7
+19:56:55.318	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1E 00 F7
+19:56:55.332	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1A 00 F7
+19:56:55.336	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1C 00 F7
+19:56:55.342	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 16 00 F7
+19:56:55.351	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1B 00 F7
+19:56:55.359	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 19 00 F7
+19:56:55.368	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:55.392	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1A 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 16 00 F7
+19:56:55.392	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 14 00 F7
+19:56:55.392	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0C 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0B 00 F7
+19:56:55.404	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:55.404	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 06 00 F7
+19:56:55.412	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.419	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 02 00 F7
+19:56:55.427	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.434	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.442	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.451	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.456	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.467	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.471	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:55.494	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:55.494	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.495	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.501	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.517	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.523	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.539	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.550	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.552	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.562	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.568	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.592	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 00 00 F7
+19:56:55.592	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:55.659	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 01 00 F7
+19:56:55.906	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 02 00 F7
+19:56:55.906	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 03 00 F7
+19:56:55.925	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 04 00 F7
+19:56:55.928	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 06 00 F7
+19:56:55.936	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 08 00 F7
+19:56:55.944	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0A 00 F7
+19:56:55.951	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0C 00 F7
+19:56:55.956	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:55.967	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 0E 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 10 00 F7
+19:56:55.972	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 14 00 F7
+19:56:55.983	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:56.007	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 13 00 F7
+19:56:56.008	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:56.008	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 17 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 19 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 17 00 F7
+19:56:56.011	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1B 00 F7
+19:56:56.026	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1F 00 F7
+19:56:56.033	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 1F 00 F7
+19:56:56.040	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 21 00 F7
+19:56:56.050	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 21 00 F7
+19:56:56.055	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 20 00 F7
+19:56:56.062	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:56.079	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 21 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 22 00 F7
+19:56:56.086	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 23 00 F7
+19:56:56.103	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 24 00 F7
+19:56:56.116	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 24 00 F7
+19:56:56.123	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 25 00 F7
+19:56:56.140	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 27 00 F7
+19:56:56.155	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:56.161	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 26 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:56.166	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2C 00 F7
+19:56:56.178	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2D 00 F7
+19:56:56.184	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2E 00 F7
+19:56:56.205	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2F 00 F7
+19:56:56.220	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 2F 00 F7
+19:56:56.228	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 30 00 F7
+19:56:56.245	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 31 00 F7
+19:56:56.251	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 32 00 F7
+19:56:56.268	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 33 00 F7
+19:56:56.284	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:56.693	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:57.200	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:57.698	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 34 00 F7
+19:56:57.722	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 35 00 F7
+19:56:57.735	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 35 00 F7
+19:56:57.743	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 37 00 F7
+19:56:57.752	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 37 00 F7
+19:56:57.759	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:57.774	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 39 00 F7
+19:56:57.803	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 3B 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 40 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 3F 00 F7
+19:56:57.807	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:57.807	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 3F 00 F7
+19:56:57.811	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 41 00 F7
+19:56:57.819	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 45 00 F7
+19:56:57.826	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 4B 00 F7
+19:56:57.834	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 4B 00 F7
+19:56:57.842	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:57.851	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 55 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 4F 00 F7
+19:56:57.855	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:57.867	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 59 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 53 00 F7
+19:56:57.878	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5E 00 F7
+19:56:57.907	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 60 00 F7
+19:56:57.916	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 5F 00 F7
+19:56:57.923	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 61 00 F7
+19:56:57.935	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 60 00 F7
+19:56:57.937	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 61 00 F7
+19:56:57.946	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:57.954	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 62 00 F7
+19:56:57.961	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:57.968	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 63 00 F7
+19:56:57.975	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:57.983	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:57.999	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.003	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.004	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.018	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.030	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.036	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.043	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.051	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.059	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.067	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.074	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+19:56:58.103	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.103	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 13 00 01 64 00 F7
+19:56:58.104	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 00 F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:58.185	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:58.709	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:56:59.213	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:56:59.699	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:00.222	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:00.728	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:01.232	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:01.738	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:02.242	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:02.749	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:03.250	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:03.753	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+19:57:04.245	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+0	To L6max for L6 Editor Port	SysEx		F0 52 00 00 31 0B F7
+19:57:04.769	From L6max for L6 Editor Port	SysEx		F0 52 00 00 00 0B F7

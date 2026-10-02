@@ -96,6 +96,11 @@ describe('verified session-command entries', () => {
     0x0f: 1, // pad note      → [pad]
     0x13: 2, // effect param  → [effect, param]
     0x14: 2, // AUX send point → [ch, aux]
+    0x15: 0, // USB mix minus (L6max)
+    0x17: 1, // pad clock sync (L6max) → [pad]
+    0x18: 0, // USB audio mode (L6max)
+    0x19: 0, // monitor point (L6max)
+    0x1a: 0, // sub-out point (L6max)
   };
 
   const verifiedSession = zoomL6ParamList.filter(
@@ -103,8 +108,10 @@ describe('verified session-command entries', () => {
   );
 
   it('covers every documented setting', () => {
-    // 3 MIDI + 3 system/recorder + 10 fx + 12 aux (ch1-6 × 2) + 12 pads (mode/level/note × 4) = 40.
-    expect(verifiedSession).toHaveLength(40);
+    // L6 (captures 02-14): 3 MIDI + 3 system/recorder + 10 fx + 12 aux (ch1-6 × 2)
+    //   + 12 pads (mode/level/note × 4) = 40.
+    // L6max (captures maxB-maxG): 4 monitor/USB + 4 aux (ch7-8 × 2) + 4 pad clock sync = 12.
+    expect(verifiedSession).toHaveLength(52);
   });
 
   it('each has a prefix length consistent with its command id and an evidence string', () => {

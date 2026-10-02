@@ -324,24 +324,19 @@ describe('ZoomL6EditorSession', () => {
       await openSession(transport, session);
       transport.sent.length = 0;
 
-      // `usbMixMinus` is still a placeholder (L6max-only, no capture).
-      await expect(session.setValue('usbMixMinus', 1)).rejects.toBeInstanceOf(UnverifiedParamError);
+      // `dateTime` is the remaining unverified placeholder (its read/write encoding isn't decoded).
+      await expect(session.setValue('dateTime', 0)).rejects.toBeInstanceOf(UnverifiedParamError);
       expect(transport.commands).toHaveLength(0);
     });
 
-    it('writes an unverified parameter when forced', async () => {
+    it('force bypasses the unverified gate', async () => {
       const { transport, session } = makeSession();
       await openSession(transport, session);
-      transport.sent.length = 0;
-
-      const pending = session.setValue('usbMixMinus', 1, { force: true });
-      await vi.advanceTimersByTimeAsync(0);
-      const sent = transport.commands.at(-1)!;
-      expect(sent[4]).toBe(0x45); // SetParam (still a placeholder param address)
-      expect(sent.at(-2)).toBe(1); // encoded bool value
-
-      transport.receive(ack(0x45));
-      await expect(pending).resolves.toBeUndefined();
+      // No unverified *numeric* param remains (all captured settings are now verified), so prove the
+      // gate itself: forcing an unverified param gets past the verified check — any rejection that
+      // follows comes from a later stage (its placeholder encoding), never UnverifiedParamError.
+      const err = await session.setValue('dateTime', 0, { force: true }).catch((e) => e);
+      expect(err).not.toBeInstanceOf(UnverifiedParamError);
     });
 
     it('reads firmware through the identity address scheme', async () => {
@@ -420,6 +415,31 @@ describe('ZoomL6EditorSession', () => {
 
     it('fx.hall.decay 100 → 31 13 00 00 64 00 (0-100 still sent as 2 bytes)', async () => {
       expect(await writeAndCapture('fx.hall.decay', 100)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x13, 0x00, 0x00, 0x64, 0x00, 0xf7]);
+    });
+
+    // L6max-only settings (captures/maxB-maxG)
+    it('monitorPoint Post → 31 19 02', async () => {
+      expect(await writeAndCapture('monitorPoint', 2)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x19, 0x02, 0xf7]);
+    });
+
+    it('subOutPoint Pre+Comp → 31 1A 01', async () => {
+      expect(await writeAndCapture('subOutPoint', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x1a, 0x01, 0xf7]);
+    });
+
+    it('usbMixMinus on → 31 15 01', async () => {
+      expect(await writeAndCapture('usbMixMinus', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x15, 0x01, 0xf7]);
+    });
+
+    it('usbAudioMode Multi Track → 31 18 01', async () => {
+      expect(await writeAndCapture('usbAudioMode', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x18, 0x01, 0xf7]);
+    });
+
+    it('aux1SendPoint.ch7 Post → 31 14 06 00 01', async () => {
+      expect(await writeAndCapture('aux1SendPoint.ch7', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x14, 0x06, 0x00, 0x01, 0xf7]);
+    });
+
+    it('pad1.clockSync on → 31 17 00 01', async () => {
+      expect(await writeAndCapture('pad1.clockSync', 1)).toEqual([0xf0, 0x52, 0x00, 0x00, 0x31, 0x17, 0x00, 0x01, 0xf7]);
     });
 
     it('only accepts the ack whose code echoes the command id', async () => {

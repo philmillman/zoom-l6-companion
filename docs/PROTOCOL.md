@@ -130,7 +130,12 @@ read encoding is not yet decoded, so these session settings are treated as **wri
 | `0D` | MIDI channel | — | channel − 1 (`00`=CH1 … `0F`=CH16) | captures/04 |
 | `0F` | sound pad MIDI note | `[pad]` (0-3) | `<note>` then `<mapped-flag>` (0 mapped / 1 Not Mapped) | captures/11 |
 | `13` | internal effect parameter | `[effect, param]` | 14-bit LE (`lo` + `hi`·128) | captures/05-09 |
-| `14` | AUX send point | `[ch, aux]` (ch 0-5, aux 0/1) | `00` Pre / `01` Post | captures/10 |
+| `14` | AUX send point | `[ch, aux]` (ch 0-7, aux 0/1) | `00` Pre / `01` Post | captures/10 (ch1-6); captures/maxF (ch7-8, L6max) |
+| `15` | USB mix minus (L6max) | — | `00` Off / `01` On | captures/maxD |
+| `17` | sound pad MIDI clock sync (L6max) | `[pad]` (0-3) | `00` Off / `01` On | captures/maxG |
+| `18` | USB audio mode (L6max) | — | `00` Stereo mix / `01` Multi Track | captures/maxE |
+| `19` | monitor point (L6max) | — | `00` Pre / `01` Pre+Comp / `02` Post | captures/maxB |
+| `1A` | sub-out point (L6max) | — | `00` Pre / `01` Pre+Comp / `02` Post | captures/maxC |
 
 ### Effect-parameter map (`31 13 <effect> <param> <lo> <hi>`)
 
@@ -186,10 +191,10 @@ Other groups are unknown; the SysEx explorer can sweep ranges to discover new on
 
 All entries as of this documentation date. The **Address** column shows the session command that
 writes the setting: `31 <id>` optionally followed by a fixed argument prefix `+[…]` (the encoded
-value bytes follow the prefix on the wire). Forty settings are **verified** against the captures in
+value bytes follow the prefix on the wire). Fifty-two settings are **verified** against the captures in
 `captures/` (write path only — see the write-only note above); `firmwareVersion` is verified via the
-identity reply. Entries marked `placeholder` are still unverified — L6max-only settings with no
-hardware to capture, plus `dateTime`/`sdInfo` whose encodings are undecoded.
+identity reply. Entries marked `placeholder` are still unverified — L6max-only settings now captured on real L6max hardware are verified too; the remaining placeholders are
+`dateTime`/`sdInfo`, whose encodings are undecoded.
 
 | ID | Label | Category | Models | Address | Encoding | Range | Verified |
 |---|---|---|---|---|---|---|---|
@@ -208,46 +213,46 @@ hardware to capture, plus `dateTime`/`sdInfo` whose encodings are undecoded.
 | `fx.echo.repeat` | Repeat | fx | l6, l6max | `31 13 +[4,1]` | u14le (2B) | 0–100 | ✓ |
 | `batteryType` | Battery Type | system | l6, l6max | `31 01` | enum (1B) | 0–2 | ✓ |
 | `autoPowerOff` | Auto Power Off | system | l6, l6max | `31 02` | enum (1B) | 0–1 | ✓ |
-| `dateTime` | Date & Time | system | l6, l6max | `placeholder` | ascii (12B) | N/A |  |
+| `dateTime` | Date & Time | system | l6, l6max | `placeholder` | ascii (12B) | — | placeholder |
 | `recorderMode` | Recorder Mode | recorder | l6, l6max | `31 04` | enum (1B) | 0–1 | ✓ |
-| `monitorPoint` | Monitor Point | monitor | l6max | `placeholder` | enum (1B) | 0–2 |  |
-| `subOutPoint` | Sub-Out Point | monitor | l6max | `placeholder` | enum (1B) | 0–2 |  |
-| `usbMixMinus` | USB Mix Minus | monitor | l6max | `placeholder` | bool (1B) | 0–1 |  |
-| `usbAudioMode` | USB Audio Mode | monitor | l6max | `placeholder` | enum (1B) | 0–1 |  |
-| `sdInfo` | microSD card | info | l6, l6max | `placeholder` | ascii (0B) | N/A |  |
-| `firmwareVersion` | Firmware | info | l6, l6max | `identity` | ascii (4B) | N/A | ✓ |
+| `monitorPoint` | Monitor Point | monitor | l6max | `31 19` | enum (1B) | 0–2 | ✓ |
+| `subOutPoint` | Sub-Out Point | monitor | l6max | `31 1A` | enum (1B) | 0–2 | ✓ |
+| `usbMixMinus` | USB Mix Minus | monitor | l6max | `31 15` | bool (1B) | 0–1 | ✓ |
+| `usbAudioMode` | USB Audio Mode | monitor | l6max | `31 18` | enum (1B) | 0–1 | ✓ |
+| `sdInfo` | microSD card | info | l6, l6max | `placeholder` | ascii (0B) | — | placeholder |
+| `firmwareVersion` | Firmware | info | l6, l6max | `identity` | ascii (4B) | — | ✓ |
 | `aux1SendPoint.ch1` | AUX 1 send point (ch 1) | aux | l6, l6max | `31 14 +[0,0]` | enum (1B) | 0–1 | ✓ |
 | `aux1SendPoint.ch2` | AUX 1 send point (ch 2) | aux | l6, l6max | `31 14 +[1,0]` | enum (1B) | 0–1 | ✓ |
 | `aux1SendPoint.ch3` | AUX 1 send point (ch 3) | aux | l6, l6max | `31 14 +[2,0]` | enum (1B) | 0–1 | ✓ |
 | `aux1SendPoint.ch4` | AUX 1 send point (ch 4) | aux | l6, l6max | `31 14 +[3,0]` | enum (1B) | 0–1 | ✓ |
 | `aux1SendPoint.ch5` | AUX 1 send point (ch 5) | aux | l6, l6max | `31 14 +[4,0]` | enum (1B) | 0–1 | ✓ |
 | `aux1SendPoint.ch6` | AUX 1 send point (ch 6) | aux | l6, l6max | `31 14 +[5,0]` | enum (1B) | 0–1 | ✓ |
-| `aux1SendPoint.ch7` | AUX 1 send point (ch 7) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
-| `aux1SendPoint.ch8` | AUX 1 send point (ch 8) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `aux1SendPoint.ch7` | AUX 1 send point (ch 7) | aux | l6max | `31 14 +[6,0]` | enum (1B) | 0–1 | ✓ |
+| `aux1SendPoint.ch8` | AUX 1 send point (ch 8) | aux | l6max | `31 14 +[7,0]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch1` | AUX 2 send point (ch 1) | aux | l6, l6max | `31 14 +[0,1]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch2` | AUX 2 send point (ch 2) | aux | l6, l6max | `31 14 +[1,1]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch3` | AUX 2 send point (ch 3) | aux | l6, l6max | `31 14 +[2,1]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch4` | AUX 2 send point (ch 4) | aux | l6, l6max | `31 14 +[3,1]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch5` | AUX 2 send point (ch 5) | aux | l6, l6max | `31 14 +[4,1]` | enum (1B) | 0–1 | ✓ |
 | `aux2SendPoint.ch6` | AUX 2 send point (ch 6) | aux | l6, l6max | `31 14 +[5,1]` | enum (1B) | 0–1 | ✓ |
-| `aux2SendPoint.ch7` | AUX 2 send point (ch 7) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
-| `aux2SendPoint.ch8` | AUX 2 send point (ch 8) | aux | l6max | `placeholder` | enum (1B) | 0–1 |  |
+| `aux2SendPoint.ch7` | AUX 2 send point (ch 7) | aux | l6max | `31 14 +[6,1]` | enum (1B) | 0–1 | ✓ |
+| `aux2SendPoint.ch8` | AUX 2 send point (ch 8) | aux | l6max | `31 14 +[7,1]` | enum (1B) | 0–1 | ✓ |
 | `pad1.mode` | Pad 1 play mode | pads | l6, l6max | `31 06 +[0]` | enum (1B) | 0–2 | ✓ |
 | `pad1.level` | Pad 1 level | pads | l6, l6max | `31 07 +[0]` | u7 (1B) | 0–59 dB | ✓ |
 | `pad1.note` | Pad 1 MIDI note | pads | l6, l6max | `31 0F +[0]` | u14le (2B) | 0–127 | ✓ |
-| `pad1.clockSync` | Pad 1 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad1.clockSync` | Pad 1 MIDI clock sync | pads | l6max | `31 17 +[0]` | bool (1B) | 0–1 | ✓ |
 | `pad2.mode` | Pad 2 play mode | pads | l6, l6max | `31 06 +[1]` | enum (1B) | 0–2 | ✓ |
 | `pad2.level` | Pad 2 level | pads | l6, l6max | `31 07 +[1]` | u7 (1B) | 0–59 dB | ✓ |
 | `pad2.note` | Pad 2 MIDI note | pads | l6, l6max | `31 0F +[1]` | u14le (2B) | 0–127 | ✓ |
-| `pad2.clockSync` | Pad 2 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad2.clockSync` | Pad 2 MIDI clock sync | pads | l6max | `31 17 +[1]` | bool (1B) | 0–1 | ✓ |
 | `pad3.mode` | Pad 3 play mode | pads | l6, l6max | `31 06 +[2]` | enum (1B) | 0–2 | ✓ |
 | `pad3.level` | Pad 3 level | pads | l6, l6max | `31 07 +[2]` | u7 (1B) | 0–59 dB | ✓ |
 | `pad3.note` | Pad 3 MIDI note | pads | l6, l6max | `31 0F +[2]` | u14le (2B) | 0–127 | ✓ |
-| `pad3.clockSync` | Pad 3 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad3.clockSync` | Pad 3 MIDI clock sync | pads | l6max | `31 17 +[2]` | bool (1B) | 0–1 | ✓ |
 | `pad4.mode` | Pad 4 play mode | pads | l6, l6max | `31 06 +[3]` | enum (1B) | 0–2 | ✓ |
 | `pad4.level` | Pad 4 level | pads | l6, l6max | `31 07 +[3]` | u7 (1B) | 0–59 dB | ✓ |
 | `pad4.note` | Pad 4 MIDI note | pads | l6, l6max | `31 0F +[3]` | u14le (2B) | 0–127 | ✓ |
-| `pad4.clockSync` | Pad 4 MIDI clock sync | pads | l6max | `placeholder` | bool (1B) | 0–1 |  |
+| `pad4.clockSync` | Pad 4 MIDI clock sync | pads | l6max | `31 17 +[3]` | bool (1B) | 0–1 | ✓ |
 
 ## Value Encoding
 

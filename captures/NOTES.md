@@ -52,3 +52,24 @@ All ids in the table above are decoded and promoted to `verified: true` in
 push-only) which is left as-is. Reads (`46 …`) are still not decoded, so these are **write-only**.
 L6max-only settings (monitor/sub-out point, USB mix-minus/audio mode, pad clock-sync, AUX ch7/8)
 stay unverified — no hardware to capture them.
+
+## L6max-only additions (captures max*.txt, firmware/editor 2.0.0, 2026-10-01)
+
+Confirmed on real L6max hardware. Shared commands (0C out mode, 0D midi channel, 13 effect params)
+are byte-identical to the L6, so the L6max reuses the base command set and adds:
+
+| id | setting | arg layout | values | capture |
+|----|---------|------------|--------|---------|
+| 15 | USB Mix Minus | `<v>` | 00 Off, 01 On | maxD |
+| 17 | sound pad MIDI clock sync | `<pad> <v>` | 00 Off, 01 On (pad 1 captured; 2-4 follow the pad-index pattern) | maxG |
+| 18 | USB audio mode | `<v>` | 00 Stereo mix, 01 Multi Track | maxE |
+| 19 | Monitor Point | `<v>` | 00 Pre / 01 Pre+Comp / 02 Post | maxB |
+| 1A | Sub-Out Point | `<v>` | 00 Pre / 01 Pre+Comp / 02 Post | maxC |
+| 14 | AUX send point ch7/8 | `<ch> <aux> <v>` | ch 06=ch7, 07=ch8 (AUX1 captured; AUX2 index per L6 pattern) | maxF |
+
+The L6max editor-open (`2A`) capability list is longer than the L6's and advertises 15/17/18/19/1A.
+
+Not captured / not a write command:
+- **SUB-MIX** (maxH empty): not exposed by the editor as a SysEx setting — device-menu only.
+- **AI Noise Reduction**: a hardware "learn" function, not an editor parameter (no registry entry).
+- **Date/time** (id 00) remains a push-only clock message; **reads** (46/45) still undecoded.

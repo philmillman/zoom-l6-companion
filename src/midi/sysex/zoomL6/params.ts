@@ -211,10 +211,10 @@ const entries: ParamDef[] = [
   def({ id: 'recorderMode', label: 'Recorder Mode', category: 'recorder', address: session(0x04), encoding: enumEnc(RECORDER_MODES), range: enumRange(RECORDER_MODES), models: BOTH, verified: true, evidence: 'captures/13-recorder-mode.txt: 31 04 00 (Multi Track) / 31 04 01 (Master Only), ack 00 04' }),
 
   // ── L6max-only routing / USB ────────────────────────────────────────────
-  def({ id: 'monitorPoint', label: 'Monitor Point', category: 'monitor', encoding: enumEnc(OUTPUT_POINTS), range: enumRange(OUTPUT_POINTS), models: L6MAX }),
-  def({ id: 'subOutPoint', label: 'Sub-Out Point', category: 'monitor', encoding: enumEnc(OUTPUT_POINTS), range: enumRange(OUTPUT_POINTS), models: L6MAX }),
-  def({ id: 'usbMixMinus', label: 'USB Mix Minus', category: 'monitor', encoding: { kind: 'bool' }, range: { min: 0, max: 1, step: 1 }, models: L6MAX }),
-  def({ id: 'usbAudioMode', label: 'USB Audio Mode', category: 'monitor', encoding: enumEnc(USB_AUDIO_MODES), range: enumRange(USB_AUDIO_MODES), models: L6MAX }),
+  def({ id: 'monitorPoint', label: 'Monitor Point', category: 'monitor', address: session(0x19), encoding: enumEnc(OUTPUT_POINTS), range: enumRange(OUTPUT_POINTS), models: L6MAX, verified: true, evidence: 'captures/maxB-monitor-point.txt: 31 19 00/01/02 (Pre/Pre+Comp/Post), ack 00 19' }),
+  def({ id: 'subOutPoint', label: 'Sub-Out Point', category: 'monitor', address: session(0x1a), encoding: enumEnc(OUTPUT_POINTS), range: enumRange(OUTPUT_POINTS), models: L6MAX, verified: true, evidence: 'captures/maxC-subout-point.txt: 31 1A 00/01/02 (Pre/Pre+Comp/Post), ack 00 1A' }),
+  def({ id: 'usbMixMinus', label: 'USB Mix Minus', category: 'monitor', address: session(0x15), encoding: { kind: 'bool' }, range: { min: 0, max: 1, step: 1 }, models: L6MAX, verified: true, evidence: 'captures/maxD-usb-mix-minus.txt: 31 15 00 (Off) / 31 15 01 (On), ack 00 15' }),
+  def({ id: 'usbAudioMode', label: 'USB Audio Mode', category: 'monitor', address: session(0x18), encoding: enumEnc(USB_AUDIO_MODES), range: enumRange(USB_AUDIO_MODES), models: L6MAX, verified: true, evidence: 'captures/maxE-usb-audio-mode.txt: 31 18 00 (Stereo mix) / 31 18 01 (Multi Track), ack 00 18' }),
 
   // ── Read-only info ──────────────────────────────────────────────────────
   def({
@@ -241,26 +241,29 @@ const entries: ParamDef[] = [
   }),
 ];
 
-// AUX send points: per channel × AUX 1/2 (31 14 <ch> <aux> <v>). Channels 1–6 are captured on the
-// L6; channels 7–8 exist only on the L6max and stay unverified (no hardware to confirm the address).
+// AUX send points: per channel × AUX 1/2 (31 14 <ch> <aux> <v>). Channels 1–6 captured on the L6
+// (captures/10); channels 7–8 exist only on the L6max and were captured there (captures/maxF, AUX1).
+// The AUX2 index for ch7/8 isn't in its own capture, but the AUX index semantics are proven on the
+// L6 for ch1–6 and the ch7/8 channel index is proven in maxF, so the combination is sound.
 for (const aux of [1, 2] as const) {
   for (let ch = 1; ch <= 8; ch++) {
-    const captured = ch <= 6;
+    const hi = (n: number) => n.toString(16).padStart(2, '0');
+    const evidence =
+      ch <= 6
+        ? `captures/10-aux-send-point.txt: 31 14 ${hi(ch - 1)} ${hi(aux - 1)} 00/01 (Pre/Post), ack 00 14`
+        : `captures/maxF-aux78.txt: 31 14 ${hi(ch - 1)} 00 00/01 (ch${ch} AUX1 Pre/Post), ack 00 14` +
+          (aux === 2 ? '; AUX2 (aux index 1) per the proven L6 pattern in captures/10' : '');
     entries.push(
       def({
         id: `aux${aux}SendPoint.ch${ch as Ch}`,
         label: `AUX ${aux} send point (ch ${ch})`,
         category: 'aux',
-        ...(captured
-          ? {
-              address: session(0x14, ch - 1, aux - 1),
-              verified: true,
-              evidence: `captures/10-aux-send-point.txt: 31 14 ${(ch - 1).toString(16).padStart(2, '0')} ${(aux - 1).toString(16).padStart(2, '0')} 00/01 (Pre/Post), ack 00 14`,
-            }
-          : {}),
+        address: session(0x14, ch - 1, aux - 1),
         encoding: enumEnc(SEND_POINTS),
         range: enumRange(SEND_POINTS),
-        models: captured ? BOTH : L6MAX,
+        models: ch <= 6 ? BOTH : L6MAX,
+        verified: true,
+        evidence,
       }),
     );
   }
@@ -307,7 +310,17 @@ for (let pad = 1; pad <= 4; pad++) {
       verified: true,
       evidence: `captures/11-sound-pad.txt: 31 0F ${padIx.toString(16).padStart(2, '0')} <note> 00 (mapped) / 31 0F ${padIx.toString(16).padStart(2, '0')} 00 01 (Not Mapped → value 128), ack 00 0F`,
     }),
-    def({ id: `pad${p}.clockSync`, label: `Pad ${p} MIDI clock sync`, category: 'pads', encoding: { kind: 'bool' }, range: { min: 0, max: 1, step: 1 }, models: L6MAX }),
+    def({
+      id: `pad${p}.clockSync`,
+      label: `Pad ${p} MIDI clock sync`,
+      category: 'pads',
+      address: session(0x17, padIx),
+      encoding: { kind: 'bool' },
+      range: { min: 0, max: 1, step: 1 },
+      models: L6MAX,
+      verified: true,
+      evidence: `captures/maxG-pad-clock-sync.txt: 31 17 00 00/01 (pad 1 Off/On), ack 00 17; pads 2-4 use the same <pad> index as 0x06/07/0F`,
+    }),
   );
 }
 
