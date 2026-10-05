@@ -8,6 +8,7 @@ import DeviceSettingsPanel from './DeviceSettingsPanel.vue';
 import DeviceNotice from './DeviceNotice.vue';
 import { useDeviceSettings } from '../composables/useDeviceSettings';
 import { getParam, type ParamId } from '../midi/sysex/zoomL6/params';
+import type { PadFileInfo } from '../midi/sysex/zoomL6/stateSnapshot';
 
 interface Props {
   isVisible: boolean;
@@ -216,6 +217,20 @@ async function syncMixer(target: { padNotes: number[]; midiChannel: number }): P
 
 const padLinkWritable = computed(() => deviceSettings.isWritable('pad1.mode'));
 
+/** The pad's assigned file as last read from the mixer; undefined until read. */
+function padFile(padIndex: number): PadFileInfo | undefined {
+  // `null` (that pad's read failed) is shown the same as not read yet.
+  return deviceSettings.mixerState.padFiles[padIndex] ?? undefined;
+}
+
+/** File name, "No file" when unassigned, "—" when not read yet. */
+function padFileLabel(padIndex: number): string {
+  const file = padFile(padIndex);
+  if (!file) return '—';
+  if (!file.assigned) return 'No file';
+  return file.fileName ?? 'Assigned';
+}
+
 const padDeviceError = computed<string | null>(() => {
   const fields: PadField[] = ['mode', 'level', 'note', 'clockSync'];
   for (let padIndex = 0; padIndex < editableSoundPads.length; padIndex++) {
@@ -332,6 +347,7 @@ async function saveChanges() {
     padNotes: editableSoundPads.map((pad) => pad.note),
     midiChannel: globalMidiChannel.value,
   });
+  // App adopts the mixer's state only after this closes (it defers while the dialog is open).
   emit('close');
 }
 
@@ -677,7 +693,20 @@ watch(() => props.isVisible, (visible) => {
               />
               <div class="pad-settings" :class="{ 'pad-settings--clock': showPadClockSync }">
                 <div v-for="(pad, padIndex) in editableSoundPads" :key="pad.id" class="pad-settings-row">
-                  <div class="pad-settings-badge" :title="pad.name">{{ pad.id }}</div>
+                  <div
+                    class="pad-settings-badge"
+                    :class="{ 'pad-settings-badge--assigned': padFile(padIndex)?.assigned }"
+                    :title="padFile(padIndex)?.assigned ? `${pad.name}: ${padFileLabel(padIndex)}` : pad.name"
+                  >{{ pad.id }}</div>
+
+                  <div class="control-row">
+                    <label>File</label>
+                    <span
+                      class="pad-file-name"
+                      :class="{ 'pad-file-name--empty': !padFile(padIndex) || !padFile(padIndex)!.assigned }"
+                      :title="padFileLabel(padIndex)"
+                    >{{ padFileLabel(padIndex) }}</span>
+                  </div>
 
                   <div class="control-row">
                     <label :for="`pad-${pad.id}-mode`">Play mode</label>
@@ -1020,8 +1049,9 @@ watch(() => props.isVisible, (visible) => {
 
 .pad-settings-row {
   display: grid;
-  grid-template-columns: 48px repeat(3, minmax(0, 1fr));
-  align-items: end;
+  grid-template-columns: 48px repeat(4, minmax(0, 1fr));
+  /* Top-align so every field label shares one line, whatever sits under it. */
+  align-items: start;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 6px;
@@ -1030,7 +1060,27 @@ watch(() => props.isVisible, (visible) => {
 }
 
 .pad-settings--clock .pad-settings-row {
-  grid-template-columns: 48px repeat(4, minmax(0, 1fr));
+  grid-template-columns: 48px repeat(5, minmax(0, 1fr));
+}
+
+/* Read-only: the file assigned on the mixer (SD card). Same box height as the selects. */
+.pad-file-name {
+  /* Same box metrics as .setting-select so the File label lines up with the dropdown labels. */
+  display: block;
+  padding: 10px 0;
+  border: 1px solid transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pad-file-name--empty {
+  color: #888;
+  font-style: italic;
 }
 
 .pad-settings-row .setting-select {
@@ -1045,6 +1095,7 @@ watch(() => props.isVisible, (visible) => {
 
 /* Echoes the main-view pad buttons (SoundPads.vue). */
 .pad-settings-badge {
+  align-self: end;
   width: 48px;
   height: 48px;
   display: flex;
@@ -1056,6 +1107,12 @@ watch(() => props.isVisible, (visible) => {
   color: #fff;
   font-size: 20px;
   font-weight: 700;
+}
+
+/* A file is assigned on the mixer (the official editor highlights these pads too). */
+.pad-settings-badge--assigned {
+  background: #4a90e2;
+  border-color: #4a90e2;
 }
 
 @media (max-width: 600px) {

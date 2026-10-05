@@ -20,7 +20,9 @@ import {
   snapshotKey,
   diffSnapshots,
 } from '../midi/sysex';
-import type { ParamSnapshot, SnapshotDiff } from '../midi/sysex';
+import type { ParamSnapshot, SnapshotDiff, PayloadDiffEntry } from '../midi/sysex';
+import { snapshotLayoutFor } from '../midi/sysex/zoomL6/stateSnapshot';
+import type { SnapshotLayout } from '../midi/sysex/zoomL6/stateSnapshot';
 
 export interface SweepRow {
   group: number;
@@ -30,6 +32,17 @@ export interface SweepRow {
   latencyMs: number;
   registryId?: string;
 }
+
+/** What a byte of the editor-open snapshot payload is, according to the layout table. */
+export interface PayloadFieldLabel {
+  /** Display text: a param id (+ lo/hi), `CC map #n`, `layout byte`, or `unknown`. */
+  field: string;
+  kind: 'layout' | 'slot' | 'ccMap' | 'unknown';
+  /** `false` when the layout marks the covering slot/range unverified; `null` when not applicable. */
+  verified: boolean | null;
+}
+
+export interface LabelledPayloadDiffEntry extends PayloadDiffEntry, PayloadFieldLabel {}
 
 export interface MessageLogEntry {
   at: number;
@@ -54,6 +67,29 @@ function errorText(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
   return String(e);
+}
+
+/**
+ * Names the byte at `offset` of an editor-open snapshot payload using `layout` (chosen from
+ * `payload[0]` via `snapshotLayoutFor`): offset 0 is the layout byte itself; a slot covering the
+ * offset gives its `paramId` (plus `lo`/`hi` for the bytes of a width-2 slot); the CC-map range
+ * gives `CC map #<n>` (n = 0-based entry index); anything else is `unknown`.
+ */
+export function labelPayloadOffset(layout: SnapshotLayout | null | undefined, offset: number): PayloadFieldLabel {
+  if (offset === 0) return { field: 'layout byte', kind: 'layout', verified: null };
+  if (!layout) return { field: 'unknown', kind: 'unknown', verified: null };
+  for (const slot of layout.slots) {
+    if (offset >= slot.offset && offset < slot.offset + slot.width) {
+      let field = slot.paramId;
+      if (slot.width === 2) field += offset === slot.offset ? ' lo' : ' hi';
+      return { field, kind: 'slot', verified: slot.verified };
+    }
+  }
+  const cc = layout.ccMap;
+  if (offset >= cc.offset && offset < cc.offset + cc.length) {
+    return { field: `CC map #${offset - cc.offset}`, kind: 'ccMap', verified: cc.verified };
+  }
+  return { field: 'unknown', kind: 'unknown', verified: null };
 }
 
 function newId(): string {
@@ -163,11 +199,28 @@ export const sysexExplorerStore = reactive({
   },
 
   snapshots: [] as ParamSnapshot[],
-  diff: null as { aId: string; bId: string; result: SnapshotDiff } | null,
+  diff: null as {
+    aId: string;
+    bId: string;
+    result: SnapshotDiff;
+    /** Layout id chosen from the snapshot payload's first byte (`unknown` if not recognised). */
+    layoutId: string;
+    /** `result.payload` plus a field label per offset. */
+    payload: LabelledPayloadDiffEntry[];
+  } | null,
   notes: '',
   messageLog: [] as MessageLogEntry[],
 
+  /** "Re-read snapshot" (re-sends editor-open and refreshes the session's state snapshot). */
+  reread: {
+    busy: false,
+    error: null as string | null,
+    /** `Date.now()` of the last successful re-read; drives the short confirmation. */
+    lastAt: null as number | null,
+  },
+
   getSingle,
+  refreshSnapshot,
   runSweep,
   abortSweep,
   setParam,
@@ -311,6 +364,31 @@ async function setParam(confirmed = false): Promise<void> {
   }
 }
 
+// ── re-read snapshot ────────────────────────────────────────────────────────────
+/** Re-sends editor-open so the session's state snapshot reflects the device's current settings. */
+async function refreshSnapshot(): Promise<void> {
+  const r = sysexExplorerStore.reread;
+  r.error = null;
+  r.busy = true;
+  try {
+    if (editorSession.state.value !== 'open') {
+      throw new Error('Editor session is not open.');
+    }
+    await editorSession.refreshState();
+    r.lastAt = Date.now();
+  } catch (e) {
+    r.error = errorText(e);
+  } finally {
+    r.busy = false;
+  }
+}
+
+/** Layout for a snapshot payload (by its first byte), or `null` when absent/unrecognised. */
+function layoutOf(payload: number[] | null | undefined): SnapshotLayout | null {
+  if (!payload || payload.length === 0) return null;
+  return snapshotLayoutFor(payload) ?? null;
+}
+
 // ── snapshots & diff ────────────────────────────────────────────────────────────
 /** Snapshots the current sweep results (`group:index` -> value bytes) plus the editor-open state
  * blob from the live session, if any. */
@@ -338,24 +416,46 @@ function runDiff(aId: string, bId: string): void {
     sysexExplorerStore.diff = null;
     return;
   }
-  sysexExplorerStore.diff = { aId, bId, result: diffSnapshots(a, b) };
+  const result = diffSnapshots(a, b);
+  // The layout comes from the payload itself (never the app's mixer type); prefer A, fall back to B.
+  const layout = layoutOf(a.editorOpenPayload) ?? layoutOf(b.editorOpenPayload);
+  const payload = result.payload.map((entry) => ({ ...entry, ...labelPayloadOffset(layout, entry.offset) }));
+  sysexExplorerStore.diff = { aId, bId, result, layoutId: layout?.id ?? 'unknown', payload };
 }
 
 // ── export / import ─────────────────────────────────────────────────────────────
 interface SysexExplorerExport {
   version: 1;
   device: { firmware: string | null };
+  /** Layout id of the live session's snapshot payload (`unknown` if none/unrecognised). */
+  layoutId: string;
   snapshots: ParamSnapshot[];
+  /** The last diff: layout id, snapshot labels and byte-level payload diff with field labels. */
+  diff: {
+    a: string;
+    b: string;
+    layoutId: string;
+    payload: LabelledPayloadDiffEntry[];
+  } | null;
   /** Raw sweep findings (address, values, width, latency) — the point of the export. */
   findings: SweepRow[];
   notes: string;
+}
+
+function exportedDiff(): SysexExplorerExport['diff'] {
+  const d = sysexExplorerStore.diff;
+  if (!d) return null;
+  const labelOf = (id: string) => sysexExplorerStore.snapshots.find((snap) => snap.id === id)?.label ?? id;
+  return { a: labelOf(d.aId), b: labelOf(d.bId), layoutId: d.layoutId, payload: d.payload };
 }
 
 function exportJson(): string {
   const data: SysexExplorerExport = {
     version: 1,
     device: { firmware: editorSession.getFirmware() },
+    layoutId: layoutOf(editorSession.info.value?.editorState.payload)?.id ?? 'unknown',
     snapshots: sysexExplorerStore.snapshots,
+    diff: exportedDiff(),
     findings: sysexExplorerStore.sweep.rows,
     notes: sysexExplorerStore.notes,
   };

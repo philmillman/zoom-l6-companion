@@ -133,28 +133,14 @@ const auxRows = computed<AuxRow[]>(() => {
   }
   return rows;
 });
-const auxIds = computed<ParamId[]>(() =>
-  auxRows.value.flatMap((row) => [row.aux1Id, row.aux2Id].filter((id): id is ParamId => id !== null)),
-);
-
 
 const showL6MaxGroup = computed(() => l6MaxIds.value.length > 0);
 const showAuxGroup = computed(() => auxRows.value.length > 0);
 
-const allVisibleIds = computed<ParamId[]>(() => [
-  ...midiIds.value,
-  ...powerIds.value,
-  ...recorderIds.value,
-  ...l6MaxIds.value,
-  ...auxIds.value,
-]);
-
-function refreshGroup(ids: ParamId[]): void {
-  if (ids.length === 0) return;
-  void deviceSettings.refresh(ids);
-}
-
-// ── refresh everything once per expand → link-open transition ────────────────────
+// ── re-read the mixer's state snapshot once per expand → link-open transition ─────────
+// Device settings are session-command (write-only) params; their values come from the snapshot.
+// Opening the link reads one already, so skip a re-read that would only repeat it.
+const SNAPSHOT_FRESH_MS = 1000;
 let refreshedForThisOpen = false;
 
 watch(
@@ -169,7 +155,10 @@ watch(
   ([expanded, open]) => {
     if (expanded && open && !refreshedForThisOpen) {
       refreshedForThisOpen = true;
-      refreshGroup(allVisibleIds.value);
+      const readAt = deviceSettings.mixerState.readAt;
+      if (readAt === null || Date.now() - readAt > SNAPSHOT_FRESH_MS) {
+        void deviceSettings.refreshState();
+      }
     }
   },
   { immediate: true },

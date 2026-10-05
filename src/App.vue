@@ -8,9 +8,11 @@ import DebugDrawer from './components/DebugDrawer.vue';
 import AdvancedSettings from './components/AdvancedSettings.vue';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads, detectMixerType, type MixerType } from './config/midiConfig';
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from './config/midiConfigL6Max';
-import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
+import type { ChannelControls, GlobalControls as GlobalControlsType, MIDIControl, SoundPad } from './config/midiConfig';
+import { applyMixerCcMap } from './config/ccMapping';
 import { midiService } from './services/midiService';
 import { useDeviceSettings } from './composables/useDeviceSettings';
+import type { ParamId } from './midi/sysex/zoomL6/params';
 
 // Platform detection
 function detectPlatform() {
@@ -244,6 +246,25 @@ function toggleAdvancedSettings() {
   showAdvancedSettings.value = !showAdvancedSettings.value;
 }
 
+/**
+ * Saves the current CC/note configuration to localStorage (no UI). `mixerTypeOverride` is only
+ * passed by the Advanced Settings Save: persisting it turns off device-name detection.
+ */
+function persistConfig(mixerTypeOverride?: MixerType): boolean {
+  try {
+    localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(channelControls.value));
+    localStorage.setItem('zoom-l6-global-controls', JSON.stringify(globalControls.value));
+    localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(soundPads.value));
+    if (mixerTypeOverride) {
+      localStorage.setItem('zoom-l6-mixer-type', mixerTypeOverride);
+    }
+    return true;
+  } catch (e) {
+    console.error('❌ Failed to save settings to localStorage:', e);
+    return false;
+  }
+}
+
 function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], globalControls: GlobalControlsType, soundPads: SoundPad[], mixerType: MixerType }) {
   // Update the mixer type if provided
   if (data.mixerType && data.mixerType !== mixerType.value) {
@@ -257,20 +278,120 @@ function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], 
   soundPads.value = data.soundPads;
   
   // Save to localStorage for persistence
-  try {
-    localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(data.channelControls));
-    localStorage.setItem('zoom-l6-global-controls', JSON.stringify(data.globalControls));
-    localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(data.soundPads));
-    if (data.mixerType) {
-      localStorage.setItem('zoom-l6-mixer-type', data.mixerType);
-    }
+  if (persistConfig(data.mixerType)) {
     console.log('✅ Advanced settings saved to localStorage');
     alert('✅ Settings saved successfully!');
-  } catch (e) {
-    console.error('❌ Failed to save settings to localStorage:', e);
+  } else {
     alert('❌ Failed to save settings. Please check browser storage permissions.');
   }
 }
+
+// ── Adopt the mixer's shared settings (MIDI channel, pad notes, CC# map) ─────────────────
+// The mixer's values win: whenever a state snapshot is read (link open, Device Settings opened,
+// scene recall), anything that differs from this app's config is copied in and saved.
+const mixerNotice = ref<string | null>(null);
+let mixerNoticeTimer: ReturnType<typeof window.setTimeout> | undefined;
+const MIXER_NOTICE_MS = 4000;
+
+function showMixerNotice(text: string): void {
+  mixerNotice.value = text;
+  window.clearTimeout(mixerNoticeTimer);
+  mixerNoticeTimer = window.setTimeout(() => {
+    mixerNotice.value = null;
+    mixerNoticeTimer = undefined;
+  }, MIXER_NOTICE_MS);
+}
+
+/** Every MIDI control of the config (channel strips incl. their EQ group, plus the globals). */
+function allControls(channels: ChannelControls[], globals: GlobalControlsType): MIDIControl[] {
+  const out: MIDIControl[] = [];
+  for (const strip of channels) {
+    for (const control of Object.values(strip.controls)) {
+      if (!control) continue;
+      if ('cc' in control) out.push(control);
+      else out.push(...Object.values(control));
+    }
+  }
+  out.push(globals.efxType, globals.compressor);
+  return out;
+}
+
+/**
+ * Copies the mixer's shared settings into the app config. `mixerState.values` already omits any
+ * setting the app was writing at read time (see useDeviceSettings), so no extra guard is needed.
+ *
+ * Deferred while Advanced Settings is open: the dialog writes pad notes / the MIDI channel to the
+ * mixer immediately but only commits them to the app on Save (and reverts the mixer on Cancel), so a
+ * snapshot taken mid-edit must not be adopted. On close the mixer is re-read and adopted then.
+ */
+function adoptMixerState(): void {
+  const state = deviceSettings.mixerState;
+  if (state.readAt === null || showAdvancedSettings.value) return;
+
+  // Work on plain copies: the refs hold reactive proxies, which structuredClone can't copy.
+  let channels: ChannelControls[] = JSON.parse(JSON.stringify(channelControls.value));
+  let globals: GlobalControlsType = JSON.parse(JSON.stringify(globalControls.value));
+  const pads: SoundPad[] = JSON.parse(JSON.stringify(soundPads.value));
+  const adopted: string[] = [];
+
+  // CC map: only from a verified table whose layout matches the config's mixer type.
+  if (state.ccMap && state.ccMapVerified && state.layout !== null && state.layout === mixerType.value) {
+    const result = applyMixerCcMap(state.ccMap, state.layout, channels, globals);
+    if (result.changed) {
+      channels = result.channelControls;
+      globals = result.globalControls;
+      adopted.push('CC map');
+    }
+  }
+
+  // MIDI channel (applies to every control and pad, as Advanced Settings' Save does).
+  const channel = state.values.midiChannel;
+  if (channel !== undefined) {
+    let changed = false;
+    for (const control of allControls(channels, globals)) {
+      if (control.channel !== channel) {
+        control.channel = channel;
+        changed = true;
+      }
+    }
+    for (const pad of pads) {
+      if (pad.channel !== channel) {
+        pad.channel = channel;
+        changed = true;
+      }
+    }
+    if (changed) adopted.push('MIDI channel');
+  }
+
+  // Pad notes.
+  let padsChanged = false;
+  pads.forEach((pad, padIndex) => {
+    const id = `pad${padIndex + 1}.note` as ParamId;
+    const note = state.values[id];
+    // A Not Mapped pad decodes as PAD_NOTE_NOT_MAPPED (the snapshot's per-pad flag), so this
+    // adopts both directions: a pad unmapped on the mixer, and one newly mapped there.
+    if (note === undefined || pad.note === note) return;
+    pad.note = note;
+    padsChanged = true;
+  });
+  if (padsChanged) adopted.push('pad notes');
+
+  if (adopted.length === 0) return;
+  channelControls.value = channels;
+  globalControls.value = globals;
+  soundPads.value = pads;
+  persistConfig();
+  console.log(`Adopted from the mixer: ${adopted.join(', ')}`);
+  showMixerNotice(`Loaded settings from the mixer (${adopted.join(', ')})`);
+}
+
+watch(() => deviceSettings.mixerState.readAt, adoptMixerState);
+
+// After Advanced Settings closes (Save, or Cancel once it has reverted the mixer), re-read the mixer
+// so adoption works from its current state rather than a snapshot taken mid-edit.
+watch(showAdvancedSettings, (open) => {
+  if (!open) void deviceSettings.refreshState();
+});
 
 // Global MIDI input handler for debugging and monitoring
 let globalMidiListener: ((cc: number, value: number, channel: number) => void) | null = null;
@@ -322,6 +443,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.clearTimeout(mixerNoticeTimer);
   if (globalMidiListener) {
     midiService.removeControlChangeListener(globalMidiListener);
     globalMidiListener = null;
@@ -526,7 +648,12 @@ onUnmounted(() => {
 
     <footer class="app-footer">
       <div class="footer-content">
-        <p>Built by <a href="https://github.com/philmillman" target="_blank">philmillman</a> | Not affiliated with Zoom Corp</p>
+        <p>
+          Built by <a href="https://github.com/philmillman" target="_blank" rel="noopener noreferrer">philmillman</a>
+          | Not affiliated with Zoom Corp
+          | <a href="https://github.com/philmillman/zoom-l6-companion/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer">Report a bug</a>
+          | <a href="https://github.com/philmillman/zoom-l6-companion/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer">Request a feature</a>
+        </p>
       </div>
     </footer>
 
@@ -538,7 +665,14 @@ onUnmounted(() => {
       @toggle="onDebugDrawerToggle"
     />
     
-        <!-- Advanced Settings Dialog -->
+    <!-- Brief notice when settings were adopted from the mixer -->
+    <Transition name="mixer-notice">
+      <div v-if="mixerNotice" class="mixer-notice" role="status" aria-live="polite">
+        {{ mixerNotice }}
+      </div>
+    </Transition>
+
+    <!-- Advanced Settings Dialog -->
     <AdvancedSettings 
       :isVisible="showAdvancedSettings"
       :currentChannelControls="channelControls"
@@ -900,6 +1034,16 @@ body {
   font-size: 12px;
 }
 
+.footer-content a {
+  color: #4a90e2;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+  color: #5a9ff2;
+}
+
 /* Mobile-first responsive design */
 @media (max-width: 1200px) {
   .app-main {
@@ -1021,6 +1165,35 @@ body {
     margin-bottom: 8px;
     padding-bottom: 4px;
   }
+}
+
+/* Mixer-adoption notice (sits above the Advanced Settings dialog, z-index 10000) */
+.mixer-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 10001;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  background: #1e1e1e;
+  border: 1px solid #4a90e2;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.mixer-notice-enter-active,
+.mixer-notice-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.mixer-notice-enter-from,
+.mixer-notice-leave-to {
+  opacity: 0;
 }
 
 /* Platform Prompt Styles */

@@ -12,11 +12,12 @@ const sessionHeld = ref(false);
 </script>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, onBeforeUnmount, watch } from 'vue';
 import { sysexExplorerStore, type SweepRow } from '../../stores/sysexExplorerStore';
 import { editorSession } from '../../services/editorSessionService';
 import { useDeviceSettings } from '../../composables/useDeviceSettings';
 import { bytesToHex, hexToBytes, findParamByAddress } from '../../midi/sysex';
+import { snapshotLayoutFor } from '../../midi/sysex/zoomL6/stateSnapshot';
 import type { ParamSnapshot } from '../../midi/sysex';
 
 const device = useDeviceSettings();
@@ -102,6 +103,37 @@ watch(sessionState, (state) => {
   if (sessionHeld.value && (state === 'closed' || state === 'error') && !opening.value) {
     closeSession();
   }
+});
+
+// ── snapshot re-read / layout ──────────────────────────────────────────────────
+/** Live session's snapshot (editor-open reply payload); `payload[0]` is the layout byte. */
+const livePayload = computed(() => editorSession.info.value?.editorState.payload ?? null);
+
+const layoutLabel = computed<string | null>(() => {
+  const payload = livePayload.value;
+  if (!payload || payload.length === 0) return null;
+  const id = snapshotLayoutFor(payload)?.id;
+  const name = id === undefined ? 'unknown' : id;
+  const pretty = name.toLowerCase() === 'l6max' ? 'L6max' : name.toLowerCase() === 'l6' ? 'L6' : name;
+  return `Layout ${pretty} (0x${payload[0]!.toString(16).padStart(2, '0')}), ${payload.length} bytes`;
+});
+
+const rereadConfirmed = ref(false);
+let rereadConfirmTimer: ReturnType<typeof setTimeout> | null = null;
+
+async function rereadSnapshot(): Promise<void> {
+  rereadConfirmed.value = false;
+  await sysexExplorerStore.refreshSnapshot();
+  if (sysexExplorerStore.reread.error) return;
+  rereadConfirmed.value = true;
+  if (rereadConfirmTimer) clearTimeout(rereadConfirmTimer);
+  rereadConfirmTimer = setTimeout(() => {
+    rereadConfirmed.value = false;
+  }, 2500);
+}
+
+onBeforeUnmount(() => {
+  if (rereadConfirmTimer) clearTimeout(rereadConfirmTimer);
 });
 
 // ── raw hex send ───────────────────────────────────────────────────────────────
@@ -232,6 +264,7 @@ function formatLogTime(at: number): string {
         <span class="pill" :class="statePillClass">{{ stateLabel[sessionState] ?? sessionState }}</span>
         <span class="info-piece" v-if="device.firmware.value">FW {{ device.firmware.value }}</span>
         <span class="info-piece">HB misses: {{ device.heartbeatMisses.value }}</span>
+        <span class="info-piece" v-if="isOpen && layoutLabel">{{ layoutLabel }}</span>
         <div class="spacer" />
         <button class="btn" :disabled="sessionHeld || opening" @click="openSession">
           {{ opening ? 'Opening…' : 'Open' }}
@@ -239,7 +272,12 @@ function formatLogTime(at: number): string {
         <button class="btn" :disabled="!sessionHeld" @click="closeSession">
           Close
         </button>
+        <button class="btn" :disabled="!isOpen || sysexExplorerStore.reread.busy" @click="rereadSnapshot">
+          {{ sysexExplorerStore.reread.busy ? 'Re-reading…' : 'Re-read snapshot' }}
+        </button>
       </div>
+      <div class="hint hint-ok" v-if="rereadConfirmed">Snapshot re-read<template v-if="layoutLabel"> — {{ layoutLabel }}</template></div>
+      <div class="hint hint-error" v-if="sysexExplorerStore.reread.error">{{ sysexExplorerStore.reread.error }}</div>
       <div class="hint hint-warn" v-if="blockedReason && !isOpen">{{ blockedReason }}</div>
       <div class="hint hint-error" v-if="openError">{{ openError }}</div>
       <div class="hint hint-error" v-if="device.lastError.value">{{ device.lastError.value }}</div>
@@ -385,6 +423,13 @@ function formatLogTime(at: number): string {
     <!-- Snapshots & diff -->
     <section class="sysex-section">
       <h4>Snapshots</h4>
+      <details class="workflow-hint">
+        <summary>How to find a setting's byte</summary>
+        <p>
+          To find a setting's byte: Take snapshot → change one setting in Device Settings or Sound Pads →
+          Re-read snapshot → Take snapshot → Diff.
+        </p>
+      </details>
       <div class="section-row wrap">
         <input type="text" class="mono-input field-grow" v-model="snapshotLabel" placeholder="Label" />
         <button class="btn" @click="takeSnapshot">Take snapshot</button>
@@ -412,7 +457,10 @@ function formatLogTime(at: number): string {
         <button class="btn" :disabled="!diffA || !diffB" @click="runDiff">Diff</button>
       </div>
       <div v-if="sysexExplorerStore.diff">
-        <p class="hint">{{ snapshotLabelFor(sysexExplorerStore.diff.aId) }} → {{ snapshotLabelFor(sysexExplorerStore.diff.bId) }}</p>
+        <p class="hint">
+          {{ snapshotLabelFor(sysexExplorerStore.diff.aId) }} → {{ snapshotLabelFor(sysexExplorerStore.diff.bId) }}
+          — layout {{ sysexExplorerStore.diff.layoutId }}
+        </p>
         <div class="table-scroll" v-if="sysexExplorerStore.diff.result.params.length > 0">
           <table class="mono-table">
             <thead>
@@ -430,11 +478,15 @@ function formatLogTime(at: number): string {
         <div class="table-scroll" v-if="sysexExplorerStore.diff.result.payload.length > 0">
           <table class="mono-table">
             <thead>
-              <tr><th>Payload offset</th><th>Before</th><th>After</th></tr>
+              <tr><th>Payload offset</th><th>Field</th><th>Before</th><th>After</th></tr>
             </thead>
             <tbody>
-              <tr v-for="entry in sysexExplorerStore.diff.result.payload" :key="entry.offset">
+              <tr v-for="entry in sysexExplorerStore.diff.payload" :key="entry.offset">
                 <td>{{ entry.offset }}</td>
+                <td :class="{ 'field-unknown': entry.kind === 'unknown' }">
+                  {{ entry.field }}
+                  <span class="tag-unverified" v-if="entry.verified === false">unverified</span>
+                </td>
                 <td class="mono">{{ entry.before ?? '—' }}</td>
                 <td class="mono">{{ entry.after ?? '—' }}</td>
               </tr>
@@ -693,6 +745,40 @@ input[type='number'] {
 
 .hint-error {
   color: #f44336;
+}
+
+.hint-ok {
+  color: #4caf50;
+}
+
+.workflow-hint {
+  margin-bottom: 8px;
+  font-size: 10px;
+  color: #999;
+}
+
+.workflow-hint summary {
+  cursor: pointer;
+  color: #4a90e2;
+}
+
+.workflow-hint p {
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.field-unknown {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.tag-unverified {
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 9px;
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.15);
 }
 
 .table-scroll {

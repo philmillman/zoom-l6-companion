@@ -38,6 +38,7 @@ import {
 import { getParam as getParamDef, type ParamDef, type ParamId } from './params';
 import { decodeParamValue, encodeParamValue } from './codec';
 import { bytesToHex } from './hex';
+import { decodePadAssigned, decodePadFileName, type PadFileInfo } from './stateSnapshot';
 
 /** Minimal transport contract: send raw SysEx, subscribe to inbound SysEx. */
 export interface SysexTransport {
@@ -165,6 +166,7 @@ export class ZoomL6EditorSession {
   private heartbeatTimer: IntervalHandle | null = null;
   private awaitingHeartbeatAck = false;
   private openPromise: Promise<SessionInfo> | null = null;
+  private refreshPromise: Promise<SessionInfo> | null = null;
   private messageListeners: Set<(m: ParsedZoomL6Message) => void> = new Set();
 
   constructor(transport: SysexTransport, opts: EditorSessionOptions = {}) {
@@ -245,6 +247,83 @@ export class ZoomL6EditorSession {
   }
 
   /**
+   * Re-reads the full settings snapshot mid-session, mirroring the official editor
+   * (captures/maxE-usb-audio-mode): Universal Identity Request → `identityReply`, then editor open
+   * `2B` → `2A` snapshot. The heartbeat keeps running throughout (its traffic never satisfies a
+   * matcher), and both requests go through the normal one-in-flight queue.
+   *
+   * On success `info` is replaced with a **new object** (fresh identity + editorState, original
+   * `openedAt`) so watchers fire. Rejects with {@link SessionClosedError} when the session isn't
+   * open (or closes meanwhile) and with {@link RequestTimeoutError} if the mixer stays silent; a
+   * failed refresh leaves `info` and the session untouched. A `stale` session is re-opened instead
+   * (the handshake reads a fresh snapshot anyway). Concurrent callers share one attempt.
+   */
+  refreshState(): Promise<SessionInfo> {
+    if (this.refreshPromise) return this.refreshPromise;
+    const attempt = this.runRefresh();
+    this.refreshPromise = attempt;
+    attempt.catch(() => undefined).then(() => {
+      if (this.refreshPromise === attempt) this.refreshPromise = null;
+    });
+    return attempt;
+  }
+
+  private async runRefresh(): Promise<SessionInfo> {
+    if (this.state.value === 'opening' && this.openPromise) return this.openPromise;
+    if (this.state.value === 'stale') return this.open();
+    const previous = this.info.value;
+    if (this.state.value !== 'open' || !previous) {
+      throw new SessionClosedError(`Editor session is ${this.state.value}; call open() before refreshState()`);
+    }
+    const identity = await this.request<'identityReply'>(
+      zoomL6Sysex.identityRequest,
+      'identityReply',
+      this.identityTimeoutMs,
+    );
+    if (identity.manufacturer !== ZOOM_MANUFACTURER_ID) {
+      throw new Error(
+        `Identity reply is not from a Zoom device (manufacturer 0x${identity.manufacturer
+          .toString(16)
+          .padStart(2, '0')}, expected 0x52)`,
+      );
+    }
+    const editorState = await this.request<'editorOpenState'>(
+      zoomL6Sysex.editorOpen,
+      'editorOpenState',
+      this.editorOpenTimeoutMs,
+    );
+    if (this.state.value !== 'open') throw new SessionClosedError();
+    const info: SessionInfo = {
+      identity,
+      editorState,
+      openedAt: this.info.value?.openedAt ?? previous.openedAt,
+    };
+    this.info.value = info;
+    return info;
+  }
+
+  /**
+   * Reads each sound pad's assigned file: `46 00 <pad>` (assigned flag) then `46 02 <pad>` (file
+   * name), sequentially for pads `0 … padCount-1`. A pad whose reads fail (e.g. a timeout) comes
+   * back as `null` so the other pads still show; a closed session aborts the whole read with
+   * {@link SessionClosedError}.
+   */
+  async readPadFiles(padCount = 4): Promise<Array<PadFileInfo | null>> {
+    const files: Array<PadFileInfo | null> = [];
+    for (let pad = 0; pad < padCount; pad++) {
+      try {
+        const assigned = decodePadAssigned(await this.getParam(0x00, pad));
+        const fileName = decodePadFileName(await this.getParam(0x02, pad));
+        files.push({ assigned, fileName });
+      } catch (error) {
+        if (error instanceof SessionClosedError) throw error;
+        files.push(null);
+      }
+    }
+    return files;
+  }
+
+  /**
    * Stops the heartbeat, fails everything queued with {@link SessionClosedError} and unsubscribes
    * from the transport. No close opcode is known for this protocol, so nothing is sent.
    *
@@ -253,6 +332,7 @@ export class ZoomL6EditorSession {
   close(): void {
     this.stopHeartbeat();
     this.openPromise = null;
+    this.refreshPromise = null;
     const pending = this.inFlight ? [this.inFlight, ...this.queue] : [...this.queue];
     this.inFlight = null;
     this.queue = [];

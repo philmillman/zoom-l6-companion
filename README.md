@@ -62,8 +62,8 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
   - **USB mass storage**: Mount the SD card as a USB drive and back
   - **Effect parameters**: Knobs for the selected internal effect (Hall/Room/Spring Decay or Dwell + Tone, Delay/Echo Time + Feedback/Repeat) next to the EFX selector
   - **SysEx explorer**: Debug drawer "SysEx" tab for live protocol inspection — sweep parameter groups, snapshot device state, and diff changes to identify new addresses
-  - Settings are written to the mixer; reading the mixer's current values back isn't supported yet
-  - See [docs/PROTOCOL.md](docs/PROTOCOL.md) for the protocol reference and [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to contribute reverse-engineering findings
+  - Settings are read from the mixer on connect (CC mappings, pad files, device settings)
+  - See [docs/PROTOCOL.md](docs/PROTOCOL.md) for the protocol reference (including how to contribute reverse-engineering findings)
 
 - **MIDI Integration** - WebMIDI.js powered features:
   - Auto-detection of Zoom L6 device
@@ -145,7 +145,7 @@ Reverse-engineering new parameter addresses? Decode MIDI Monitor captures from t
 npm run decode captures/NN-scenario.txt
 npm run decode captures/NN-scenario.txt -- --diff captures/MM-baseline.txt
 ```
-See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
+See [How to Contribute Findings](docs/PROTOCOL.md#how-to-contribute-findings) for how to record captures.
 
 ## Usage Tips
 
@@ -159,7 +159,7 @@ See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 - **Persistence**: Your custom settings are automatically saved to localStorage
 
 > [!TIP]
-> Custom MIDI must be set in the official Zoom L6 editor first. Then you can update the MIDI settings in the app.
+> The app reads the mixer's CC mappings when it connects and uses them automatically, so custom mappings set in the official Zoom L6 Editor carry over. Because the mixer's mapping wins on every connect, change custom mappings in the official editor (the app can't write the mapping to the mixer yet).
 
 ### LFO System
 - **Enable LFOs**: Click the small LFO button on any knob in regular view mode

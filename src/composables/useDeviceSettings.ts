@@ -19,6 +19,9 @@ import {
 } from '../midi/sysex/zoomL6/params';
 import type { ParamDef, ParamId, ZoomModel } from '../midi/sysex/zoomL6/params';
 import type { ParsedZoomL6Message } from '../midi/sysex/zoomL6/parse';
+import { SessionClosedError, type SessionInfo } from '../midi/sysex/zoomL6/editorSession';
+import { decodeSnapshot } from '../midi/sysex/zoomL6/stateSnapshot';
+import type { PadFileInfo, SnapshotLayoutId } from '../midi/sysex/zoomL6/stateSnapshot';
 import type { MixerType } from '../config/midiConfig';
 
 export type ParamStatus = 'idle' | 'reading' | 'writing' | 'ok' | 'error';
@@ -38,8 +41,36 @@ export interface SetOptions {
   verifyAfterWrite?: boolean;
 }
 
+/**
+ * What the mixer reported in its last state snapshot (the editor-open `2A` reply) plus the pad file
+ * reads that follow it. Refreshed on every session open and by {@link refreshState}.
+ */
+export interface MixerState {
+  /** Snapshot layout, chosen from the payload's layout byte (not from the app's mixer type). */
+  layout: SnapshotLayoutId | null;
+  /** The mixer's CC# table in snapshot order (see `config/ccMapping.ts`), or null if unknown. */
+  ccMap: number[] | null;
+  ccMapVerified: boolean;
+  /** Per pad (index 0 = pad 1); empty until read, `null` for a pad whose read failed. */
+  padFiles: Array<PadFileInfo | null>;
+  /**
+   * The verified snapshot values that were actually applied to `values` by the last read. Ids that
+   * had a write in flight (or queued) were skipped and are absent, so this only ever holds what the
+   * mixer reported — App adopts the shared settings (MIDI channel, pad notes) from here.
+   */
+  values: Partial<Record<ParamId, number>>;
+  /** `Date.now()` of the last applied snapshot; null until one has been read. */
+  readAt: number | null;
+}
+
 /** Leading + trailing throttle window for numeric (knob/slider) writes. */
 const WRITE_THROTTLE_MS = 50;
+
+/** A scene recall arrives as a Program Change; wait for it to settle before re-reading the mixer. */
+const SCENE_REFRESH_DEBOUNCE_MS = 300;
+
+/** Sound pads on both the L6 and the L6max. */
+const PAD_COUNT = 4;
 
 const LINK_ENABLED_KEY = 'zoom-l6-editor-link';
 const SHOW_EXPERIMENTAL_KEY = 'zoom-l6-show-experimental';
@@ -97,10 +128,25 @@ const mixerType = ref<MixerType>('l6');
 const suspended = ref(false);
 const linkError = ref<string | null>(null);
 const applyingRemote = ref(false);
+const mixerState = reactive<MixerState>({
+  layout: null,
+  ccMap: null,
+  ccMapVerified: false,
+  padFiles: [],
+  values: {},
+  readAt: null,
+});
 
 let refCount = 0;
 let openInFlight: Promise<boolean> | null = null;
 let remoteDepth = 0;
+/** Bumped per snapshot (and on reset) so a slow pad-file read can't overwrite a newer one. */
+let mixerStateSeq = 0;
+/** Pad-file read started by the latest snapshot; `refreshState` awaits it. */
+let mixerStateLoad: Promise<void> = Promise.resolve();
+let sceneRefreshTimer: ReturnType<typeof setTimeout> | undefined;
+/** `openedAt` of the session whose pad files were last read (pad files are read once per open). */
+let padFilesOpenedAt: number | null = null;
 
 const editorPortsReady = computed(() => midiService.editorPortsAvailable.value);
 const sysexReady = computed(() => midiService.sysexEnabled.value);
@@ -223,6 +269,14 @@ function clearValues(): void {
       deviceValues[p.id] = undefined;
     }
   });
+  mixerStateSeq += 1;
+  mixerState.layout = null;
+  mixerState.ccMap = null;
+  mixerState.ccMapVerified = false;
+  mixerState.padFiles = [];
+  mixerState.values = {};
+  mixerState.readAt = null;
+  padFilesOpenedAt = null;
 }
 
 /** Ref-counted session ownership. Returns the matching `release` for onMounted/onUnmounted. */
@@ -445,6 +499,104 @@ editorSession.onMessage((m: ParsedZoomL6Message) => {
   errors[def.id] = null;
 });
 
+// ── mixer state snapshot (editor-open `2A` reply) ─────────────────────────────
+/** True while a write for `id` is in flight or queued behind the throttle. */
+function hasLocalWrite(id: string): boolean {
+  return status[id] === 'writing' || pending.get(id)?.timer !== undefined;
+}
+
+/**
+ * Applies a snapshot to `values`/`deviceValues` (verified slots only) and records the layout and CC
+ * map. Ids with a local write in flight keep the user's value: the write is about to change the
+ * mixer anyway, and its result is what the UI should show.
+ */
+function applySnapshot(payload: readonly number[]): void {
+  const decoded = decodeSnapshot(payload);
+  const applied: Partial<Record<ParamId, number>> = {};
+  withRemote(() => {
+    for (const [id, value] of Object.entries(decoded.values) as [ParamId, number][]) {
+      if (!entry(id) || hasLocalWrite(id)) continue;
+      values[id] = value;
+      deviceValues[id] = value;
+      status[id] = 'ok';
+      errors[id] = null;
+      applied[id] = value;
+    }
+  });
+  mixerState.layout = decoded.layout;
+  mixerState.ccMap = decoded.ccMap;
+  mixerState.ccMapVerified = decoded.ccMapVerified;
+  mixerState.values = applied;
+  // Strictly increasing so watchers fire even for two reads within the same millisecond.
+  mixerState.readAt = Math.max(Date.now(), (mixerState.readAt ?? 0) + 1);
+}
+
+async function loadPadFiles(seq: number): Promise<void> {
+  // Let `open()` finish (state → 'open', heartbeat started) before queueing the reads.
+  await Promise.resolve();
+  if (seq !== mixerStateSeq) return;
+  try {
+    const files = await editorSession.readPadFiles(PAD_COUNT);
+    if (seq === mixerStateSeq) mixerState.padFiles = files;
+  } catch (e) {
+    // Closing the link mid-read is routine; anything else only costs the file names.
+    if (!(e instanceof SessionClosedError)) console.warn('Could not read sound pad files:', e);
+  }
+}
+
+// `sync` so `mixerStateLoad` is already set when `editorSession.refreshState()` resolves.
+watch(
+  editorSession.info,
+  (info: SessionInfo | null) => {
+    if (!info) return;
+    mixerStateSeq += 1;
+    applySnapshot(info.editorState.payload);
+    // Pad file assignments are global (not part of scenes), so read them once per session open
+    // rather than on every refresh (scene recall, Device Settings opened, explorer re-read).
+    if (info.openedAt !== padFilesOpenedAt) {
+      padFilesOpenedAt = info.openedAt;
+      mixerStateLoad = loadPadFiles(mixerStateSeq);
+    } else {
+      mixerStateLoad = Promise.resolve();
+    }
+  },
+  { flush: 'sync' },
+);
+
+/**
+ * Re-reads the mixer's state snapshot and pad files. No-op unless the link is open; never throws
+ * (a failure lands in `lastError`). Values are applied by the `editorSession.info` watcher above.
+ */
+async function refreshState(): Promise<void> {
+  if (link.value !== 'open') return;
+  try {
+    await editorSession.refreshState();
+    linkError.value = null;
+    await mixerStateLoad;
+  } catch (e) {
+    if (e instanceof SessionClosedError) return;
+    linkError.value = errorText(e);
+  }
+}
+
+/** Scene recall on the hardware (Program Change in): re-read once things settle. */
+function onProgramChange(): void {
+  if (sceneRefreshTimer !== undefined) clearTimeout(sceneRefreshTimer);
+  sceneRefreshTimer = setTimeout(() => {
+    sceneRefreshTimer = undefined;
+    void refreshState();
+  }, SCENE_REFRESH_DEBOUNCE_MS);
+}
+
+/**
+ * `addProgramChangeListener` needs a connected input and `removeAllListeners` (port change,
+ * hot-plug) drops it, so this runs on every (re)connection. Re-adding is a no-op while it's held.
+ */
+function registerProgramChangeListener(): void {
+  if (!midiService.midiInputConnected.value) return;
+  midiService.addProgramChangeListener(onProgramChange);
+}
+
 // ── watches ───────────────────────────────────────────────────────────────────
 watch(linkEnabled, (enabled) => {
   persistBool(LINK_ENABLED_KEY, enabled);
@@ -457,10 +609,13 @@ watch(linkEnabled, (enabled) => {
 
 watch(midiService.connectionState, (connected) => {
   if (!connected) {
+    if (sceneRefreshTimer !== undefined) clearTimeout(sceneRefreshTimer);
+    sceneRefreshTimer = undefined;
     close();
     clearValues();
     return;
   }
+  registerProgramChangeListener();
   // A disconnect/reconnect cycle (e.g. USB mass storage) clears a suspension.
   suspended.value = false;
   if (refCount > 0 && linkEnabled.value) {
@@ -469,6 +624,16 @@ watch(midiService.connectionState, (connected) => {
     })();
   }
 });
+
+// An input swap or hot-plug can `removeAllListeners` while `connectionState` stays true; `sync` so
+// the drop-and-reconnect inside one call (false → true) is still seen.
+watch(
+  midiService.midiInputConnected,
+  (inputConnected) => {
+    if (inputConnected) registerProgramChangeListener();
+  },
+  { flush: 'sync' },
+);
 
 watch([sysexReady, editorPortsReady], ([sysex, ports]) => {
   if (sysex && ports && refCount > 0 && linkEnabled.value && !suspended.value) {
@@ -488,6 +653,8 @@ export interface DeviceSettingsApi {
   lastError: ComputedRef<string | null>;
   heartbeatMisses: ComputedRef<number>;
   applyingRemote: Ref<boolean>;
+  /** The mixer's last reported state (snapshot + pad files); see {@link MixerState}. */
+  mixerState: MixerState;
   entry: (id: ParamId) => ParamDef | undefined;
   isAvailable: (id: ParamId) => boolean;
   isWritable: (id: ParamId) => boolean;
@@ -495,6 +662,13 @@ export interface DeviceSettingsApi {
   release: () => void;
   refresh: (ids: ParamId[]) => Promise<void>;
   refreshAll: () => Promise<void>;
+  /** Re-reads the mixer's state snapshot and pad files (no-op unless the link is open; never throws). */
+  refreshState: () => Promise<void>;
+  /**
+   * Call after the app itself recalls a scene (sends a Program Change): the mixer doesn't echo it,
+   * so this schedules the same debounced re-read an inbound Program Change triggers.
+   */
+  sceneChanged: () => void;
   set: (id: ParamId, value: number, opts?: SetOptions) => void;
   setNow: (id: ParamId, value: number, opts?: SetOptions) => Promise<void>;
   suspend: () => Promise<void>;
@@ -514,6 +688,7 @@ const api: DeviceSettingsApi = {
   lastError,
   heartbeatMisses,
   applyingRemote,
+  mixerState,
   entry,
   isAvailable,
   isWritable,
@@ -521,6 +696,8 @@ const api: DeviceSettingsApi = {
   release,
   refresh,
   refreshAll,
+  refreshState,
+  sceneChanged: onProgramChange,
   set,
   setNow,
   suspend,
