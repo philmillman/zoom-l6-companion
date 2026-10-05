@@ -43,8 +43,28 @@ export interface GlobalControls {
 export interface SoundPad {
   id: number;
   name: string;
-  note: number; // MIDI note number
+  /** MIDI note number 0-127, or {@link PAD_NOTE_NOT_MAPPED} when the pad has no note. */
+  note: number;
   channel: number;
+}
+
+/**
+ * Pad note value meaning "Not Mapped" (the mixer ignores notes for that pad). Same sentinel the
+ * SysEx registry uses for `pad*.note`, so the app and mixer share one value domain.
+ */
+export const PAD_NOTE_NOT_MAPPED = 128;
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+/** Note name using the ZOOM L6 Editor's convention, where C3 = 60. */
+export function midiNoteName(note: number): string {
+  return `${NOTE_NAMES[note % 12]}${Math.floor(note / 12) - 2}`;
+}
+
+/** Label as shown by the ZOOM L6 Editor, e.g. "C3 (60)", or "Not Mapped". */
+export function midiNoteLabel(note: number): string {
+  if (note === PAD_NOTE_NOT_MAPPED) return 'Not Mapped';
+  return `${midiNoteName(note)} (${note})`;
 }
 
 // Channel strip MIDI CC mappings (typical values - may need adjustment based on actual device)

@@ -59,6 +59,8 @@ export interface ParamDef {
   deviceOffset?: number;
   /** Labels for out-of-range sentinel values (e.g. 128 = "Not Mapped"). */
   specialValues?: Readonly<Record<number, string>>;
+  /** Discrete choices for a numeric param; the UI renders them as a dropdown instead of a number box. */
+  choices?: readonly { value: number; label: string }[];
   models: readonly ZoomModel[];
   readOnly?: boolean;
   /** Only verified entries may be written by the session without `force`. */
@@ -179,6 +181,7 @@ const entries: ParamDef[] = [
     encoding: { kind: 'u7' },
     range: { min: 1, max: 16, step: 1 },
     deviceOffset: -1,
+    choices: Array.from({ length: 16 }, (_, i) => ({ value: i + 1, label: `Channel ${i + 1}` })),
     models: BOTH,
     verified: true,
     evidence: 'captures/04-midi-channel.txt: 31 0D 00 (CH1) / 31 0D 0F (CH16), value = channel-1, ack 00 0D',

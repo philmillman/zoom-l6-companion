@@ -6,6 +6,8 @@
 
 ***You can try it out here: https://zooml6.webmidi.cc in a WebMIDI supported browser***
 
+***On iPhone and iPad:*** install the free [MIDIWeb Browser](https://apps.apple.com/us/app/midiweb-browser/id6757226617) app (from [MIDIWeb Hub](https://midiwebhub.com/)), then open the Zoom L6 Companion from its directory or go to https://zooml6.webmidi.cc in the app.
+
 
 ![full channel view](/images/channel-full.png)
 
@@ -47,17 +49,20 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
 - **Advanced Settings** - Complete MIDI configuration:
   - Customize all MIDI CC mappings for channel controls
   - Configure global control CC assignments
-  - Set MIDI notes for Sound Pads
-  - Global MIDI channel setting
+  - Sound pad play mode, level, MIDI note, and (L6max) MIDI clock sync, laid out like the official editor
+  - One MIDI channel setting shared by the app and the mixer (in Device Settings)
   - Duplicate CC/note detection with warnings
   - Reset to factory defaults
   - Persistent settings saved to browser storage
 
-- **Device settings & SysEx (experimental)** - Editor-only device control via the dedicated SysEx port:
-  - **Editor link**: Toggle the SysEx connection in Advanced Settings (turn off before using the official Zoom L6 Editor)
-  - **Experimental features**: Show experimental settings with the "Show experimental" toggle once parameter addresses are verified
-  - **Effect parameters**: Interactive knobs for Hall/Room/Spring/Delay/Echo effect parameters (Decay, Tone, Time, etc.) — appear once registered
+- **Device Settings** - Editor-only mixer settings over the dedicated SysEx (Editor) port:
+  - **Editor link**: Toggle the SysEx connection (turn it off before using the official Zoom L6 Editor)
+  - **Mixer settings**: MIDI Out/Thru mode, Mixer Control via MIDI, MIDI channel, battery type, auto power off, recorder mode, and AUX send points (pre/post fader)
+  - **L6max routing / USB**: Monitor point, Sub-Out point, USB Mix Minus, USB audio mode, AUX send points for channels 7-8
+  - **USB mass storage**: Mount the SD card as a USB drive and back
+  - **Effect parameters**: Knobs for the selected internal effect (Hall/Room/Spring Decay or Dwell + Tone, Delay/Echo Time + Feedback/Repeat) next to the EFX selector
   - **SysEx explorer**: Debug drawer "SysEx" tab for live protocol inspection — sweep parameter groups, snapshot device state, and diff changes to identify new addresses
+  - Settings are written to the mixer; reading the mixer's current values back isn't supported yet
   - See [docs/PROTOCOL.md](docs/PROTOCOL.md) for the protocol reference and [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to contribute reverse-engineering findings
 
 - **MIDI Integration** - WebMIDI.js powered features:
@@ -75,7 +80,7 @@ A web-based companion application for the Zoom L6 mixer built with Vue.js and We
   - Debug console for troubleshooting
 
 ## Requirements
-- Modern web browser with WebMIDI support (Chrome, Edge, Firefox)
+- Modern web browser with WebMIDI support (Chrome, Edge, Firefox), or on iOS/iPadOS the free [MIDIWeb Browser](https://apps.apple.com/us/app/midiweb-browser/id6757226617) app
 - Zoom L6 mixer connected via USB
 - MIDI drivers installed (Windows)
 
@@ -147,8 +152,8 @@ See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 ### Advanced Settings
 - **Access**: Click the "Advanced" button in the header to open MIDI configuration
 - **Customize MIDI Mappings**: Change any CC assignment for channel or global controls
-- **Configure Sound Pads**: Set custom MIDI notes for each pad
-- **MIDI Channel**: Set the global MIDI channel for all controls (default: 1)
+- **Configure Sound Pads**: Set each pad's play mode, level, and MIDI note (plus MIDI clock sync on the L6max). The MIDI note is shared by the app and the mixer: it's sent to the mixer immediately and saved in the app on Save, and Cancel puts the mixer's notes back
+- **MIDI Channel**: Device Settings ▸ MIDI sets one channel for both the app and the mixer (default: 1). The mixer updates immediately, all app controls switch on Save, and Cancel puts the mixer's channel back
 - **Duplicate Detection**: The system warns you about duplicate CC or note assignments
 - **Reset**: Return to factory default MIDI mappings at any time
 - **Persistence**: Your custom settings are automatically saved to localStorage
@@ -172,6 +177,7 @@ See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 - **MIDI Triggers**: Send MIDI note on/off messages to your Zoom L6
 - **Touch Support**: Works with both mouse and touch input
 - **Customizable**: Configure MIDI notes and channels in Advanced Settings
+- **Not Mapped**: A pad set to "Not Mapped" is disabled until you assign it a MIDI note
 
 ### Debug Console
 - **Troubleshooting**: Access via the Debug button in the header
@@ -192,7 +198,7 @@ See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 ### MIDI Not Responding to Controls
 1. Verify the correct MIDI input/output devices are selected
 2. Check if your Zoom L6 uses different MIDI CC mappings - use **Advanced Settings** to customize
-3. Ensure the MIDI channel matches your device (default is Channel 1)
+3. Ensure the MIDI channel matches your device (default is Channel 1). Setting it in Advanced Settings ▸ Device Settings ▸ MIDI updates both the app and the mixer
 4. Check for duplicate CC assignments in Advanced Settings
 5. Try resetting to default settings in Advanced Settings
 
@@ -204,6 +210,7 @@ See [docs/CAPTURE_GUIDE.md](docs/CAPTURE_GUIDE.md) for how to record captures.
 | Microsoft Edge | ✅ | ✅ | ✅ | 🚧 | ❌ | Full WebMIDI support |
 | Firefox | ✅ | ✅ | ✅ | 🚧 | ❌ | Requires WebMIDI enabled |
 | Safari | ❌ | ✅ | ❌ | ❌ | ❌ | Plugin required |
+| [MIDIWeb Browser](https://midiwebhub.com/) app | — | — | — | — | ✅ | Free native app for iPhone & iPad (iOS/iPadOS) |
 
 See https://webmidijs.org/docs/getting-started/ and https://caniuse.com/midi for more information.
 

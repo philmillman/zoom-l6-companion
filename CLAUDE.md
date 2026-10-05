@@ -49,10 +49,12 @@ lives in module singletons, not a store.
     in flight, no correlation id), `capture/` the MIDI Monitor decoder.
 - **`src/services/editorSessionService.ts`** — the `editorSession` singleton over `midiService`.
 - **`src/composables/useDeviceSettings.ts`** — registry-driven device state: `link` lifecycle,
-  ref-counted `acquire()/release()`, optimistic throttled `set()`, experimental gating. Components
+  ref-counted `acquire()/release()`, optimistic throttled `set()` + awaitable `setNow()`, verified-only gating. Components
   read/write settings only through this.
 - **UI**: `ParamKnob` / `EffectParams` (effect knobs), `DeviceSettingsPanel` / `DeviceParamField`
-  (Advanced Settings device panel), `debug/SysexExplorer.vue` (Debug drawer SysEx tab).
+  (Advanced Settings ▸ Device Settings, incl. editor link + USB mass storage), the Sound Pads section
+  of `AdvancedSettings.vue` (pad play mode / level / MIDI note / L6max clock sync, laid out like the
+  official editor), `debug/SysexExplorer.vue` (Debug drawer SysEx tab).
 
 ## The SysEx protocol (see docs/PROTOCOL.md for the full tables)
 
@@ -70,10 +72,10 @@ encoding is **not yet decoded**, so registry settings are currently **write-only
    fixed selector bytes, e.g. pad index or effect+param), the right `encoding`/`range`/labels,
    `verified: true`, and an `evidence` string naming the capture and bytes.
 3. Add a byte-level test in `src/midi/sysex/zoomL6/__tests__/` asserting the exact wire bytes.
-4. Unverified entries render as "experimental" (hidden unless the toggle is on) and are refused by
-   `editorSession.setValue` without `{ force: true }`. Only mark `verified` from a real capture —
-   never invent an address. L6max-only entries stay unverified (no hardware); see
-   `docs/CAPTURE_GUIDE_L6MAX.md`.
+4. Unverified entries stay hidden from the UI (there is no "show experimental" toggle) and are
+   refused by `editorSession.setValue` without `{ force: true }`. Only mark `verified` from a real
+   capture — never invent an address. The L6max-only settings were verified on an L6max
+   (`captures/max*.txt`); `docs/CAPTURE_GUIDE_L6MAX.md` covers capturing more.
 
 ## Gotchas
 
@@ -83,3 +85,12 @@ encoding is **not yet decoded**, so registry settings are currently **write-only
 - Values > 127 are 7-bit little-endian (LSB first); `codec.ts` handles this and `deviceOffset`
   (e.g. MIDI channel stored as value − 1).
 - WebMIDI is unavailable in some embedded browser previews; verify MIDI behaviour in real Chrome.
+- The Safari/iOS warnings in `App.vue` are gated on feature detection (`navigator.requestMIDIAccess`),
+  not the user agent, so WebMIDI-capable apps like MIDIWeb Browser don't trigger them. iPadOS reports a
+  Mac user agent; `detectPlatform()` uses `maxTouchPoints` to tell iPads apart.
+- Pad MIDI notes and the MIDI channel are each one value shared by the app and the mixer: the UI
+  writes the mixer immediately and the app config on Save; Cancel reverts the mixer and Save pushes
+  values changed by Reset to Defaults (`syncMixer` in `AdvancedSettings.vue`). The channel control
+  lives in Device Settings ▸ MIDI (`DeviceParamField` in controlled mode via `modelValue`).
+  `PAD_NOTE_NOT_MAPPED` (128, `midiConfig.ts`) means "Not Mapped" and disables that pad in the main view.
+- Note names follow the official editor (C3 = 60): use `midiNoteLabel()` from `midiConfig.ts`.

@@ -15,14 +15,21 @@ import { useDeviceSettings } from './composables/useDeviceSettings';
 // Platform detection
 function detectPlatform() {
   const userAgent = navigator.userAgent.toLowerCase();
-  const isMac = /macintosh|mac os x/.test(userAgent);
-  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  // iPadOS 13+ reports a desktop Mac user agent by default; touch support gives an iPad away.
+  const isIPadDesktopUA = /macintosh/.test(userAgent) && navigator.maxTouchPoints > 1;
+  const isIOS = /iphone|ipad|ipod/.test(userAgent) || isIPadDesktopUA;
+  // iPhone/iPad user agents also contain "Mac OS X", so exclude them from the Mac check.
+  const isMac = /macintosh|mac os x/.test(userAgent) && !isIOS;
   const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
-  
+  // What actually matters is whether the browser provides the Web MIDI API. Browsers such as the
+  // MIDIWeb Browser app do on Apple devices, so the warnings below only show when it's missing.
+  const hasWebMidi = typeof navigator.requestMIDIAccess === 'function';
+
   return {
     isMac,
     isIOS,
     isSafari,
+    hasWebMidi,
     isSafariMac: isMac && isSafari,
     isIOSDevice: isIOS
   };
@@ -31,6 +38,8 @@ function detectPlatform() {
 // Platform-specific prompts
 const platformInfo = ref(detectPlatform());
 const showPlatformPrompt = ref(false);
+/** This page's address, shown in the iOS prompt so users can open it inside MIDIWeb Browser. */
+const appHost = window.location.host;
 
 // Reactive state
 const midiConnected = ref(false);
@@ -272,8 +281,10 @@ onMounted(() => {
     console.log(`[App] Global MIDI received: CC${cc} = ${value} on channel ${channel}`);
   };
   
-  // Check for platform-specific prompts
-  if (platformInfo.value.isSafariMac || platformInfo.value.isIOSDevice) {
+  // Check for platform-specific prompts. Re-detect now rather than at setup, so a browser that
+  // installs the Web MIDI API during page load (e.g. MIDIWeb Browser) is counted as supported.
+  platformInfo.value = detectPlatform();
+  if (!platformInfo.value.hasWebMidi && (platformInfo.value.isSafariMac || platformInfo.value.isIOSDevice)) {
     showPlatformPrompt.value = true;
   }
   
@@ -484,24 +495,26 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- iOS prompt -->
+        <!-- iOS / iPadOS prompt (only shown when the browser lacks the Web MIDI API) -->
         <div v-if="platformInfo.isIOSDevice" class="platform-notice ios">
           <div class="notice-header">
-            <h3>📱 iOS WebMIDI Limitation</h3>
+            <h3>📱 Use MIDIWeb Browser on iPhone &amp; iPad</h3>
             <button @click="showPlatformPrompt = false" class="close-button">×</button>
           </div>
           <div class="notice-content">
-            <p>Unfortunately, Apple does not support the Web MIDI API on iOS devices. This web app cannot directly control your Zoom L6 from iOS.</p>
+            <p>Safari on iPhone and iPad doesn't support the Web MIDI API, so it can't control your Zoom L6.</p>
             <div class="ios-info">
-              <p><strong>Good news:</strong> We're working on a native iOS app that will provide full Zoom L6 control!</p>
-              <p>For now, you can use this app on:</p>
-              <ul>
-                <li>macOS (Safari with Jazz Plugin, or Chrome/Firefox)</li>
-                <li>Windows (Chrome, Firefox, Edge)</li>
-                <li>Linux (Chrome, Firefox)</li>
-              </ul>
+              <p>Install the free <strong>MIDIWeb Browser</strong> app, which adds Web MIDI on Apple devices:</p>
+              <ol>
+                <li>Get MIDIWeb Browser from the App Store</li>
+                <li>Open it and find <strong>Zoom L6 Companion</strong> in its MIDIWeb Hub directory, or go to <strong>{{ appHost }}</strong></li>
+                <li>Connect your Zoom L6 over USB and allow MIDI access when asked</li>
+              </ol>
             </div>
             <div class="notice-actions">
+              <a href="https://apps.apple.com/us/app/midiweb-browser/id6757226617" target="_blank" rel="noopener" class="download-button">
+                Get MIDIWeb Browser
+              </a>
               <button @click="showPlatformPrompt = false" class="continue-button">
                 Continue anyway
               </button>

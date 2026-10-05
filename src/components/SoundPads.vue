@@ -4,24 +4,28 @@
       <h2 class="pads-title">Sound Pads</h2>
     </div>
     <div class="pads-grid">
+      <!-- aria-disabled (not `disabled`) so the tooltip still shows on unmapped pads in every browser -->
       <button
         v-for="pad in soundPads"
         :key="pad.id"
         class="pad-button"
+        :class="{ 'pad-button--unmapped': isUnmapped(pad) }"
+        :aria-disabled="isUnmapped(pad)"
+        :title="isUnmapped(pad) ? UNMAPPED_TOOLTIP : undefined"
         @mousedown="noteOn(pad)"
         @mouseup="noteOff(pad)"
         @touchstart.prevent="noteOn(pad)"
         @touchend.prevent="noteOff(pad)"
       >
         <div class="pad-id">{{ pad.id }}</div>
-        <div class="pad-note">MIDI {{ noteLabel(pad.note) }}</div>
+        <div class="pad-note">{{ isUnmapped(pad) ? 'Not Mapped' : `MIDI ${midiNoteLabel(pad.note)}` }}</div>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { SoundPad } from '../config/midiConfig';
+import { PAD_NOTE_NOT_MAPPED, midiNoteLabel, type SoundPad } from '../config/midiConfig';
 import { midiService } from '../services/midiService';
 
 interface Props {
@@ -30,20 +34,21 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const UNMAPPED_TOOLTIP =
+  'This pad is Not Mapped. Assign it a MIDI note in Advanced Settings ▸ Sound Pads to enable it.';
+
+function isUnmapped(pad: { note: number }): boolean {
+  return pad.note === PAD_NOTE_NOT_MAPPED;
+}
+
 function noteOn(pad: { note: number; channel: number }) {
+  if (isUnmapped(pad)) return;
   midiService.sendNoteOn(pad.note, pad.channel, 100);
 }
 
 function noteOff(pad: { note: number; channel: number }) {
+  if (isUnmapped(pad)) return;
   midiService.sendNoteOff(pad.note, pad.channel, 0);
-}
-
-function noteLabel(note: number) {
-  // Simple C-based note naming around middle C (60)
-  const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const octave = Math.floor(note / 12) - 1;
-  const name = names[note % 12];
-  return `${name}${octave} (${note})`;
 }
 </script>
 
@@ -103,6 +108,16 @@ function noteLabel(note: number) {
 .pad-button:active {
   background: #4a90e2;
   border-color: #4a90e2;
+}
+
+.pad-button--unmapped,
+.pad-button--unmapped:hover,
+.pad-button--unmapped:active {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #2a2a2a;
+  border-color: #444;
+  transform: none;
 }
 
 .pad-id {

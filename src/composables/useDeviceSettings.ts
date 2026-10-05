@@ -84,7 +84,15 @@ for (const p of zoomL6ParamList) {
 }
 
 const linkEnabled = ref(readPersistedBool(LINK_ENABLED_KEY, true));
-const showExperimental = ref(readPersistedBool(SHOW_EXPERIMENTAL_KEY, false));
+// The "Show experimental" UI toggle was removed once every captured setting was verified.
+// Unverified registry entries now simply stay hidden. Clear any previously persisted opt-in so
+// nobody is left with it stuck on and no control to turn it off.
+const showExperimental = ref(false);
+try {
+  localStorage.removeItem(SHOW_EXPERIMENTAL_KEY);
+} catch {
+  /* storage unavailable — nothing persisted to clear */
+}
 const mixerType = ref<MixerType>('l6');
 const suspended = ref(false);
 const linkError = ref<string | null>(null);
@@ -391,6 +399,30 @@ async function flush(id: ParamId, value: number, verify: boolean): Promise<void>
   }
 }
 
+/**
+ * Awaitable, unthrottled write. Use when the caller must know the write finished before it
+ * releases the editor link — e.g. reverting pad notes on Cancel. Any pending throttled write for
+ * the same id is dropped first so a stale trailing value can't land afterwards.
+ */
+async function setNow(id: ParamId, value: number, opts?: SetOptions): Promise<void> {
+  const def = entry(id);
+  if (!def) return;
+  if (def.readOnly || !isAvailable(id)) {
+    // Reuse set()'s error reporting for the not-writable cases.
+    set(id, value, opts);
+    return;
+  }
+  const slot = pending.get(id);
+  if (slot?.timer !== undefined) {
+    clearTimeout(slot.timer);
+    slot.timer = undefined;
+    slot.value = undefined;
+  }
+  values[id] = value;
+  errors[id] = null;
+  await flush(id, value, shouldVerify(def, opts));
+}
+
 // ── unsolicited device pushes / replies ───────────────────────────────────────
 editorSession.onMessage((m: ParsedZoomL6Message) => {
   if (m.kind !== 'paramValue') return;
@@ -421,10 +453,6 @@ watch(linkEnabled, (enabled) => {
   } else if (refCount > 0) {
     void ensureOpen();
   }
-});
-
-watch(showExperimental, (value) => {
-  persistBool(SHOW_EXPERIMENTAL_KEY, value);
 });
 
 watch(midiService.connectionState, (connected) => {
@@ -468,6 +496,7 @@ export interface DeviceSettingsApi {
   refresh: (ids: ParamId[]) => Promise<void>;
   refreshAll: () => Promise<void>;
   set: (id: ParamId, value: number, opts?: SetOptions) => void;
+  setNow: (id: ParamId, value: number, opts?: SetOptions) => Promise<void>;
   suspend: () => Promise<void>;
   resume: () => Promise<void>;
   close: () => void;
@@ -493,6 +522,7 @@ const api: DeviceSettingsApi = {
   refresh,
   refreshAll,
   set,
+  setNow,
   suspend,
   resume,
   close,

@@ -8,36 +8,50 @@ interface Props {
   paramId: ParamId;
   label?: string;
   readonly?: boolean;
-  /** Show the "enable experimental" hint on this field (only the first field of a group should). */
-  showExperimentalHint?: boolean;
+  /**
+   * Controlled mode: when set, the parent owns the value (e.g. a setting shared by the app and the
+   * mixer). The field shows this value and emits `update:modelValue` instead of writing the mixer
+   * itself, and it stays editable even when the editor link is closed.
+   */
+  modelValue?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   label: undefined,
   readonly: false,
-  showExperimentalHint: false,
+  modelValue: undefined,
 });
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number): void;
+}>();
 
 const deviceSettings = useDeviceSettings();
 const def = computed(() => getParam(props.paramId));
 
 const displayLabel = computed(() => props.label ?? def.value.label);
-const value = computed<number | undefined>(() => deviceSettings.values[props.paramId]);
+const controlled = computed(() => props.modelValue !== undefined);
+const value = computed<number | undefined>(() =>
+  controlled.value ? props.modelValue : deviceSettings.values[props.paramId],
+);
 const paramStatus = computed(() => deviceSettings.status[props.paramId] ?? 'idle');
 const errorText = computed(() => deviceSettings.errors[props.paramId] ?? null);
 
 const isReadOnly = computed(() => props.readonly || def.value.readOnly === true);
 const isTextOnly = computed(() => isReadOnly.value || def.value.encoding.kind === 'ascii');
-const disabled = computed(() => isReadOnly.value || !deviceSettings.isWritable(props.paramId));
-
-/** Locked specifically because the entry is unverified and the experimental toggle is off. */
-const experimentalHintVisible = computed(
-  () =>
-    props.showExperimentalHint &&
-    !isReadOnly.value &&
-    !def.value.verified &&
-    !deviceSettings.showExperimental.value,
+const disabled = computed(
+  () => isReadOnly.value || (!controlled.value && !deviceSettings.isWritable(props.paramId)),
 );
+
+/** Writes the mixer, or hands the value to the parent in controlled mode. */
+function commit(next: number): void {
+  if (controlled.value) {
+    emit('update:modelValue', next);
+  } else {
+    deviceSettings.set(props.paramId, next);
+  }
+}
+
 
 const statusTitle = computed(() => {
   if (paramStatus.value === 'error') return errorText.value ?? 'Error';
@@ -48,13 +62,13 @@ const statusTitle = computed(() => {
 function onEnumChange(event: Event): void {
   const raw = Number((event.target as HTMLSelectElement).value);
   if (Number.isNaN(raw)) return;
-  deviceSettings.set(props.paramId, raw);
+  commit(raw);
 }
 
 // ── bool control ─────────────────────────────────────────────────────────────
 function toggleBool(): void {
   if (disabled.value) return;
-  deviceSettings.set(props.paramId, value.value === 1 ? 0 : 1);
+  commit(value.value === 1 ? 0 : 1);
 }
 
 // ── numeric control (with optional specialValues combo) ─────────────────────
@@ -88,7 +102,7 @@ function onSpecialSelectChange(event: Event): void {
   }
   manualEntry.value = false;
   const num = Number(raw);
-  if (!Number.isNaN(num)) deviceSettings.set(props.paramId, num);
+  if (!Number.isNaN(num)) commit(num);
 }
 
 function clampToRange(n: number): number {
@@ -99,7 +113,7 @@ function clampToRange(n: number): number {
 function onNumberChange(event: Event): void {
   const raw = Number((event.target as HTMLInputElement).value);
   if (Number.isNaN(raw)) return;
-  deviceSettings.set(props.paramId, clampToRange(raw));
+  commit(clampToRange(raw));
 }
 
 const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectValue.value === '__custom');
@@ -152,6 +166,19 @@ const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectV
         <span class="toggle-state">{{ value === 1 ? 'ON' : 'OFF' }}</span>
       </button>
 
+      <!-- numeric with discrete choices (e.g. MIDI channel 1-16) -->
+      <select
+        v-else-if="def.choices"
+        class="setting-select device-param-field__select"
+        :disabled="disabled"
+        :value="value ?? def.choices[0]?.value"
+        @change="onEnumChange"
+      >
+        <option v-for="choice in def.choices" :key="choice.value" :value="choice.value">
+          {{ choice.label }}
+        </option>
+      </select>
+
       <!-- numeric (u7 / u14le / u28le), optionally combined with specialValues -->
       <div v-else class="device-param-field__numeric">
         <select
@@ -181,13 +208,77 @@ const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectV
       </div>
     </div>
 
-    <p v-if="experimentalHintVisible" class="setting-hint device-param-field__hint">
-      Enable "Show experimental device settings" above to edit
-    </p>
   </div>
 </template>
 
 <style scoped>
+/* Shared control look: copied from AdvancedSettings.vue (its styles are scoped, so they don't
+   reach into this child component). Keep in sync with .setting-select / .cc-input there. */
+.setting-select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 10px 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  min-width: 150px;
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3e%3cpath fill='%234a90e2' d='M6 9L1 4h10z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background-color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.setting-select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.setting-select option {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 8px;
+}
+
+.cc-input {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.cc-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.cc-input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.setting-hint {
+  color: #888;
+  font-size: 12px;
+  margin: 0;
+  font-style: italic;
+}
+
 .device-param-field {
   display: flex;
   align-items: center;
@@ -273,11 +364,6 @@ const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectV
   font-weight: 600;
 }
 
-.device-param-field__select {
-  min-width: 120px;
-  padding: 6px 32px 6px 10px;
-  font-size: 13px;
-}
 
 .device-param-field__numeric {
   display: flex;
@@ -287,7 +373,6 @@ const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectV
 
 .device-param-field__number {
   width: 80px;
-  padding: 6px 8px;
 }
 
 .device-param-field__unit {
@@ -327,11 +412,6 @@ const showNumberInput = computed(() => !hasSpecialValues.value || specialSelectV
 .device-param-field__number:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.device-param-field__hint {
-  flex-basis: 100%;
-  margin: 0;
 }
 
 @media (max-width: 480px) {
