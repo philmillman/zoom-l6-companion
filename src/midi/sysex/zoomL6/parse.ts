@@ -72,8 +72,7 @@ function parseUniversal(bytes: readonly number[]): ZoomL6Message | null {
  * blob whose exact framing is not fully reverse-engineered yet. In real captures the id list is an
  * ascending run of the session-command ids the editor may address (`01 02 03 … 41`) that sits
  * *after* an interior run of zero bytes, so the old "collect until the first 00 00" heuristic
- * stopped almost immediately and returned garbage. Until the framing is verified (see
- * docs/CAPTURE_GUIDE.md) we treat `payload` as the source of truth and derive `supportedIds`
+ * stopped almost immediately and returned garbage. Until the framing is verified we treat `payload` as the source of truth and derive `supportedIds`
  * heuristically as the longest strictly-ascending contiguous run after the flag region. `flags`
  * and `tail` are best-effort and may change once the layout is confirmed.
  */

@@ -28,3 +28,7 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Raw MIDI Monitor / probe captures are working files; tests use src/**/__tests__/fixtures
+captures/
+.claude/launch.json

@@ -101,21 +101,110 @@ Device: Heartbeat Ack (F0 52 00 00 00 0B F7)
 
 **Stale detection:** If the device stops acking heartbeats (e.g., the connection is broken or the app is backgrounded), the session is marked **stale**. The next time the host needs to read or write a parameter, it will automatically reopen the session (issue a new EditorOpen if still connected).
 
-**Concurrent sessions:** The official ZOOM L6 Editor and this app must not both hold an open session. If they overlap, SysEx messages collide and both may malfunction. Always close one before opening the other; the CAPTURE_GUIDE.md recommends quitting the editor before using this app's editor link.
+**Concurrent sessions:** The official ZOOM L6 Editor and this app must not both hold an open session. If they overlap, SysEx messages collide and both may malfunction. Always close one before opening the other: quit the editor before turning on this app's editor link.
+
+## State Snapshot (GlobalSettingDump)
+
+When an editor session opens, the device immediately replies to the **EditorOpen** command with a **GlobalSettingDump** — a complete snapshot of the mixer's settings, laid out in write-command-id order (`31 <id>` command bytes).
+
+```
+Host: EditorOpen (F0 52 00 00 2B F7)
+Device: EditorOpenReply (F0 52 00 00 2A <layoutByte> <payload> F7)
+```
+
+The first byte of the payload (`<layoutByte>`) identifies the device type:
+- `0x03`: L6 (133-byte payload)
+- `0x2E`: L6max (176-byte payload)
+
+### State Layout (L6)
+
+| Offset | Width | Setting | Notes |
+|--------|-------|---------|-------|
+| 0 | 1 | layout byte | `0x03` |
+| 2 | 1 | battery type | `00` Alkaline / `01` Ni-MH / `02` Lithium |
+| 3 | 1 | auto power off | `00` 10 Hours / `01` Never |
+| 4 | 1 | mixer control via MIDI | `00` off / `01` on |
+| 5 | 1 | recorder mode | `00` Multi Track / `01` Master Only |
+| 6–9 | 1 each | pad 1–4 play mode | `00` One-shot / `01` Loop / `02` Hold |
+| 10–13 | 1 each | pad 1–4 level | `00`–`3B` (`00` = −∞, otherwise raw − 49 dB; `31` = 0 dB) |
+| 19 | 1 | MIDI out mode | `00` Out / `01` Thru |
+| 20 | 1 | MIDI channel | channel − 1 (`00` = ch 1 … `0F` = ch 16) |
+| 21–86 | 1 each | CC mapping table | 66 bytes: the CC# for each control, in write-order |
+| 87–90 | 1 each | pad 1–4 MIDI note | `00`–`7F` (C−2 … G8, with C3 = 60); reads `00` when the pad is Not Mapped |
+| 91–94 | 1 each | pad 1–4 Not Mapped flag | `01` = Not Mapped (overrides the note byte) / `00` = mapped |
+| 95–114 | 2 each (LE) | effect parameters | 10 slots: Hall Decay/Tone, Room Decay/Tone, Spring Dwell/Tone, Delay Time/Feedback, Echo Time/Repeat (14-bit LE) |
+| 115–120 | 1 each | AUX1 send point, ch 1–6 | `00` Pre / `01` Post |
+| 121–126 | 1 each | AUX2 send point, ch 1–6 | `00` Pre / `01` Post (AUX-major: all AUX1 channels, then all AUX2) |
+
+Bytes 1, 14–18 and 127–132 are still unidentified. Offsets 3, 5, 19, 20, 91–94 and 115–126 were
+located by a live probe on an L6 (fw 1.00): each setting was written with its verified `31 <id>`
+command, the snapshot was re-read (Identity Request + EditorOpen) and diffed, then the mixer was
+restored (`scripts/l6probe.swift`). The snapshots are in
+`src/midi/sysex/zoomL6/__tests__/fixtures/probe-l6-snapshot-diff.jsonl`, which the unit tests use.
+
+### State Layout (L6max)
+
+| Offset | Width | Setting | Notes |
+|--------|-------|---------|-------|
+| 0 | 1 | layout byte | `0x2E` |
+| 6 | 1 | USB audio mode | `00` Stereo mix / `01` Multi Track |
+| 13–16 | 1 each | pad 1–4 play mode | `00` One-shot / `01` Loop / `02` Hold; unverified (same structure as the L6) |
+| 17–20 | 1 each | pad 1–4 level | `00`–`3B` (−∞ … +10 dB); unverified (same structure as the L6) |
+| 28–121 | 1 each | CC mapping table | 94 bytes: the CC# for each control, in write-order |
+| 122–125 | 1 each | pad 1–4 MIDI note | `00`–`7F` (C−2 … G8, with C3 = 60); unverified (same structure as the L6) |
+| 130–149 | 2 each (LE) | effect parameters | 10 slots (same order as L6; unverified) |
+| 150 | 1 | monitor point | `00` Pre / `01` Pre+Comp / `02` Post |
+| 151 | 1 | sub-out point | `00` Pre / `01` Pre+Comp / `02` Post |
+
+### Sound Pad Files
+
+Pad file names are read separately with **GetParam** (`46 00 <pad>` and `46 02 <pad>`):
+
+```
+Host: GetParam (F0 52 00 00 46 00 <pad> F7)                     — check if assigned
+Device: ParamValue (F0 52 00 00 45 00 <pad> [00 01] F7)        — [00 01] = file assigned
+
+Host: GetParam (F0 52 00 00 46 02 <pad> F7)                     — read file name
+Device: ParamValue (F0 52 00 00 45 02 <pad> <header> <packed> F7)
+```
+
+The file-name payload:
+- Bytes 0–1: header (usually `7F 7F` if no file, ignored if file is assigned)
+- Bytes 2–3: file-name byte length (7-bit LE)
+- Bytes 4+: UTF-16LE text, packed 8→7-bit (one MSB byte followed by up to seven data bytes)
+
+### Re-Read Sequence
+
+The mixer does not push changes made on its hardware; the app re-reads state at these points:
+
+1. **On session open**: Decode the snapshot immediately
+2. **When Device Settings opens**: Send Identity Request, then EditorOpen again
+3. **After a scene recall** (from hardware or the app): Re-read snapshot
+4. **When Advanced Settings closes**: Re-read snapshot
+
+The SysEx explorer includes a **Snapshot** button to capture the current state and a **Diff** button to show byte-level changes from the last capture.
 
 ## Session-Command Writes (`31 <id> …`) — the write path for editable settings
 
-Reverse-engineering the official editor's captures (`captures/`) showed that **every editable
-setting is written with a session command**, not the `45 <group> <index>` family originally assumed:
+Reverse-engineering the official editor's captures showed that **every editable setting is
+written with a session command**, not the `45 <group> <index>` family originally assumed.
+
+> The evidence column cites the original MIDI Monitor captures by name (`captures/12` =
+> `12-device-settings.txt`, `maxB` = `maxB-monitor-point.txt`, …; L6 fw 1.00, L6max editor 2.0.0).
+> The raw captures are not kept in the repo; the snapshots and reads the tests need are in
+> `src/midi/sysex/zoomL6/__tests__/fixtures/editor-captures.json`, keyed by capture name.
+>
+> Not write commands: **SUB-MIX** is device-menu only (the editor sends nothing), **AI Noise
+> Reduction** is a hardware learn function, and **date/time** (`00`) is a one-way clock push.
 
 ```
 F0 52 00 00 31 <id> <prefix…> <value…> F7        (host → device)
 F0 52 00 00 00 <id> F7                            (device → host ack, id echoed)
 ```
 
-`<prefix…>` is a fixed run of selector bytes; the encoded value bytes follow it. The `45/46` family
-is what the editor uses to **read** device state at connect (pad file names, a settings block); that
-read encoding is not yet decoded, so these session settings are treated as **write-only**.
+`<prefix…>` is a fixed run of selector bytes; the encoded value bytes follow it. The device state
+is read at session open via the **GlobalSettingDump** (see the State Snapshot section above); pad
+file names are read separately with `46 02 <pad>` (see Sound Pad Files above).
 
 | id | setting | prefix | value | evidence |
 |----|---------|--------|-------|----------|
@@ -167,7 +256,7 @@ Each parameter definition includes:
 - **label**: Human-readable name for the UI
 - **category**: `midi`, `fx`, `aux`, `pads`, `system`, `recorder`, `monitor`, or `info`
 - **address**: How to access it — either:
-  - `{scheme: 'session', id, prefix?}`: **write** via the session command `31 <id> <prefix…> <value…>` (the path every editable setting uses; write-only for now). `prefix` is the fixed selector run, e.g. `[pad]`, `[ch, aux]`, `[effect, param]`.
+  - `{scheme: 'session', id, prefix?}`: **write** via the session command `31 <id> <prefix…> <value…>` (the path every editable setting uses; current values are read from the state snapshot instead, see above). `prefix` is the fixed selector run, e.g. `[pad]`, `[ch, aux]`, `[effect, param]`.
   - `{scheme: 'param', group, index}`: read/write via `46/45 <group> <index>` (used for the placeholder addresses of settings not yet decoded)
   - `{scheme: 'identity'}`: derived from the Identity Reply (firmware version only)
 - **encoding**: Byte representation — `u7`, `u14le`, `u28le`, `bool`, `enum`, or `ascii`
@@ -192,7 +281,7 @@ Other groups are unknown; the SysEx explorer can sweep ranges to discover new on
 All entries as of this documentation date. The **Address** column shows the session command that
 writes the setting: `31 <id>` optionally followed by a fixed argument prefix `+[…]` (the encoded
 value bytes follow the prefix on the wire). Fifty-two settings are **verified** against the captures in
-`captures/` (write path only — see the write-only note above); `firmwareVersion` is verified via the
+`captures/` (write path; reading is covered by the state snapshot section); `firmwareVersion` is verified via the
 identity reply. Entries marked `placeholder` are still unverified — L6max-only settings now captured on real L6max hardware are verified too; the remaining placeholders are
 `dateTime`/`sdInfo`, whose encodings are undecoded.
 
@@ -293,43 +382,34 @@ The registry defines the offset for each entry; the UI layer and the session tra
 
 ## How to Contribute Findings
 
-If you are reverse-engineering new parameter addresses:
+**Writes** come from watching the official ZOOM L6 Editor (macOS):
 
-1. **Record a capture**: Follow the steps in [docs/CAPTURE_GUIDE.md](./CAPTURE_GUIDE.md) to record MIDI Monitor output (macOS) or equivalent tool (Linux / Windows) while using the official ZOOM L6 Editor.
-
-2. **Decode the capture**:
+1. Install [MIDI Monitor](https://www.snoize.com/MIDIMonitor/). In Settings ▸ Display turn on
+   **Expert mode**. In a new window, check **L6 Editor Port** under both *MIDI sources* and
+   *Spy on output to destinations*, and nothing else.
+2. Turn the app's **Editor link** off (or close the app), launch the editor and wait for CONNECTED.
+3. Change one setting slowly (e.g. Out → Thru → Out), then ⌘A ⌘C the event list into
+   `captures/NN-scenario.txt` (`captures/` is git-ignored scratch space).
+4. Decode it; a toggled setting shows up as one `31 <id>` write whose value flips and flips back:
    ```bash
    npm run decode captures/NN-scenario.txt
-   ```
-   This prints a human-readable report of every parameter read/write, grouped by group/index.
-
-3. **Compare captures** (optional):
-   ```bash
    npm run decode captures/NN-scenario.txt -- --diff captures/MM-scenario.txt
    ```
-   Shows only the differences between two captures.
 
-4. **Inspect the SysEx explorer** (live, in the app):
-   - Open Debug drawer (⌘D or gear icon)
-   - Go to **SysEx** tab
-   - Click **Open** to start an editor session
-   - Use **Sweep** to query groups/indices automatically (GET only; never use SET on placeholders)
-   - Use **Snapshot** to capture current device state, then modify on hardware and **Diff** to see what changed
+**Reads** (where a setting sits in the state snapshot) come from diffing snapshots around one
+change, either with the Debug drawer's **SysEx** tab (Open → Snapshot → change the setting →
+Re-read snapshot → Snapshot → Diff) or with `swift scripts/l6probe.swift steps.json` on macOS
+(verified `31` writes per step, a snapshot after each, restore steps at the end). Never send `45`
+SETs to unknown addresses; the explorer's Sweep is GET-only.
 
-5. **Promote an entry to verified**:
-   - In `src/midi/sysex/zoomL6/params.ts`, find the entry
-   - Change `address: placeholder()` to `address: {scheme: 'param', group: X, index: Y}`
-   - Change `verified: false` to `verified: true`
-   - Add `evidence: "captures/NN-scenario.txt lines A–B"` with a specific cite
-   - Run `npm test` to ensure no duplicate addresses
+**Promote an entry to verified** only from such evidence:
 
-6. **Run tests**:
-   ```bash
-   npm test
-   npm run type-check
-   ```
-
-7. **Submit a PR** linking to your capture(s) and parameter findings.
+- Write: in `src/midi/sysex/zoomL6/params.ts`, set `address: { scheme: 'session', id, prefix }`,
+  `verified: true` and an `evidence` string naming the capture and bytes; add a wire-byte test.
+- Read: add a `SnapshotSlot` in `stateSnapshot.ts` with `verified: true` and `evidence`; copy the
+  messages its test needs into `src/midi/sysex/zoomL6/__tests__/fixtures/` rather than committing
+  the raw capture.
+- Run `npm test` and `npm run type-check`, then open a PR describing the findings.
 
 The Debug drawer's SysEx tab logs all inbound and outbound SysEx to the browser console; if the official ZOOM L6 Editor and this app both push on the same port, you will see collisions in the MIDI tab.
 

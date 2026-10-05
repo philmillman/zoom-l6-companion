@@ -4,7 +4,7 @@
  *
  *   npx tsx scripts/decode-capture.ts <capture.txt> [--diff <other.txt>] [--all-heartbeats]
  *
- * `capture.txt` is text copied from snoize MIDI Monitor (see docs/CAPTURE_GUIDE.md).
+ * `capture.txt` is text copied from snoize MIDI Monitor (see docs/PROTOCOL.md ▸ How to Contribute Findings).
  */
 import { readFileSync } from 'node:fs';
 import { parseMidiMonitorText } from '../src/midi/sysex/zoomL6/capture/midiMonitorParser';

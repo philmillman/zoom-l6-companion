@@ -60,22 +60,43 @@ lives in module singletons, not a store.
 
 Envelope `F0 52 00 00 <cmd> <args> F7` (52 = Zoom). Editable settings are **written** with a session
 command `31 <id> <args>` and acked by `00 <id>`. Example: MIDI Out→Thru is `F0 52 00 00 31 0C 01 F7`.
-The `45/46 <group> <index>` family is the editor *reading* device state; its per-setting read
-encoding is **not yet decoded**, so registry settings are currently **write-only**
-(`useDeviceSettings.refresh` skips them; the UI shows what you set, not what the device holds).
+
+When an editor session opens, the mixer replies with a **snapshot** (`F0 52 00 00 2A <payload> F7`,
+the official editor's "GlobalSettingDump"): a full dump of its settings in write-command-id order,
+with `payload[0]` = layout (`03` L6, `2E` L6max). `decodeSnapshot()` in `stateSnapshot.ts` turns its
+**verified** slots into setting values on every session open and re-read (Device Settings opened,
+scene recall, Advanced Settings closed). Unverified slots are never shown. Pad files are separate
+`46 00/02 <pad>` reads. The mixer never pushes hardware changes, so state is only as fresh as the
+last read.
 
 ### Adding or verifying a setting
 
-1. Capture the official ZOOM L6 Editor with MIDI Monitor per `docs/CAPTURE_GUIDE.md`; save under
-   `captures/`. `npm run decode` prints the `31 <id>` writes.
-2. In `params.ts`, set the entry's `address` to `{ scheme: 'session', id, prefix }` (prefix = the
-   fixed selector bytes, e.g. pad index or effect+param), the right `encoding`/`range`/labels,
+**Writing it** (to change the setting from the app):
+
+1. Capture the official ZOOM L6 Editor with MIDI Monitor (steps in `docs/PROTOCOL.md` ▸ How to
+   Contribute Findings); save under
+   `captures/` (git-ignored scratch). `npm run decode` prints the `31 <id>` writes.
+2. In `params.ts`, set the entry's `address` to `{ scheme: 'session', id, prefix }` (prefix = fixed
+   selector bytes, e.g. pad index or effect+param), the right `encoding`/`range`/labels,
    `verified: true`, and an `evidence` string naming the capture and bytes.
 3. Add a byte-level test in `src/midi/sysex/zoomL6/__tests__/` asserting the exact wire bytes.
-4. Unverified entries stay hidden from the UI (there is no "show experimental" toggle) and are
-   refused by `editorSession.setValue` without `{ force: true }`. Only mark `verified` from a real
-   capture — never invent an address. The L6max-only settings were verified on an L6max
-   (`captures/max*.txt`); `docs/CAPTURE_GUIDE_L6MAX.md` covers capturing more.
+
+**Reading it** (so the UI shows the mixer's current value):
+
+1. Find its snapshot byte by diffing snapshots around a single change, either with the Debug drawer's
+   **SysEx explorer** (Open → Take snapshot → change the one setting → Re-read snapshot → Take
+   snapshot → Diff; the diff labels known bytes) or, on macOS without a browser,
+   `swift scripts/l6probe.swift steps.json` (verified `31` writes per step, a snapshot after each,
+   restore steps at the end).
+2. Add a `SnapshotSlot` (`paramId`, payload-relative `offset`, `width`, `verified: true`, `evidence`)
+   to the right layout in `stateSnapshot.ts`.
+3. Add a test that decodes a real captured snapshot and checks the value. Fixtures live in
+   `src/midi/sysex/zoomL6/__tests__/fixtures/` (loaded via `captureFixtures.ts`): the extracted
+   editor-capture messages and the probe JSONL. Raw captures are not committed.
+
+Only mark anything `verified` from a real capture or explorer diff; never invent an address or
+offset. Unverified entries stay hidden and are refused by `editorSession.setValue` without
+`{ force: true }`. The L6max-only settings were verified on an L6max (captures `maxA`–`maxJ`).
 
 ## Gotchas
 
@@ -94,3 +115,5 @@ encoding is **not yet decoded**, so registry settings are currently **write-only
   lives in Device Settings ▸ MIDI (`DeviceParamField` in controlled mode via `modelValue`).
   `PAD_NOTE_NOT_MAPPED` (128, `midiConfig.ts`) means "Not Mapped" and disables that pad in the main view.
 - Note names follow the official editor (C3 = 60): use `midiNoteLabel()` from `midiConfig.ts`.
+- Snapshot adoption (writing the mixer's CC mapping, MIDI channel and pad notes to the app config) is deferred while
+  Advanced Settings is open; it happens when it closes. This avoids overwriting user edits in progress.

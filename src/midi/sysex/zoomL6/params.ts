@@ -6,7 +6,7 @@
  * SysEx explorer (which addresses are known).
  *
  * Every entry starts `verified: false` with a **placeholder address in group 0x7F** (never sent
- * by the app). Reverse-engineering captures (see docs/CAPTURE_GUIDE.md) promote entries to
+ * by the app). Reverse-engineering captures (see docs/PROTOCOL.md) promote entries to
  * `verified: true` with a real address, encoding, range and an `evidence` note.
  */
 

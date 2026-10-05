@@ -1,6 +1,6 @@
 /**
  * Parses text copied from snoize MIDI Monitor (Select All -> Copy) into structured SysEx events.
- * See docs/CAPTURE_GUIDE.md for how a capture is produced.
+ * See docs/PROTOCOL.md (How to Contribute Findings) for how a capture is produced.
  *
  * One event per line, tab-separated, no header: Time / Source / Message / Chan / Data.
  * - Source is `From <port>` (device->host) or `To <port>` (spied output, host->device).
