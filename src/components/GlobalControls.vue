@@ -1,9 +1,9 @@
 <template>
-  <div class="global-controls">
+  <div class="global-controls" :class="{ compact }">
     <div class="global-header">
       <h2 class="global-title">Global</h2>
     </div>
-    
+
     <!-- Always show normal layout -->
     <div class="controls-container">
       <div class="control-section">
@@ -20,8 +20,14 @@
             @change="onControlChange('global', 'compressor', $event)"
           />
         </div>
+        <EffectParams
+          :efxType="values.efxType"
+          :efxOptions="globalData.efxType.options ?? []"
+          :mixerType="mixerType"
+          :compact="compact"
+        />
       </div>
-      
+
       <div class="control-section">
         <SceneControls :mixerType="mixerType" @sceneChanged="onSceneChanged" />
       </div>
@@ -33,11 +39,13 @@
 import { reactive } from 'vue';
 import MidiControl from './MidiControl.vue';
 import SceneControls from './SceneControls.vue';
+import EffectParams from './EffectParams.vue';
 import type { GlobalControls } from '../config/midiConfig';
 
 interface Props {
   globalData: GlobalControls;
   mixerType?: 'l6' | 'l6max';
+  compact?: boolean;
 }
 
 interface Emits {
@@ -46,7 +54,8 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  mixerType: 'l6'
+  mixerType: 'l6',
+  compact: false
 });
 const emit = defineEmits<Emits>();
 
@@ -143,33 +152,6 @@ defineExpose({
 /* Section-specific styling */
 .master-section {
   border-color: rgba(74, 144, 226, 0.3);
-}
-
-.reverb-section {
-  border-color: rgba(156, 39, 176, 0.3);
-}
-
-.delay-section {
-  border-color: rgba(255, 193, 7, 0.3);
-}
-
-.compressor-section {
-  border-color: rgba(244, 67, 54, 0.3);
-}
-
-.reverb-section .section-title {
-  color: #9c27b0;
-  border-bottom-color: rgba(156, 39, 176, 0.3);
-}
-
-.delay-section .section-title {
-  color: #ffc107;
-  border-bottom-color: rgba(255, 193, 7, 0.3);
-}
-
-.compressor-section .section-title {
-  color: #f44336;
-  border-bottom-color: rgba(244, 67, 54, 0.3);
 }
 
 /* Compact Mode */

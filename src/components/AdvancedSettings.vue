@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onUnmounted } from 'vue';
 import type { ChannelControls, GlobalControls, SoundPad, MixerType } from '../config/midiConfig';
+import { PAD_NOTE_NOT_MAPPED, midiNoteLabel } from '../config/midiConfig';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads } from '../config/midiConfig';
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from '../config/midiConfigL6Max';
-import { midiService } from '../services/midiService';
-import { runZoomL6FileTransferHandshake } from '../midi/sysex';
+import DeviceSettingsPanel from './DeviceSettingsPanel.vue';
+import DeviceNotice from './DeviceNotice.vue';
+import { useDeviceSettings } from '../composables/useDeviceSettings';
+import { getParam, type ParamId } from '../midi/sysex/zoomL6/params';
+import type { PadFileInfo } from '../midi/sysex/zoomL6/stateSnapshot';
 
 interface Props {
   isVisible: boolean;
@@ -42,44 +46,11 @@ const hasCustomSettings = computed(() => {
 
 // Track which section is expanded
 const expandedSections = reactive({
-  channels: true,
+  channels: false,
   global: false,
   soundPads: false,
-  nonMidi: false,
+  device: false,
 });
-
-const massStorageBusy = ref(false);
-const massStorageCooldown = ref(false);
-let massStorageCooldownTimer: ReturnType<typeof window.setTimeout> | undefined;
-
-const massStorageNotice = ref('');
-const massStorageNoticeVariant = ref<'success' | 'error'>('success');
-
-const massStorageButtonsLocked = computed(
-  () => massStorageBusy.value || massStorageCooldown.value,
-);
-
-function startMassStorageCooldown() {
-  massStorageCooldown.value = true;
-  window.clearTimeout(massStorageCooldownTimer);
-  massStorageCooldownTimer = window.setTimeout(() => {
-    massStorageCooldown.value = false;
-    massStorageCooldownTimer = undefined;
-  }, 3000);
-}
-
-const midiOutputReady = computed(() => midiService.midiOutputConnected.value);
-const midiInputReady = computed(() => midiService.midiInputConnected.value);
-const sysexReady = computed(() => midiService.sysexEnabled.value);
-/** SysEx can use the Editor output even when Mixer Control is selected for CC. */
-const massStorageOutReady = computed(
-  () => midiOutputReady.value || midiService.hasZoomEditorSysexOutput(),
-);
-const massStorageHandshakeWaitReady = computed(
-  () =>
-    sysexReady.value &&
-    (midiInputReady.value || midiService.hasZoomEditorSysexInput()),
-);
 
 // Check for duplicate CCs
 const hasDuplicateCCs = computed(() => {
@@ -124,11 +95,171 @@ const hasDuplicateCCs = computed(() => {
 const hasDuplicateNotes = computed(() => {
   const noteCounts = new Map<number, number>();
   editableSoundPads.forEach(pad => {
-    if (pad.note >= 0) {
+    if (pad.note >= 0 && pad.note !== PAD_NOTE_NOT_MAPPED) {
       noteCounts.set(pad.note, (noteCounts.get(pad.note) || 0) + 1);
     }
   });
   return Array.from(noteCounts.values()).some(count => count > 1);
+});
+
+
+// ── Sound pads: mixer settings laid out like the official ZOOM L6 Editor ─────────────
+// Play mode / level / clock sync are mixer-only settings, written immediately (like the Device
+// Settings section). MIDI Note is ONE column kept in sync: it writes the mixer immediately AND
+// sets this app's trigger note, which (like everything else here) is persisted on Save. Cancel
+// reverts the mixer to the notes it had when the dialog opened; Save also pushes notes changed
+// without a mixer write (Reset to Defaults).
+const deviceSettings = useDeviceSettings();
+
+type PadField = 'mode' | 'level' | 'note' | 'clockSync';
+function padParam(padIndex: number, field: PadField): ParamId {
+  return `pad${padIndex + 1}.${field}` as ParamId;
+}
+
+function enumLabels(id: ParamId): readonly string[] {
+  const enc = getParam(id).encoding;
+  return enc.kind === 'enum' ? enc.labels : [];
+}
+
+const PAD_MODE_OPTIONS = enumLabels('pad1.mode').map((label, value) => ({ value, label }));
+/** Raw level v: 00 = −∞, otherwise v − 49 dB in 1 dB steps (01 = −48 … 31 = 0 … 3B = +10). */
+const PAD_LEVEL_OPTIONS = Array.from({ length: 0x3b + 1 }, (_, v) => {
+  const db = v - 49;
+  const sign = db < 0 ? '−' : db > 0 ? '+' : '';
+  return { value: v, label: v === 0 ? '−∞' : `${sign}${Math.abs(db)} dB` };
+});
+const PAD_NOTE_OPTIONS = [
+  { value: PAD_NOTE_NOT_MAPPED, label: midiNoteLabel(PAD_NOTE_NOT_MAPPED) },
+  ...Array.from({ length: 128 }, (_, n) => ({ value: n, label: midiNoteLabel(n) })),
+];
+const PAD_CLOCK_SYNC_OPTIONS = [
+  { value: 0, label: 'Off' },
+  { value: 1, label: 'On' },
+];
+
+/** MIDI Clock Sync exists only on the L6max (official L6max editor column). */
+const showPadClockSync = computed(() => mixerTypeOverride.value === 'l6max');
+
+/** Raw pad level for 0 dB (see PAD_LEVEL_OPTIONS). */
+const PAD_LEVEL_0DB = 0x31;
+
+/**
+ * Unread mixer values show the first option, matching the other device settings — except Level,
+ * which defaults to 0 dB rather than −∞.
+ */
+function padDeviceValue(padIndex: number, field: PadField): number {
+  return deviceSettings.values[padParam(padIndex, field)] ?? (field === 'level' ? PAD_LEVEL_0DB : 0);
+}
+
+function padFieldWritable(padIndex: number, field: PadField): boolean {
+  return deviceSettings.isWritable(padParam(padIndex, field));
+}
+
+function onPadDeviceChange(padIndex: number, field: PadField, event: Event): void {
+  const value = Number((event.target as HTMLSelectElement).value);
+  if (Number.isNaN(value)) return;
+  deviceSettings.set(padParam(padIndex, field), value);
+}
+
+/** App notes when the dialog opened (Cancel restores the mixer to these). */
+let originalPadNotes: number[] = props.currentSoundPads.map((pad) => pad.note);
+/** What this dialog session has asked the mixer to hold (assumed to match the app at open). */
+let mixerPadNotes: number[] = [...originalPadNotes];
+
+function onPadNoteChange(padIndex: number, event: Event): void {
+  const note = Number((event.target as HTMLSelectElement).value);
+  const pad = editableSoundPads[padIndex];
+  if (Number.isNaN(note) || !pad) return;
+  pad.note = note;
+  mixerPadNotes[padIndex] = note;
+  deviceSettings.set(padParam(padIndex, 'note'), note);
+}
+
+// MIDI channel: one control (Device Settings ▸ MIDI) shared by the app and the mixer, same model as
+// the pad notes — the mixer is written immediately, all app controls take the channel on Save.
+/** App channel when the dialog opened (Cancel restores the mixer to it). */
+let originalMidiChannel = globalMidiChannel.value;
+/** Channel this dialog session has asked the mixer to use (assumed to match the app at open). */
+let mixerMidiChannel = originalMidiChannel;
+
+function onMidiChannelChange(channel: number): void {
+  globalMidiChannel.value = channel;
+  mixerMidiChannel = channel;
+  deviceSettings.set('midiChannel', channel);
+}
+
+/**
+ * Brings the mixer to the given pad notes and MIDI channel, writing only what differs from what it
+ * was last told and waiting for each write to finish.
+ */
+async function syncMixer(target: { padNotes: number[]; midiChannel: number }): Promise<void> {
+  const changedPads = target.padNotes
+    .map((note, padIndex) => (note !== mixerPadNotes[padIndex] ? padIndex : -1))
+    .filter((padIndex) => padIndex >= 0);
+  const channelChanged = target.midiChannel !== mixerMidiChannel;
+  if (changedPads.length === 0 && !channelChanged) return;
+  // Hold the editor link for the duration so the writes aren't cut off when the dialog closes.
+  const release = deviceSettings.acquire();
+  try {
+    if (channelChanged) {
+      await deviceSettings.setNow('midiChannel', target.midiChannel);
+      mixerMidiChannel = target.midiChannel;
+    }
+    for (const padIndex of changedPads) {
+      const note = target.padNotes[padIndex]!;
+      await deviceSettings.setNow(padParam(padIndex, 'note'), note);
+      mixerPadNotes[padIndex] = note;
+    }
+  } finally {
+    release();
+  }
+}
+
+const padLinkWritable = computed(() => deviceSettings.isWritable('pad1.mode'));
+
+/** The pad's assigned file as last read from the mixer; undefined until read. */
+function padFile(padIndex: number): PadFileInfo | undefined {
+  // `null` (that pad's read failed) is shown the same as not read yet.
+  return deviceSettings.mixerState.padFiles[padIndex] ?? undefined;
+}
+
+/** File name, "No file" when unassigned, "—" when not read yet. */
+function padFileLabel(padIndex: number): string {
+  const file = padFile(padIndex);
+  if (!file) return '—';
+  if (!file.assigned) return 'No file';
+  return file.fileName ?? 'Assigned';
+}
+
+const padDeviceError = computed<string | null>(() => {
+  const fields: PadField[] = ['mode', 'level', 'note', 'clockSync'];
+  for (let padIndex = 0; padIndex < editableSoundPads.length; padIndex++) {
+    for (const field of fields) {
+      const error = deviceSettings.errors[padParam(padIndex, field)];
+      if (error) return `Pad ${padIndex + 1}: ${error}`;
+    }
+  }
+  return null;
+});
+
+// Hold the editor link open while the Sound Pads section is showing, so mixer writes go out.
+let releasePadLink: (() => void) | null = null;
+watch(
+  () => props.isVisible && expandedSections.soundPads,
+  (active) => {
+    if (active && !releasePadLink) {
+      releasePadLink = deviceSettings.acquire();
+    } else if (!active && releasePadLink) {
+      releasePadLink();
+      releasePadLink = null;
+    }
+  },
+  { immediate: true },
+);
+
+onUnmounted(() => {
+  releasePadLink?.();
+  releasePadLink = null;
 });
 
 
@@ -170,7 +301,7 @@ function resetToDefaults() {
 }
 
 // Save changes
-function saveChanges() {
+async function saveChanges() {
   // Warn about duplicates
   if (hasDuplicateCCs.value || hasDuplicateNotes.value) {
     const warnings = [];
@@ -211,53 +342,26 @@ function saveChanges() {
     soundPads: JSON.parse(JSON.stringify(editableSoundPads)),
     mixerType: mixerTypeOverride.value,
   });
+  // Notes/channel changed without a mixer write (e.g. Reset to Defaults) reach the mixer on Save.
+  await syncMixer({
+    padNotes: editableSoundPads.map((pad) => pad.note),
+    midiChannel: globalMidiChannel.value,
+  });
+  // App adopts the mixer's state only after this closes (it defers while the dialog is open).
   emit('close');
 }
 
 // Close without saving
-function cancel() {
+async function cancel() {
   if (confirm('Are you sure? Any unsaved changes will be lost.')) {
+    // Pad notes / MIDI channel were already sent to the mixer; put them back the way they were.
+    await syncMixer({ padNotes: originalPadNotes, midiChannel: originalMidiChannel });
     emit('close');
   }
 }
 
 function toggleSection(section: keyof typeof expandedSections) {
   expandedSections[section] = !expandedSections[section];
-}
-
-async function applyMassStorage(enable: boolean) {
-  massStorageNotice.value = '';
-  if (!massStorageOutReady.value) {
-    massStorageNoticeVariant.value = 'error';
-    massStorageNotice.value =
-      'No MIDI output available for SysEx. Connect Mixer Control or ensure a Zoom “Editor” output appears in the device list.';
-    return;
-  }
-  if (!sysexReady.value) {
-    massStorageNoticeVariant.value = 'error';
-    massStorageNotice.value =
-      'System Exclusive is not enabled. Reload the app and allow SysEx when the browser prompts.';
-    return;
-  }
-  startMassStorageCooldown();
-  massStorageBusy.value = true;
-  try {
-    const useInboundWait = massStorageHandshakeWaitReady.value;
-    await runZoomL6FileTransferHandshake((msg) => midiService.sendSysexRaw(msg), enable, {
-      waitForInboundSysex: useInboundWait
-        ? (timeoutMs: number) => midiService.waitForSysexOnce(timeoutMs)
-        : undefined,
-    });
-    massStorageNoticeVariant.value = 'success';
-    massStorageNotice.value = enable
-      ? 'Command sent. The L6 should appear as a USB drive (SD card access) in the host file manager.'
-      : 'Command sent. The L6 USB storage will disconnect.';
-  } catch (e) {
-    massStorageNoticeVariant.value = 'error';
-    massStorageNotice.value = e instanceof Error ? e.message : String(e);
-  } finally {
-    massStorageBusy.value = false;
-  }
 }
 
 // Watch for mixer type changes to update defaults if needed
@@ -267,10 +371,6 @@ watch(mixerTypeOverride, (newType) => {
 });
 
 // Watch for dialog open to reload current settings
-onUnmounted(() => {
-  window.clearTimeout(massStorageCooldownTimer);
-});
-
 watch(() => props.isVisible, (visible) => {
   if (visible) {
     // Reload settings from current props when dialog opens
@@ -282,14 +382,11 @@ watch(() => props.isVisible, (visible) => {
     // Update MIDI channel from current settings
     globalMidiChannel.value = editableChannelControls[0]?.controls.volume.channel || 1;
 
-    massStorageNotice.value = '';
-    window.clearTimeout(massStorageCooldownTimer);
-    massStorageCooldown.value = false;
-    massStorageCooldownTimer = undefined;
-  } else {
-    window.clearTimeout(massStorageCooldownTimer);
-    massStorageCooldown.value = false;
-    massStorageCooldownTimer = undefined;
+    // Snapshot pad notes + MIDI channel for Cancel's mixer revert / Save's mixer sync
+    originalPadNotes = props.currentSoundPads.map((pad) => pad.note);
+    mixerPadNotes = [...originalPadNotes];
+    originalMidiChannel = globalMidiChannel.value;
+    mixerMidiChannel = originalMidiChannel;
   }
 });
 </script>
@@ -326,73 +423,24 @@ watch(() => props.isVisible, (visible) => {
             <p class="setting-hint">Override the auto-detected mixer type. Changing this will affect available controls.</p>
           </div>
           
-          <!-- Global MIDI Channel Setting -->
-          <div class="global-setting">
-            <label for="midi-channel">MIDI Channel (applies to all controls)</label>
-            <select 
-              id="midi-channel"
-              v-model.number="globalMidiChannel"
-              class="setting-select"
-            >
-              <option v-for="ch in 16" :key="ch" :value="ch">Channel {{ ch }}</option>
-            </select>
-          </div>
 
-          <!-- Non-MIDI (SysEx device features) -->
+          <!-- Device Settings (SysEx, mass storage, editor link) -->
           <div class="settings-section">
-            <div class="section-header" @click="toggleSection('nonMidi')">
-              <h3>Non-MIDI</h3>
-              <span class="toggle-icon">{{ expandedSections.nonMidi ? '▼' : '▶' }}</span>
+            <div class="section-header" @click="toggleSection('device')">
+              <h3>Device Settings</h3>
+              <span class="toggle-icon">{{ expandedSections.device ? '▼' : '▶' }}</span>
             </div>
 
-            <div v-if="expandedSections.nonMidi" class="section-content">
-              <p class="non-midi-intro">
-                Toggle USB file transfer (SD card as a drive) with SysEx over the same MIDI port as mixer control. The device will disconnect and re-enumerate on USB when you switch modes. If it gets stuck try ejecting the device on the host or disable from the official Zoom L6 app. 
-              </p>
-              <p v-if="!sysexReady" class="mass-storage-hint mass-storage-hint--warn">
-                SysEx permission was not granted. Reload and approve System Exclusive access for this site.
-              </p>
-              <p v-else-if="!massStorageOutReady" class="mass-storage-hint">
-                Connect a MIDI output (Mixer Control) or ensure a Zoom Editor output appears in the list.
-              </p>
-              <p
-                v-else-if="!massStorageHandshakeWaitReady"
-                class="mass-storage-hint mass-storage-hint--warn"
-              >
-                SysEx replies won’t be waited on: allow SysEx and connect a MIDI input or ensure an Editor
-                input exists. Commands still send with fixed delays.
-              </p>
-              <div class="mass-storage-actions">
-                <button
-                  type="button"
-                  class="mass-storage-button mass-storage-button--on"
-                  :disabled="massStorageButtonsLocked || !massStorageOutReady || !sysexReady"
-                  @click="applyMassStorage(true)"
-                >
-                  {{ massStorageBusy ? 'Sending…' : massStorageCooldown ? 'Wait…' : 'Enable mass storage' }}
-                </button>
-                <button
-                  type="button"
-                  class="mass-storage-button mass-storage-button--off"
-                  :disabled="massStorageButtonsLocked || !massStorageOutReady || !sysexReady"
-                  @click="applyMassStorage(false)"
-                >
-                  {{ massStorageBusy ? 'Sending…' : massStorageCooldown ? 'Wait…' : 'Disable mass storage' }}
-                </button>
-              </div>
-              <p
-                v-if="massStorageNotice"
-                class="mass-storage-notice"
-                :class="{
-                  'mass-storage-notice--success': massStorageNoticeVariant === 'success',
-                  'mass-storage-notice--error': massStorageNoticeVariant === 'error',
-                }"
-              >
-                {{ massStorageNotice }}
-              </p>
+            <div v-if="expandedSections.device" class="section-content">
+              <DeviceSettingsPanel
+                :expanded="expandedSections.device"
+                :mixerType="mixerTypeOverride"
+                :midiChannel="globalMidiChannel"
+                @update:midiChannel="onMidiChannelChange"
+              />
             </div>
           </div>
-          
+
           <!-- Channel Controls Section -->
           <div class="settings-section">
             <div class="section-header" @click="toggleSection('channels')">
@@ -633,19 +681,86 @@ watch(() => props.isVisible, (visible) => {
             </div>
             
             <div v-if="expandedSections.soundPads" class="section-content">
-              <div class="controls-grid">
-                <div v-for="pad in editableSoundPads" :key="pad.id" class="control-row">
-                  <label>{{ pad.name }} (Note)</label>
-                  <input 
-                    type="number" 
-                    v-model.number="pad.note"
-                    min="0" 
-                    max="127"
-                    class="cc-input"
-                  />
-                  <span class="note-name">{{ getMidiNoteName(pad.note) }}</span>
+              <p class="setting-hint pad-settings-hint">
+                {{ showPadClockSync ? 'Play mode, level and MIDI clock sync' : 'Play mode and level' }} apply to the mixer immediately.
+                MIDI Note updates the mixer immediately and this app's pad on Save; Cancel puts the mixer's notes back.
+              </p>
+              <DeviceNotice
+                v-if="!padLinkWritable"
+                subtle
+                variant="warn"
+                text="Editor link isn't open, so pad settings can't be sent to the mixer. Check Device Settings."
+              />
+              <div class="pad-settings" :class="{ 'pad-settings--clock': showPadClockSync }">
+                <div v-for="(pad, padIndex) in editableSoundPads" :key="pad.id" class="pad-settings-row">
+                  <div
+                    class="pad-settings-badge"
+                    :class="{ 'pad-settings-badge--assigned': padFile(padIndex)?.assigned }"
+                    :title="padFile(padIndex)?.assigned ? `${pad.name}: ${padFileLabel(padIndex)}` : pad.name"
+                  >{{ pad.id }}</div>
+
+                  <div class="control-row">
+                    <label>File</label>
+                    <span
+                      class="pad-file-name"
+                      :class="{ 'pad-file-name--empty': !padFile(padIndex) || !padFile(padIndex)!.assigned }"
+                      :title="padFileLabel(padIndex)"
+                    >{{ padFileLabel(padIndex) }}</span>
+                  </div>
+
+                  <div class="control-row">
+                    <label :for="`pad-${pad.id}-mode`">Play mode</label>
+                    <select
+                      :id="`pad-${pad.id}-mode`"
+                      class="setting-select"
+                      :disabled="!padFieldWritable(padIndex, 'mode')"
+                      :value="padDeviceValue(padIndex, 'mode')"
+                      @change="onPadDeviceChange(padIndex, 'mode', $event)"
+                    >
+                      <option v-for="opt in PAD_MODE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </div>
+
+                  <div class="control-row">
+                    <label :for="`pad-${pad.id}-level`">Level</label>
+                    <select
+                      :id="`pad-${pad.id}-level`"
+                      class="setting-select"
+                      :disabled="!padFieldWritable(padIndex, 'level')"
+                      :value="padDeviceValue(padIndex, 'level')"
+                      @change="onPadDeviceChange(padIndex, 'level', $event)"
+                    >
+                      <option v-for="opt in PAD_LEVEL_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </div>
+
+                  <div class="control-row">
+                    <label :for="`pad-${pad.id}-note`">MIDI Note</label>
+                    <select
+                      :id="`pad-${pad.id}-note`"
+                      class="setting-select"
+                      :value="pad.note"
+                      @change="onPadNoteChange(padIndex, $event)"
+                    >
+                      <option v-for="opt in PAD_NOTE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </div>
+
+                  <div v-if="showPadClockSync" class="control-row">
+                    <label :for="`pad-${pad.id}-clock`">MIDI Clock Sync</label>
+                    <select
+                      :id="`pad-${pad.id}-clock`"
+                      class="setting-select"
+                      :disabled="!padFieldWritable(padIndex, 'clockSync')"
+                      :value="padDeviceValue(padIndex, 'clockSync')"
+                      @change="onPadDeviceChange(padIndex, 'clockSync', $event)"
+                    >
+                      <option v-for="opt in PAD_CLOCK_SYNC_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </div>
                 </div>
               </div>
+              <DeviceNotice v-if="padDeviceError" subtle variant="error" :text="padDeviceError" />
             </div>
           </div>
         </div>
@@ -663,19 +778,6 @@ watch(() => props.isVisible, (visible) => {
     </div>
   </Teleport>
 </template>
-
-<script lang="ts">
-// Helper function to get MIDI note name
-function getMidiNoteName(note: number): string {
-  if (note < 0 || note > 127) return 'Invalid';
-  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const octave = Math.floor(note / 12) - 1;
-  const noteName = noteNames[note % 12];
-  return `${noteName}${octave}`;
-}
-
-export { getMidiNoteName };
-</script>
 
 <style scoped>
 .advanced-settings-overlay {
@@ -787,12 +889,12 @@ export { getMidiNoteName };
 
 .setting-select {
   background: rgba(0, 0, 0, 0.5);
-  border: 2px solid #4a90e2;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 10px 16px;
   color: #fff;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 500;
   min-width: 150px;
   cursor: pointer;
   transition: all 0.2s;
@@ -807,13 +909,13 @@ export { getMidiNoteName };
 
 .setting-select:focus {
   outline: none;
-  border-color: #6aa0f2;
+  border-color: #4a90e2;
   background-color: rgba(0, 0, 0, 0.7);
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
 .setting-select:hover {
-  border-color: #6aa0f2;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .setting-select option {
@@ -932,94 +1034,103 @@ export { getMidiNoteName };
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.note-name {
-  color: #4a90e2;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.non-midi-intro {
-  color: #bbb;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
-}
-
-.non-midi-intro a {
-  color: #6aa0f2;
-}
-
-.mass-storage-hint {
-  font-size: 13px;
-  color: #888;
-  margin: 0 0 12px 0;
-}
-
-.mass-storage-hint--warn {
-  color: #ffb74d;
-}
-
-.mass-storage-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+/* Sound pads: one row per pad, laid out like the official ZOOM L6 Editor. Controls reuse the
+   existing .setting-select / .control-row styles; rows match the Device Settings rows. */
+.pad-settings-hint {
   margin-bottom: 12px;
 }
 
-.mass-storage-button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+.pad-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
 }
 
-.mass-storage-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.mass-storage-button--on {
-  background: #2e7d32;
-  color: #fff;
-}
-
-.mass-storage-button--on:not(:disabled):hover {
-  background: #1b5e20;
-}
-
-.mass-storage-button--off {
-  background: rgba(255, 255, 255, 0.12);
-  color: #e0e0e0;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.mass-storage-button--off:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.mass-storage-notice {
-  font-size: 13px;
-  margin: 0;
+.pad-settings-row {
+  display: grid;
+  grid-template-columns: 48px repeat(4, minmax(0, 1fr));
+  /* Top-align so every field label shares one line, whatever sits under it. */
+  align-items: start;
+  gap: 12px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #ccc;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.mass-storage-notice--success {
-  background: rgba(76, 175, 80, 0.15);
-  border: 1px solid rgba(76, 175, 80, 0.35);
-  color: #a5d6a7;
+.pad-settings--clock .pad-settings-row {
+  grid-template-columns: 48px repeat(5, minmax(0, 1fr));
 }
 
-.mass-storage-notice--error {
-  background: rgba(244, 67, 54, 0.12);
-  border: 1px solid rgba(244, 67, 54, 0.35);
-  color: #ffcdd2;
+/* Read-only: the file assigned on the mixer (SD card). Same box height as the selects. */
+.pad-file-name {
+  /* Same box metrics as .setting-select so the File label lines up with the dropdown labels. */
+  display: block;
+  padding: 10px 0;
+  border: 1px solid transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pad-file-name--empty {
+  color: #888;
+  font-style: italic;
+}
+
+.pad-settings-row .setting-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.pad-settings-row .setting-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Echoes the main-view pad buttons (SoundPads.vue). */
+.pad-settings-badge {
+  align-self: end;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+  border: 2px solid #444;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* A file is assigned on the mixer (the official editor highlights these pads too). */
+.pad-settings-badge--assigned {
+  background: #4a90e2;
+  border-color: #4a90e2;
+}
+
+@media (max-width: 600px) {
+  .pad-settings-row,
+  .pad-settings--clock .pad-settings-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pad-settings-badge {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .pad-settings-row,
+  .pad-settings--clock .pad-settings-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .dialog-footer {

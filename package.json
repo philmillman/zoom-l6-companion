@@ -1,6 +1,6 @@
 {
   "name": "zoom-l6-companion",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,7 +11,10 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "decode": "tsx scripts/decode-capture.ts"
   },
   "dependencies": {
     "vue": "^3.5.22",
@@ -25,9 +28,11 @@
     "@vue/tsconfig": "^0.8.1",
     "npm-run-all": "^4.1.5",
     "npm-run-all2": "^8.0.4",
+    "tsx": "^4.23.13",
     "typescript": "~5.9.0",
     "vite": "^7.1.7",
     "vite-plugin-vue-devtools": "^8.0.2",
+    "vitest": "^5.0.0",
     "vue-tsc": "^3.1.0"
   }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick, watch } from 'vue';
 import MidiConnection from './components/MidiConnection.vue';
 import ChannelStrip from './components/ChannelStrip.vue';
 import GlobalControls from './components/GlobalControls.vue';
@@ -8,20 +8,30 @@ import DebugDrawer from './components/DebugDrawer.vue';
 import AdvancedSettings from './components/AdvancedSettings.vue';
 import { channelControls as defaultChannelControls, globalControls as defaultGlobalControls, soundPads as defaultSoundPads, detectMixerType, type MixerType } from './config/midiConfig';
 import { channelControlsL6Max, globalControlsL6Max, soundPadsL6Max } from './config/midiConfigL6Max';
-import type { ChannelControls, GlobalControls as GlobalControlsType, SoundPad } from './config/midiConfig';
+import type { ChannelControls, GlobalControls as GlobalControlsType, MIDIControl, SoundPad } from './config/midiConfig';
+import { applyMixerCcMap } from './config/ccMapping';
 import { midiService } from './services/midiService';
+import { useDeviceSettings } from './composables/useDeviceSettings';
+import type { ParamId } from './midi/sysex/zoomL6/params';
 
 // Platform detection
 function detectPlatform() {
   const userAgent = navigator.userAgent.toLowerCase();
-  const isMac = /macintosh|mac os x/.test(userAgent);
-  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  // iPadOS 13+ reports a desktop Mac user agent by default; touch support gives an iPad away.
+  const isIPadDesktopUA = /macintosh/.test(userAgent) && navigator.maxTouchPoints > 1;
+  const isIOS = /iphone|ipad|ipod/.test(userAgent) || isIPadDesktopUA;
+  // iPhone/iPad user agents also contain "Mac OS X", so exclude them from the Mac check.
+  const isMac = /macintosh|mac os x/.test(userAgent) && !isIOS;
   const isSafari = /safari/.test(userAgent) && !/chrome/.test(userAgent);
-  
+  // What actually matters is whether the browser provides the Web MIDI API. Browsers such as the
+  // MIDIWeb Browser app do on Apple devices, so the warnings below only show when it's missing.
+  const hasWebMidi = typeof navigator.requestMIDIAccess === 'function';
+
   return {
     isMac,
     isIOS,
     isSafari,
+    hasWebMidi,
     isSafariMac: isMac && isSafari,
     isIOSDevice: isIOS
   };
@@ -30,6 +40,8 @@ function detectPlatform() {
 // Platform-specific prompts
 const platformInfo = ref(detectPlatform());
 const showPlatformPrompt = ref(false);
+/** This page's address, shown in the iOS prompt so users can open it inside MIDIWeb Browser. */
+const appHost = window.location.host;
 
 // Reactive state
 const midiConnected = ref(false);
@@ -64,7 +76,7 @@ function loadConfigForMixerType(type: MixerType) {
 const debugData = reactive({
   errorLogs: [] as any[],
   midiLogs: [] as any[],
-  activeTab: 'errors' as 'errors' | 'midi' | 'system',
+  activeTab: 'errors' as 'errors' | 'midi' | 'system' | 'sysex',
   systemInfo: {
     userAgent: navigator.userAgent,
     platform: navigator.platform,
@@ -77,6 +89,13 @@ const debugData = reactive({
     webMidiSupported: false,
     timestamp: new Date()
   }
+});
+
+// SysEx device settings (editor session) — keep the mixer type in sync
+const deviceSettings = useDeviceSettings();
+deviceSettings.mixerType.value = mixerType.value;
+watch(mixerType, (type) => {
+  deviceSettings.mixerType.value = type;
 });
 
 // Refs to channel components for resetting and LFO control
@@ -117,6 +136,8 @@ function onMidiConnectionChanged(connected: boolean) {
     }
   } else {
     console.log('MIDI disconnected');
+    // Close the SysEx editor session (heartbeats would keep firing at a dead port)
+    deviceSettings.close();
     // Remove global MIDI listener when disconnected
     if (globalMidiListener) {
       midiService.removeControlChangeListener(globalMidiListener);
@@ -225,6 +246,25 @@ function toggleAdvancedSettings() {
   showAdvancedSettings.value = !showAdvancedSettings.value;
 }
 
+/**
+ * Saves the current CC/note configuration to localStorage (no UI). `mixerTypeOverride` is only
+ * passed by the Advanced Settings Save: persisting it turns off device-name detection.
+ */
+function persistConfig(mixerTypeOverride?: MixerType): boolean {
+  try {
+    localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(channelControls.value));
+    localStorage.setItem('zoom-l6-global-controls', JSON.stringify(globalControls.value));
+    localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(soundPads.value));
+    if (mixerTypeOverride) {
+      localStorage.setItem('zoom-l6-mixer-type', mixerTypeOverride);
+    }
+    return true;
+  } catch (e) {
+    console.error('❌ Failed to save settings to localStorage:', e);
+    return false;
+  }
+}
+
 function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], globalControls: GlobalControlsType, soundPads: SoundPad[], mixerType: MixerType }) {
   // Update the mixer type if provided
   if (data.mixerType && data.mixerType !== mixerType.value) {
@@ -238,20 +278,120 @@ function handleAdvancedSettingsSave(data: { channelControls: ChannelControls[], 
   soundPads.value = data.soundPads;
   
   // Save to localStorage for persistence
-  try {
-    localStorage.setItem('zoom-l6-channel-controls', JSON.stringify(data.channelControls));
-    localStorage.setItem('zoom-l6-global-controls', JSON.stringify(data.globalControls));
-    localStorage.setItem('zoom-l6-sound-pads', JSON.stringify(data.soundPads));
-    if (data.mixerType) {
-      localStorage.setItem('zoom-l6-mixer-type', data.mixerType);
-    }
+  if (persistConfig(data.mixerType)) {
     console.log('✅ Advanced settings saved to localStorage');
     alert('✅ Settings saved successfully!');
-  } catch (e) {
-    console.error('❌ Failed to save settings to localStorage:', e);
+  } else {
     alert('❌ Failed to save settings. Please check browser storage permissions.');
   }
 }
+
+// ── Adopt the mixer's shared settings (MIDI channel, pad notes, CC# map) ─────────────────
+// The mixer's values win: whenever a state snapshot is read (link open, Device Settings opened,
+// scene recall), anything that differs from this app's config is copied in and saved.
+const mixerNotice = ref<string | null>(null);
+let mixerNoticeTimer: ReturnType<typeof window.setTimeout> | undefined;
+const MIXER_NOTICE_MS = 4000;
+
+function showMixerNotice(text: string): void {
+  mixerNotice.value = text;
+  window.clearTimeout(mixerNoticeTimer);
+  mixerNoticeTimer = window.setTimeout(() => {
+    mixerNotice.value = null;
+    mixerNoticeTimer = undefined;
+  }, MIXER_NOTICE_MS);
+}
+
+/** Every MIDI control of the config (channel strips incl. their EQ group, plus the globals). */
+function allControls(channels: ChannelControls[], globals: GlobalControlsType): MIDIControl[] {
+  const out: MIDIControl[] = [];
+  for (const strip of channels) {
+    for (const control of Object.values(strip.controls)) {
+      if (!control) continue;
+      if ('cc' in control) out.push(control);
+      else out.push(...Object.values(control));
+    }
+  }
+  out.push(globals.efxType, globals.compressor);
+  return out;
+}
+
+/**
+ * Copies the mixer's shared settings into the app config. `mixerState.values` already omits any
+ * setting the app was writing at read time (see useDeviceSettings), so no extra guard is needed.
+ *
+ * Deferred while Advanced Settings is open: the dialog writes pad notes / the MIDI channel to the
+ * mixer immediately but only commits them to the app on Save (and reverts the mixer on Cancel), so a
+ * snapshot taken mid-edit must not be adopted. On close the mixer is re-read and adopted then.
+ */
+function adoptMixerState(): void {
+  const state = deviceSettings.mixerState;
+  if (state.readAt === null || showAdvancedSettings.value) return;
+
+  // Work on plain copies: the refs hold reactive proxies, which structuredClone can't copy.
+  let channels: ChannelControls[] = JSON.parse(JSON.stringify(channelControls.value));
+  let globals: GlobalControlsType = JSON.parse(JSON.stringify(globalControls.value));
+  const pads: SoundPad[] = JSON.parse(JSON.stringify(soundPads.value));
+  const adopted: string[] = [];
+
+  // CC map: only from a verified table whose layout matches the config's mixer type.
+  if (state.ccMap && state.ccMapVerified && state.layout !== null && state.layout === mixerType.value) {
+    const result = applyMixerCcMap(state.ccMap, state.layout, channels, globals);
+    if (result.changed) {
+      channels = result.channelControls;
+      globals = result.globalControls;
+      adopted.push('CC map');
+    }
+  }
+
+  // MIDI channel (applies to every control and pad, as Advanced Settings' Save does).
+  const channel = state.values.midiChannel;
+  if (channel !== undefined) {
+    let changed = false;
+    for (const control of allControls(channels, globals)) {
+      if (control.channel !== channel) {
+        control.channel = channel;
+        changed = true;
+      }
+    }
+    for (const pad of pads) {
+      if (pad.channel !== channel) {
+        pad.channel = channel;
+        changed = true;
+      }
+    }
+    if (changed) adopted.push('MIDI channel');
+  }
+
+  // Pad notes.
+  let padsChanged = false;
+  pads.forEach((pad, padIndex) => {
+    const id = `pad${padIndex + 1}.note` as ParamId;
+    const note = state.values[id];
+    // A Not Mapped pad decodes as PAD_NOTE_NOT_MAPPED (the snapshot's per-pad flag), so this
+    // adopts both directions: a pad unmapped on the mixer, and one newly mapped there.
+    if (note === undefined || pad.note === note) return;
+    pad.note = note;
+    padsChanged = true;
+  });
+  if (padsChanged) adopted.push('pad notes');
+
+  if (adopted.length === 0) return;
+  channelControls.value = channels;
+  globalControls.value = globals;
+  soundPads.value = pads;
+  persistConfig();
+  console.log(`Adopted from the mixer: ${adopted.join(', ')}`);
+  showMixerNotice(`Loaded settings from the mixer (${adopted.join(', ')})`);
+}
+
+watch(() => deviceSettings.mixerState.readAt, adoptMixerState);
+
+// After Advanced Settings closes (Save, or Cancel once it has reverted the mixer), re-read the mixer
+// so adoption works from its current state rather than a snapshot taken mid-edit.
+watch(showAdvancedSettings, (open) => {
+  if (!open) void deviceSettings.refreshState();
+});
 
 // Global MIDI input handler for debugging and monitoring
 let globalMidiListener: ((cc: number, value: number, channel: number) => void) | null = null;
@@ -262,8 +402,10 @@ onMounted(() => {
     console.log(`[App] Global MIDI received: CC${cc} = ${value} on channel ${channel}`);
   };
   
-  // Check for platform-specific prompts
-  if (platformInfo.value.isSafariMac || platformInfo.value.isIOSDevice) {
+  // Check for platform-specific prompts. Re-detect now rather than at setup, so a browser that
+  // installs the Web MIDI API during page load (e.g. MIDIWeb Browser) is counted as supported.
+  platformInfo.value = detectPlatform();
+  if (!platformInfo.value.hasWebMidi && (platformInfo.value.isSafariMac || platformInfo.value.isIOSDevice)) {
     showPlatformPrompt.value = true;
   }
   
@@ -301,6 +443,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  window.clearTimeout(mixerNoticeTimer);
   if (globalMidiListener) {
     midiService.removeControlChangeListener(globalMidiListener);
     globalMidiListener = null;
@@ -401,6 +544,7 @@ onUnmounted(() => {
           <GlobalControls
             :globalData="globalControls"
             :mixerType="mixerType"
+            :compact="appSettings.compactMode"
             @controlChange="onGlobalControlChange"
             @sceneChanged="onSceneChanged"
           />
@@ -434,12 +578,12 @@ onUnmounted(() => {
           <h2>Connect Your Zoom L6 or L6Max</h2>
           <p>Please connect your Zoom L6 or L6Max via USB and select it from the MIDI connection panel above.</p>
           <ul class="setup-steps">
-            <li>Connect your Zoom L6 or L6Max to your device via USB</li>
-            <li>Ensure the device is powered on</li>
-            <li>Click "Auto-Connect Zoom" or manually select the device. If there are multiple L6 or L6Max devices, it's usually the 2nd one or the one labeled "Mixer Control".</li>
-            <li>Start controlling your mixer!</li>
-            <li>Note: You may need to bridge the MIDI in and out ports (plug a cable between the two) on the Zoom L6 or L6Max to get MIDI to work in both directions.</li>
-            <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the mappings in the Advanced Settings.</li>
+            <li>Connect your Zoom L6 or L6Max to your device via USB and power it on.</li>
+            <li>Click "Auto-Connect Zoom", or in the Input and Output menus pick the port labeled "Mixer Control" (with multiple L6 devices it's usually the 2nd one). That port carries the faders, EQ, pans, mutes, sound pads, and scenes.</li>
+            <li>You don't need to also select the "Editor" port. The app detects it on its own and uses it automatically for the SysEx features — effect parameters, device settings, and mass storage — at the same time as Mixer Control. Just leave SysEx access allowed when the browser asks.</li>
+            <li>Start controlling your mixer! Effect-parameter knobs appear in the Effects section once the Editor port is detected.</li>
+            <li>Note: on some mobile setups (e.g. Android) only a single MIDI port is exposed. If controls or two-way MIDI aren't working there, bridge the L6/L6Max's MIDI IN and OUT jacks with a cable (a 3.5mm TRS cable between the two) so MIDI works in both directions.</li>
+            <li>The app uses the default Zoom L6 or L6Max MIDI mappings on first run. You can customize the CC mappings, and toggle the Editor link, in Advanced Settings.</li>
           </ul>
         </div>
       </div>
@@ -473,24 +617,26 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- iOS prompt -->
+        <!-- iOS / iPadOS prompt (only shown when the browser lacks the Web MIDI API) -->
         <div v-if="platformInfo.isIOSDevice" class="platform-notice ios">
           <div class="notice-header">
-            <h3>📱 iOS WebMIDI Limitation</h3>
+            <h3>📱 Use MIDIWeb Browser on iPhone &amp; iPad</h3>
             <button @click="showPlatformPrompt = false" class="close-button">×</button>
           </div>
           <div class="notice-content">
-            <p>Unfortunately, Apple does not support the Web MIDI API on iOS devices. This web app cannot directly control your Zoom L6 from iOS.</p>
+            <p>Safari on iPhone and iPad doesn't support the Web MIDI API, so it can't control your Zoom L6.</p>
             <div class="ios-info">
-              <p><strong>Good news:</strong> We're working on a native iOS app that will provide full Zoom L6 control!</p>
-              <p>For now, you can use this app on:</p>
-              <ul>
-                <li>macOS (Safari with Jazz Plugin, or Chrome/Firefox)</li>
-                <li>Windows (Chrome, Firefox, Edge)</li>
-                <li>Linux (Chrome, Firefox)</li>
-              </ul>
+              <p>Install the free <strong>MIDIWeb Browser</strong> app, which adds Web MIDI on Apple devices:</p>
+              <ol>
+                <li>Get MIDIWeb Browser from the App Store</li>
+                <li>Open it and find <strong>Zoom L6 Companion</strong> in its MIDIWeb Hub directory, or go to <strong>{{ appHost }}</strong></li>
+                <li>Connect your Zoom L6 over USB and allow MIDI access when asked</li>
+              </ol>
             </div>
             <div class="notice-actions">
+              <a href="https://apps.apple.com/us/app/midiweb-browser/id6757226617" target="_blank" rel="noopener" class="download-button">
+                Get MIDIWeb Browser
+              </a>
               <button @click="showPlatformPrompt = false" class="continue-button">
                 Continue anyway
               </button>
@@ -502,7 +648,12 @@ onUnmounted(() => {
 
     <footer class="app-footer">
       <div class="footer-content">
-        <p>Built by <a href="https://github.com/philmillman" target="_blank">philmillman</a> | Not affiliated with Zoom Corp</p>
+        <p>
+          Built by <a href="https://github.com/philmillman" target="_blank" rel="noopener noreferrer">philmillman</a>
+          | Not affiliated with Zoom Corp
+          | <a href="https://github.com/philmillman/zoom-l6-companion/issues/new?template=bug_report.yml" target="_blank" rel="noopener noreferrer">Report a bug</a>
+          | <a href="https://github.com/philmillman/zoom-l6-companion/issues/new?template=feature_request.yml" target="_blank" rel="noopener noreferrer">Request a feature</a>
+        </p>
       </div>
     </footer>
 
@@ -514,7 +665,14 @@ onUnmounted(() => {
       @toggle="onDebugDrawerToggle"
     />
     
-        <!-- Advanced Settings Dialog -->
+    <!-- Brief notice when settings were adopted from the mixer -->
+    <Transition name="mixer-notice">
+      <div v-if="mixerNotice" class="mixer-notice" role="status" aria-live="polite">
+        {{ mixerNotice }}
+      </div>
+    </Transition>
+
+    <!-- Advanced Settings Dialog -->
     <AdvancedSettings 
       :isVisible="showAdvancedSettings"
       :currentChannelControls="channelControls"
@@ -876,6 +1034,16 @@ body {
   font-size: 12px;
 }
 
+.footer-content a {
+  color: #4a90e2;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+  color: #5a9ff2;
+}
+
 /* Mobile-first responsive design */
 @media (max-width: 1200px) {
   .app-main {
@@ -997,6 +1165,35 @@ body {
     margin-bottom: 8px;
     padding-bottom: 4px;
   }
+}
+
+/* Mixer-adoption notice (sits above the Advanced Settings dialog, z-index 10000) */
+.mixer-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 10001;
+  max-width: calc(100% - 32px);
+  padding: 10px 16px;
+  background: #1e1e1e;
+  border: 1px solid #4a90e2;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.mixer-notice-enter-active,
+.mixer-notice-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.mixer-notice-enter-from,
+.mixer-notice-leave-to {
+  opacity: 0;
 }
 
 /* Platform Prompt Styles */

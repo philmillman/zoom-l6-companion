@@ -15,9 +15,23 @@ export class MidiService {
   private _midiOutputConnected = ref(false);
   private _midiInputConnected = ref(false);
   private _sysexEnabled = ref(false);
+  private _editorPortsAvailable = ref(false);
 
   // Device state change callback
   private onDeviceStateChangeCallback: (() => void) | null = null;
+
+  /**
+   * SysEx fan-out for the Zoom **Editor** input.
+   *
+   * The editor protocol (identity / editor open / heartbeat / param get-set) runs on the dedicated
+   * "Editor" MIDI pair, *not* on the Mixer Control pair the user picks in the UI. A single native
+   * `sysex` listener is kept on the current editor port and fanned out to every subscriber, so the
+   * port can be rebound after USB re-enumeration (mass-storage toggle replaces the port objects)
+   * without subscribers noticing.
+   */
+  private editorSysexListeners: Set<(bytes: readonly number[]) => void> = new Set();
+  private editorInput: Input | null = null;
+  private editorSysexHandler: ((event: { message: { data: number[] } }) => void) | null = null;
 
   async initialize(): Promise<boolean> {
     try {
@@ -30,12 +44,17 @@ export class MidiService {
 
       // Listen for device state changes
       WebMidi.addListener('connected', (event) => {
+        // Port objects are replaced on re-enumeration; rebind the editor SysEx listener first.
+        this.attachEditorInput();
         this.onDeviceStateChange();
       });
 
       WebMidi.addListener('disconnected', (event) => {
+        this.attachEditorInput();
         this.onDeviceStateChange();
       });
+
+      this.attachEditorInput();
       return true;
     } catch (error) {
       console.error('Failed to enable WebMIDI:', error);
@@ -95,6 +114,8 @@ export class MidiService {
     }
 
     this._isConnected.value = this.input !== null || this.output !== null;
+    // Rebind the editor SysEx listener: after re-enumeration the old port object is dead.
+    this.attachEditorInput();
     return didChange;
   }
 
@@ -143,6 +164,9 @@ export class MidiService {
     this._inputName.value = targetInput.name;
     this._midiInputConnected.value = true;
     this._isConnected.value = this.input !== null || this.output !== null;
+    // The editor SysEx listener falls back to the mixer input when no dedicated Editor port
+    // exists; a manual port change here must rebind it or the editor session goes deaf.
+    this.attachEditorInput();
     return true;
   }
 
@@ -175,6 +199,7 @@ export class MidiService {
     this._outputName.value = targetOutput.name;
     this._midiOutputConnected.value = true;
     this._isConnected.value = this.input !== null || this.output !== null;
+    this.refreshEditorPortsAvailable();
     return true;
   }
 
@@ -236,31 +261,120 @@ export class MidiService {
 
   /**
    * Resolves with the next inbound SysEx payload (full bytes including F0/F7), or null on timeout.
-   * Listens on the Zoom **Editor** input when present (SysEx replies for file transfer), else the
-   * selected mixer input — matches Magicking/L6-MassStorage `wait_for_sysex` pairing.
+   * Built on the editor fan-out (see {@link addEditorSysexListener}), which listens on the Zoom
+   * **Editor** input when present, else the selected mixer input — matches
+   * Magicking/L6-MassStorage `wait_for_sysex` pairing.
    */
   waitForSysexOnce(timeoutMs: number): Promise<readonly number[] | null> {
     this.syncPortsAfterHotplug();
-    const inputPort = this.findZoomEditorInput() ?? this.input;
-    if (!inputPort || inputPort.state === 'disconnected') {
+    this.attachEditorInput();
+    if (!this.editorInput) {
       return Promise.resolve(null);
     }
     return new Promise((resolve) => {
       let settled = false;
+      let unsubscribe: (() => void) | null = null;
+      let timer: ReturnType<typeof globalThis.setTimeout> | null = null;
       const finish = (data: readonly number[] | null) => {
         if (settled) return;
         settled = true;
-        window.clearTimeout(timer);
-        inputPort.removeListener('sysex', onSysex);
+        if (timer !== null) globalThis.clearTimeout(timer);
+        unsubscribe?.();
         resolve(data);
       };
-      const timer = window.setTimeout(() => finish(null), timeoutMs);
-      const onSysex = (event: { message: { data: number[] } }) => {
-        const data = event.message?.data;
-        if (!data?.length) return;
-        finish(Array.from(data));
-      };
-      inputPort.addListener('sysex', onSysex as (e: unknown) => void);
+      unsubscribe = this.addEditorSysexListener((bytes) => finish(bytes));
+      timer = globalThis.setTimeout(() => finish(null), timeoutMs);
+    });
+  }
+
+  /**
+   * Subscribes to SysEx arriving on the Zoom **Editor** input (falling back to the selected mixer
+   * input when the device exposes no editor port). Returns an unsubscribe function.
+   *
+   * The native listener is shared by all subscribers and rebound automatically on hot-plug, so a
+   * long-lived consumer (the editor session) survives USB re-enumeration.
+   */
+  addEditorSysexListener(callback: (bytes: readonly number[]) => void): () => void {
+    this.editorSysexListeners.add(callback);
+    this.attachEditorInput();
+    return () => {
+      this.editorSysexListeners.delete(callback);
+    };
+  }
+
+  /** Names of the detected Zoom Editor ports (null when the device is absent or in mass storage). */
+  getEditorPortNames(): { input: string | null; output: string | null } {
+    return {
+      input: this.findZoomEditorInput()?.name ?? null,
+      output: this.findZoomEditorOutput()?.name ?? null,
+    };
+  }
+
+  /** True while both Zoom Editor ports are present; updated on hot-plug. */
+  get editorPortsAvailable(): Ref<boolean> {
+    return this._editorPortsAvailable;
+  }
+
+  private refreshEditorPortsAvailable(): void {
+    const available = this.findZoomEditorInput() !== null && this.findZoomEditorOutput() !== null;
+    if (this._editorPortsAvailable.value !== available) {
+      this._editorPortsAvailable.value = available;
+    }
+  }
+
+  /**
+   * (Re)binds the single native `sysex` listener to the current editor input. Cheap and idempotent:
+   * returns immediately when the resolved port object has not changed. Must be called whenever the
+   * WebMidi port list changes (hot-plug, mass-storage re-enumeration), because WebMidi replaces the
+   * `Input` objects and listeners attached to the old ones are silently dead.
+   */
+  private attachEditorInput(): void {
+    if (!this.isInitialized) return;
+    this.refreshEditorPortsAvailable();
+
+    const mixerInput = this.input && this.input.state !== 'disconnected' ? this.input : null;
+    const target = this.findZoomEditorInput() ?? mixerInput;
+    if (target === this.editorInput) return;
+
+    if (this.editorInput && this.editorSysexHandler) {
+      try {
+        this.editorInput.removeListener('sysex', this.editorSysexHandler as (e: unknown) => void);
+      } catch {
+        // Port already gone; nothing to detach.
+      }
+    }
+    this.editorInput = target;
+    this.editorSysexHandler = null;
+    if (!target) return;
+
+    const handler = (event: { message: { data: number[] } }) => {
+      const data = event.message?.data;
+      if (!data?.length) return;
+      this.dispatchEditorSysex(Array.from(data));
+    };
+    this.editorSysexHandler = handler;
+    target.addListener('sysex', handler as (e: unknown) => void);
+  }
+
+  private dispatchEditorSysex(bytes: readonly number[]): void {
+    this.editorSysexListeners.forEach((listener) => {
+      try {
+        listener(bytes);
+      } catch (error) {
+        console.error('Error in editor SysEx listener callback:', error);
+      }
+    });
+    // Legacy `addSysexListener` consumers (the Debug drawer) must see editor replies too.
+    this.emitToSysexListeners(bytes);
+  }
+
+  private emitToSysexListeners(bytes: readonly number[]): void {
+    this.sysexListeners.forEach((listener) => {
+      try {
+        listener(bytes);
+      } catch (error) {
+        console.error('Error in SysEx listener callback:', error);
+      }
     });
   }
 
@@ -474,29 +588,36 @@ export class MidiService {
     this.programChangeListeners.delete(callback);
   }
 
+  /**
+   * Observes SysEx on the selected mixer input **and** on the Zoom Editor input, so the Debug
+   * drawer logs editor replies (identity, editor-open state, acks) as well as mixer traffic.
+   * Editor-port messages arrive through {@link dispatchEditorSysex}; the mixer handler below skips
+   * them when both roles resolve to the same port.
+   */
   addSysexListener(callback: (data: readonly number[]) => void): void {
+    this.sysexListeners.add(callback);
+    // Guarantees editor replies reach this callback even when no mixer input is selected.
+    this.attachEditorInput();
+
     if (!this.input) {
-      console.warn('No MIDI input connected');
+      console.warn('No MIDI input connected; SysEx listener will only see Zoom Editor traffic');
       return;
     }
 
-    this.sysexListeners.add(callback);
-
-    if (this.sysexListeners.size === 1) {
-      this.input.addListener('sysex', (event: { message: { data: number[] } }) => {
+    if (!this.mixerSysexHandler) {
+      const handler = (event: { message: { data: number[] } }) => {
         const data = event.message?.data;
         if (!data?.length) return;
-        const bytes = Array.from(data);
-        this.sysexListeners.forEach((listener) => {
-          try {
-            listener(bytes);
-          } catch (error) {
-            console.error('Error in SysEx listener callback:', error);
-          }
-        });
-      });
+        // Already dispatched by the editor fan-out when the editor role fell back to this port.
+        if (this.editorInput && this.input && this.editorInput.id === this.input.id) return;
+        this.emitToSysexListeners(Array.from(data));
+      };
+      this.mixerSysexHandler = handler;
+      this.input.addListener('sysex', handler as (e: unknown) => void);
     }
   }
+
+  private mixerSysexHandler: ((event: { message: { data: number[] } }) => void) | null = null;
 
   removeSysexListener(callback: (data: readonly number[]) => void): void {
     this.sysexListeners.delete(callback);
@@ -558,12 +679,22 @@ export class MidiService {
   removeAllListeners(): void {
     if (this.input) {
       this.input.removeListener();
+      this.mixerSysexHandler = null;
+      // The editor fan-out shares this port when the device exposes no Editor input; its native
+      // listener was just removed as well, so force a rebind below.
+      if (this.editorInput && this.editorInput.id === this.input.id) {
+        this.editorInput = null;
+        this.editorSysexHandler = null;
+      }
     }
     this.controlChangeListeners.clear();
     this.noteOnListeners.clear();
     this.noteOffListeners.clear();
     this.programChangeListeners.clear();
     this.sysexListeners.clear();
+    // Editor subscribers (editor session) are independent of the mixer port selection: keep them
+    // and rebind the native listener if an Editor port is still present.
+    this.attachEditorInput();
   }
 
   disconnect(): void {

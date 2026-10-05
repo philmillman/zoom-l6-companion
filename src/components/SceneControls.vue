@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { midiService } from '../services/midiService';
+import { useDeviceSettings } from '../composables/useDeviceSettings';
 import { sceneControls, type SceneControl } from '../config/midiConfig';
 import { sceneControlsL6Max } from '../config/midiConfigL6Max';
+
+const deviceSettings = useDeviceSettings();
 
 interface Props {
   mixerType?: 'l6' | 'l6max';
@@ -36,6 +39,9 @@ function selectScene(scene: SceneControl) {
   try {
     // Send Program Change message
     midiService.sendProgramChange(scene.program, scene.channel);
+    // The recalled scene changes effect parameters and other mixer settings, and the mixer doesn't
+    // echo the Program Change back, so ask for a (debounced) re-read of its state.
+    deviceSettings.sceneChanged();
     
     // Update current scene
     currentScene.value = scene;

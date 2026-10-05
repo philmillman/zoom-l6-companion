@@ -1,5 +1,14 @@
 export { sendCompleteSysex } from './rawSysex';
-export { zoomL6Sysex } from './zoomL6/messages';
+export * from './zoomL6/hex';
+export * from './zoomL6/messages';
+export * from './zoomL6/parse';
+export * from './zoomL6/params';
+export * from './zoomL6/editorSession';
+export * from './zoomL6/codec';
+export * from './zoomL6/snapshot';
+export * from './zoomL6/stateSnapshot';
+export * from './zoomL6/capture/midiMonitorParser';
+export * from './zoomL6/capture/report';
 export {
   runZoomL6FileTransferHandshake,
   DEFAULT_PAUSE_AFTER_IDENTITY_MS,
